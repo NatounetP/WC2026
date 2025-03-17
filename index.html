@@ -236,7 +236,7 @@
             position: absolute;
             font-size: 10px;
             transform: translate(-50%, 20px);
-            width: 60px;
+            width: 80px;
             text-align: center;
             white-space: nowrap;
             overflow: hidden;
@@ -657,11 +657,11 @@
                 playerDot.textContent = player.position;
                 
                 // Ajouter le nom du joueur en dessous
-                const playerName = document.createElement('div');
-                playerName.className = 'player-name';
-                playerName.textContent = getInitials(player.name);
-                playerName.style.left = `${position.x}%`;
-                playerName.style.top = `${position.y}%`;
+const playerName = document.createElement('div');
+playerName.className = 'player-name';
+playerName.textContent = player.name; // Nom complet au lieu des initiales
+playerName.style.left = `${position.x}%`;
+playerName.style.top = `${position.y}%`;
                 
                 fieldElement.appendChild(playerDot);
                 fieldElement.appendChild(playerName);
