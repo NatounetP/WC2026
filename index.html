@@ -407,7 +407,7 @@
         // Fonction pour charger les données depuis le fichier externe
         async function loadData() {
     try {
-        const response = await fetch('../data/data.json'); // Chemin relatif pour accéder à data.json
+        const response = await fetch('data.json'); // Chemin relatif pour accéder à data.json
         if (!response.ok) {
             throw new Error('Erreur lors du chargement des données');
         }
