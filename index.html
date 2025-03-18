@@ -442,9 +442,9 @@
 
             position: absolute;
 
-            width: 36px;
+            width: 20px;
 
-            height: 36px;
+            height: 20px;
 
             border-radius: 50%;
 
@@ -470,7 +470,7 @@
 
             position: absolute;
 
-            font-size: 10px;
+            font-size: 12px;
 
             transform: translate(-50%, 20px);
 
@@ -1149,13 +1149,7 @@
 
                 playerDot.style.top = `${position.y}%`;
 
-                
-
-                // Ajouter le texte de la position
-
-                playerDot.textContent = player.position;
-
-                
+                               
 
                 // Ajouter le nom du joueur en dessous
 
@@ -1163,7 +1157,7 @@
 
                 playerName.className = 'player-name';
 
-                playerName.textContent = getInitials(player.name);
+                playerName.textContent = player.name;
 
                 playerName.style.left = `${position.x}%`;
 
