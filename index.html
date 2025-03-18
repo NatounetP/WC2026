@@ -467,24 +467,20 @@
         }
 
         .player-name {
-
-            position: absolute;
-
-            font-size: 10px;
-
-            transform: translate(-50%, 20px);
-
-            width: 60px;
-
-            text-align: center;
-
-            white-space: nowrap;
-
-            overflow: hidden;
-
-            text-overflow: ellipsis;
-
-        }
+    position: absolute;
+    font-size: 14px; /* Taille de police plus grande */
+    transform: translate(-50%, 20px);
+    width: 100px; /* Largeur suffisante pour afficher le nom complet */
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: bold; /* Texte en gras */
+    color: #000; /* Couleur du texte */
+    background-color: rgba(255, 255, 255, 0.8); /* Fond légèrement opaque pour une meilleure lisibilité */
+    padding: 2px 5px; /* Espacement autour du texte */
+    border-radius: 3px; /* Coins arrondis */
+}
 
         .position-GK {
 
@@ -1026,157 +1022,85 @@
 
         // Fonction pour placer les joueurs sur le terrain selon la formation
 
-        function placePlayersOnField(players, fieldElement, formation) {
-
-            // Positions prédéfinies basées sur la formation 
-
-            let positionMapping;
-
-            
-
-            if (formation === "1-2-3") {
-
-                // Formation 1-2-3 (1 gardien, 2 défenseurs, 3 attaquants)
-
-                positionMapping = {
-
-                    'GK': { x: 15, y: 50 },    // Gardien
-
-                    'DF1': { x: 35, y: 30 },   // Défenseur gauche
-
-                    'DF2': { x: 35, y: 70 },   // Défenseur droit
-
-                    'FW1': { x: 65, y: 30 },   // Attaquant gauche
-
-                    'FW2': { x: 65, y: 50 },   // Attaquant central
-
-                    'FW3': { x: 65, y: 70 }    // Attaquant droit
-
-                };
-
-            } else {
-
-                // Formation 1-3-2 (1 gardien, 3 défenseurs, 2 attaquants)
-
-                positionMapping = {
-
-                    'GK': { x: 15, y: 50 },    // Gardien
-
-                    'DF1': { x: 35, y: 30 },   // Défenseur gauche
-
-                    'DF2': { x: 35, y: 50 },   // Défenseur central
-
-                    'DF3': { x: 35, y: 70 },   // Défenseur droit
-
-                    'FW1': { x: 65, y: 35 },   // Attaquant gauche
-
-                    'FW2': { x: 65, y: 65 }    // Attaquant droit
-
-                };
-
-            }
-
-            
-
-            // Trier les joueurs par position (GK, puis DF, puis FW)
-
-            const sortedPlayers = [...players].sort((a, b) => {
-
-                const posOrder = { 'GK': 0, 'DF': 1, 'FW': 2 };
-
-                return posOrder[a.position] - posOrder[b.position];
-
-            });
-
-            
-
-            // Compter les défenseurs et attaquants pour le placement
-
-            let dfCount = 0;
-
-            let fwCount = 0;
-
-            
-
-            sortedPlayers.forEach(player => {
-
-                const playerDot = document.createElement('div');
-
-                playerDot.className = `player-dot position-${player.position}`;
-
-                
-
-                // Déterminer la position sur le terrain
-
-                let position;
-
-                
-
-                if (player.position === 'GK') {
-
-                    position = positionMapping['GK'];
-
-                } else if (player.position === 'DF') {
-
-                    dfCount++;
-
-                    const posKey = `DF${dfCount}`;
-
-                    position = positionMapping[posKey] || positionMapping['DF1']; // Fallback
-
-                } else if (player.position === 'FW') {
-
-                    fwCount++;
-
-                    const posKey = `FW${fwCount}`;
-
-                    position = positionMapping[posKey] || positionMapping['FW1']; // Fallback
-
-                } else {
-
-                    // Position par défaut au milieu
-
-                    position = { x: 50, y: 50 };
-
-                }
-
-                
-
-                // Positionner le joueur
-
-                playerDot.style.left = `${position.x}%`;
-
-                playerDot.style.top = `${position.y}%`;
-
-                
-
-                // Ajouter le texte de la position
-
-                playerDot.textContent = player.position;
-
-                
-
-                // Ajouter le nom du joueur en dessous
-
-                const playerName = document.createElement('div');
-
-                playerName.className = 'player-name';
-
-                playerName.textContent = getInitials(player.name);
-
-                playerName.style.left = `${position.x}%`;
-
-                playerName.style.top = `${position.y}%`;
-
-                
-
-                fieldElement.appendChild(playerDot);
-
-                fieldElement.appendChild(playerName);
-
-            });
-
+// Fonction pour placer les joueurs sur le terrain selon la formation
+function placePlayersOnField(players, fieldElement, formation) {
+    // Positions prédéfinies basées sur la formation 
+    let positionMapping;
+    
+    if (formation === "1-2-3") {
+        // Formation 1-2-3 (1 gardien, 2 défenseurs, 3 attaquants)
+        positionMapping = {
+            'GK': { x: 15, y: 50 },    // Gardien
+            'DF1': { x: 35, y: 30 },   // Défenseur gauche
+            'DF2': { x: 35, y: 70 },   // Défenseur droit
+            'FW1': { x: 65, y: 30 },   // Attaquant gauche
+            'FW2': { x: 65, y: 50 },   // Attaquant central
+            'FW3': { x: 65, y: 70 }    // Attaquant droit
+        };
+    } else {
+        // Formation 1-3-2 (1 gardien, 3 défenseurs, 2 attaquants)
+        positionMapping = {
+            'GK': { x: 15, y: 50 },    // Gardien
+            'DF1': { x: 35, y: 30 },   // Défenseur gauche
+            'DF2': { x: 35, y: 50 },   // Défenseur central
+            'DF3': { x: 35, y: 70 },   // Défenseur droit
+            'FW1': { x: 65, y: 35 },   // Attaquant gauche
+            'FW2': { x: 65, y: 65 }    // Attaquant droit
+        };
+    }
+    
+    // Trier les joueurs par position (GK, puis DF, puis FW)
+    const sortedPlayers = [...players].sort((a, b) => {
+        const posOrder = { 'GK': 0, 'DF': 1, 'FW': 2 };
+        return posOrder[a.position] - posOrder[b.position];
+    });
+    
+    // Compter les défenseurs et attaquants pour le placement
+    let dfCount = 0;
+    let fwCount = 0;
+    
+    sortedPlayers.forEach(player => {
+        const playerDot = document.createElement('div');
+        playerDot.className = `player-dot position-${player.position}`;
+        
+        // Déterminer la position sur le terrain
+        let position;
+        
+        if (player.position === 'GK') {
+            position = positionMapping['GK'];
+        } else if (player.position === 'DF') {
+            dfCount++;
+            const posKey = `DF${dfCount}`;
+            position = positionMapping[posKey] || positionMapping['DF1']; // Fallback
+        } else if (player.position === 'FW') {
+            fwCount++;
+            const posKey = `FW${fwCount}`;
+            position = positionMapping[posKey] || positionMapping['FW1']; // Fallback
+        } else {
+            // Position par défaut au milieu
+            position = { x: 50, y: 50 };
         }
+        
+        // Positionner le joueur
+        playerDot.style.left = `${position.x}%`;
+        playerDot.style.top = `${position.y}%`;
+        
+        // Ajouter les couleurs du drapeau (si nécessaire)
+        const flagColors = getFlagColors(player.nation);
+        playerDot.style.backgroundColor = flagColors[0]; // Première couleur du drapeau
+        playerDot.style.border = `2px solid ${flagColors[1] || '#000000'}`; // Deuxième couleur du drapeau
+        
+        // Ajouter le nom du joueur en dessous
+        const playerName = document.createElement('div');
+        playerName.className = 'player-name';
+        playerName.textContent = player.name; // Afficher le nom complet
+        playerName.style.left = `${position.x}%`;
+        playerName.style.top = `${position.y}%`;
+        
+        fieldElement.appendChild(playerDot);
+        fieldElement.appendChild(playerName);
+    });
+}
 
 
 
