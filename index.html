@@ -674,7 +674,11 @@
                     <th>M1</th>
                     <th>M2</th>
                     <th>M3</th>
-                    <th>M4</th>
+                    <th>1/16</th>
+		    <th>1/8</th>
+		    <th>1/4</th>
+		    <th>1/2</th>
+		    <th>Final</th>
                     <th>Pts</th>
                 </tr>
             </thead>
@@ -712,22 +716,18 @@
                     <thead>
 
                         <tr>
-
-                            <th>Joueur</th>
-
-                            <th>Équipe</th>
-
-                            <th>Buts</th>
-
-                            <th>Passes D.</th>
-
-                            <th>Matchs</th>
-
-                            <th>Cartons J.</th>
-
-                            <th>Cartons R.</th>
-
-                        </tr>
+                    <th>Position</th>
+                    <th>Équipe</th>
+                    <th>M1</th>
+                    <th>M2</th>
+                    <th>M3</th>
+                    <th>1/16</th>
+		    <th>1/8</th>
+		    <th>1/4</th>
+		    <th>1/2</th>
+		    <th>Final</th>
+                    <th>Pts</th>
+                </tr>
 
                     </thead>
 
@@ -843,7 +843,7 @@
         renderTeams(data.teams);
         renderStandings(data.teams); // Passer les données des équipes avec leurs résultats
         renderPlayerStats(data.playerStats);
-	renderBracket(data.bracket);
+	//renderBracket(data.bracket);
     } catch (error) {
         console.error('Erreur:', error);
         // Si l'erreur est due à l'absence de fichier data.json, utiliser des données de démonstration
@@ -1261,7 +1261,7 @@ function renderStandings(standings) {
     });
 }
 
-	    // Fonction pour afficher le bracket
+/*	    // Fonction pour afficher le bracket
 function renderBracket(bracketData) {
     const bracketContainer = document.getElementById('bracket-container');
     bracketContainer.innerHTML = '';
@@ -1303,7 +1303,7 @@ function renderBracket(bracketData) {
 
         bracketContainer.appendChild(roundDiv);
     });
-}
+}*/
 
 
         // Fonction pour afficher les statistiques des joueurs
