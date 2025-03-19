@@ -224,6 +224,40 @@
 
         }
 
+	    * Styles pour le bracket */
+.bracket-container {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.bracket-round {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.bracket-match {
+    background-color: white;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+    width: 200px;
+    text-align: center;
+}
+
+.bracket-match.winner {
+    background-color: #3d195b;
+    color: white;
+}
+
+.bracket-match span {
+    display: block;
+    margin: 5px 0;
+}
+
         
 
         /* Styles pour le terrain de football */
@@ -809,6 +843,7 @@
         renderTeams(data.teams);
         renderStandings(data.teams); // Passer les données des équipes avec leurs résultats
         renderPlayerStats(data.playerStats);
+	renderBracket(data.bracket);
     } catch (error) {
         console.error('Erreur:', error);
         // Si l'erreur est due à l'absence de fichier data.json, utiliser des données de démonstration
@@ -1226,6 +1261,49 @@ function renderStandings(standings) {
     });
 }
 
+	    // Fonction pour afficher le bracket
+function renderBracket(bracketData) {
+    const bracketContainer = document.getElementById('bracket-container');
+    bracketContainer.innerHTML = '';
+
+    // Rondes disponibles
+    const rounds = ["roundOf16", "quarterFinals", "semiFinals", "final"];
+
+    rounds.forEach(round => {
+        const roundDiv = document.createElement('div');
+        roundDiv.className = 'bracket-round';
+
+        const roundTitle = document.createElement('h3');
+        roundTitle.textContent = round.replace(/([A-Z])/g, ' $1').toUpperCase(); // Formatage du titre
+        roundDiv.appendChild(roundTitle);
+
+        bracketData[round].forEach(match => {
+            const matchDiv = document.createElement('div');
+            matchDiv.className = 'bracket-match';
+
+            // Ajouter les équipes
+            const team1 = document.createElement('span');
+            team1.textContent = match.team1;
+            if (match.winner === match.team1) team1.style.fontWeight = 'bold';
+
+            const team2 = document.createElement('span');
+            team2.textContent = match.team2;
+            if (match.winner === match.team2) team2.style.fontWeight = 'bold';
+
+            matchDiv.appendChild(team1);
+            matchDiv.appendChild(team2);
+
+            // Mettre en évidence le gagnant
+            if (match.winner) {
+                matchDiv.classList.add('winner');
+            }
+
+            roundDiv.appendChild(matchDiv);
+        });
+
+        bracketContainer.appendChild(roundDiv);
+    });
+}
 
 
         // Fonction pour afficher les statistiques des joueurs
