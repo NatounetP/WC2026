@@ -489,7 +489,7 @@
 
         .position-GK {
 
-            background-color: #e8665c;
+            background-color: #4caf50;
 
         }
 
@@ -561,40 +561,6 @@
 
         }
 
-/* Styles pour le bracket */
-.bracket-container {
-    display: flex;
-    justify-content: space-around;
-    flex-wrap: wrap;
-    gap: 20px;
-    margin-top: 20px;
-}
-
-.bracket-round {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.bracket-match {
-    background-color: white;
-    border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    padding: 10px;
-    width: 200px;
-    text-align: center;
-}
-
-.bracket-match.winner {
-    background-color: #3d195b;
-    color: white;
-}
-
-.bracket-match span {
-    display: block;
-    margin: 5px 0;
-}
-
         @media (max-width: 768px) {
 
             .team-card {
@@ -636,7 +602,6 @@
             <button class="tab" onclick="openTab('standings')">Classement</button>
 
             <button class="tab" onclick="openTab('stats')">Statistiques</button>
-            <button class="tab" onclick="openTab('bracket')">Bracket</button>
 
         </div>
 
@@ -674,11 +639,7 @@
                     <th>M1</th>
                     <th>M2</th>
                     <th>M3</th>
-                    <th>1/16</th>
-                    <th>1/8</th>
-                    <th>1/4</th>
-                    <th>1/2</th>
-                    <th>Final</th>
+                    <th>M4</th>
                     <th>Pts</th>
                 </tr>
             </thead>
@@ -708,16 +669,19 @@
                         <tr>
 
                             <th>Joueur</th>
+
                             <th>Équipe</th>
-                    <th>M1</th>
-                    <th>M2</th>
-                    <th>M3</th>
-                    <th>1/16</th>
-                    <th>1/8</th>
-                    <th>1/4</th>
-                    <th>1/2</th>
-                    <th>Final</th>
-                    <th>Pts</th>
+
+                            <th>Buts</th>
+
+                            <th>Passes D.</th>
+
+                            <th>Matchs</th>
+
+                            <th>Cartons J.</th>
+
+                            <th>Cartons R.</th>
+
                         </tr>
 
                     </thead>
@@ -737,17 +701,6 @@
             </div>
 
         </div>
-
-<!-- Section Bracket -->
-<div id="standings" class="tab-content">
-    <div class="section">
-        <h2>Bracket</h2>
-        <div class="bracket-container" id="bracket-container">
-            <div class="loading">Chargement des données...</div>
-        </div>
-    </div>
-</div>
-
 
     </div>
 
@@ -843,23 +796,20 @@
         }
         const data = await response.json();
         renderTeams(data.teams);
-        renderStandings(data.standings);
+        renderStandings(data.teams); // Passer les données des équipes avec leurs résultats
         renderPlayerStats(data.playerStats);
-        //renderBracket(data.bracket); // Afficher le bracket
     } catch (error) {
         console.error('Erreur:', error);
         // Si l'erreur est due à l'absence de fichier data.json, utiliser des données de démonstration
         if (error.message.includes('404')) {
             const demoData = getDemoData();
             renderTeams(demoData.teams);
-            renderStandings(demoData.standings);
+            renderStandings(demoData.teams); // Passer les données de démonstration
             renderPlayerStats(demoData.playerStats);
-            //renderBracket(demoData.bracket); // Afficher le bracket de démonstration
         } else {
             document.getElementById('team-container').innerHTML = '<p>Erreur lors du chargement des données. Veuillez réessayer plus tard.</p>';
-            document.getElementById('standings-body').innerHTML = '<tr><td colspan="10">Erreur lors du chargement des données.</td></tr>';
+            document.getElementById('standings-body').innerHTML = '<tr><td colspan="7">Erreur lors du chargement des données.</td></tr>';
             document.getElementById('player-stats-body').innerHTML = '<tr><td colspan="7">Erreur lors du chargement des données.</td></tr>';
-            //document.getElementById('bracket-container').innerHTML = '<p>Erreur lors du chargement des données.</p>';
         }
     }
 }
@@ -927,31 +877,6 @@
                 redCards: 0
             }
         ]
-	bracket: {
-            roundOf16: [
-                { "team1": "Équipe Rouge", "team2": "Équipe Bleue", "winner": "Équipe Rouge" },
-                { "team1": "Équipe Verte", "team2": "Équipe Jaune", "winner": "Équipe Verte" },
-                { "team1": "Équipe Orange", "team2": "Équipe Violette", "winner": "Équipe Orange" },
-                { "team1": "Équipe A", "team2": "Équipe B", "winner": "Équipe A" },
-                { "team1": "Équipe C", "team2": "Équipe D", "winner": "Équipe C" },
-                { "team1": "Équipe E", "team2": "Équipe F", "winner": "Équipe E" },
-                { "team1": "Équipe G", "team2": "Équipe H", "winner": "Équipe G" },
-                { "team1": "Équipe I", "team2": "Équipe J", "winner": "Équipe I" }
-            ],
-            quarterFinals: [
-                { "team1": "Équipe Rouge", "team2": "Équipe Verte", "winner": "Équipe Rouge" },
-                { "team1": "Équipe Orange", "team2": "Équipe A", "winner": "Équipe Orange" },
-                { "team1": "Équipe C", "team2": "Équipe E", "winner": "Équipe C" },
-                { "team1": "Équipe G", "team2": "Équipe I", "winner": "Équipe G" }
-            ],
-            semiFinals: [
-                { "team1": "Équipe Rouge", "team2": "Équipe Orange", "winner": "Équipe Rouge" },
-                { "team1": "Équipe C", "team2": "Équipe G", "winner": "Équipe C" }
-            ],
-            final: [
-                { "team1": "Équipe Rouge", "team2": "Équipe C", "winner": "Équipe Rouge" }
-            ]
-        }
     };
 }
 
@@ -1336,49 +1261,6 @@ function renderStandings(standings) {
 
         }
 
-// Fonction pour afficher le bracket
-function renderBracket(bracketData) {
-    const bracketContainer = document.getElementById('bracket-container');
-    bracketContainer.innerHTML = '';
-
-    // Rondes disponibles
-    const rounds = ["roundOf16", "quarterFinals", "semiFinals", "final"];
-
-    rounds.forEach(round => {
-        const roundDiv = document.createElement('div');
-        roundDiv.className = 'bracket-round';
-
-        const roundTitle = document.createElement('h3');
-        roundTitle.textContent = round.replace(/([A-Z])/g, ' $1').toUpperCase(); // Formatage du titre
-        roundDiv.appendChild(roundTitle);
-
-        bracketData[round].forEach(match => {
-            const matchDiv = document.createElement('div');
-            matchDiv.className = 'bracket-match';
-
-            // Ajouter les équipes
-            const team1 = document.createElement('span');
-            team1.textContent = match.team1;
-            if (match.winner === match.team1) team1.style.fontWeight = 'bold';
-
-            const team2 = document.createElement('span');
-            team2.textContent = match.team2;
-            if (match.winner === match.team2) team2.style.fontWeight = 'bold';
-
-            matchDiv.appendChild(team1);
-            matchDiv.appendChild(team2);
-
-            // Mettre en évidence le gagnant
-            if (match.winner) {
-                matchDiv.classList.add('winner');
-            }
-
-            roundDiv.appendChild(matchDiv);
-        });
-
-        bracketContainer.appendChild(roundDiv);
-    });
-}
 
 
         // Charger les données au chargement de la page
