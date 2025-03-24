@@ -1134,6 +1134,7 @@ function renderBracket(bracketData) {
             playerStats.forEach(player => {
 
                 const row = document.createElement('tr');
+		const totalPoints = (player.M1 || 0) + (player.M2 || 0) + (player.M3 || 0) + (player.F32 || 0) + (player.F16 || 0) + (player.F8 || 0) + (player.F4 || 0) + (player.Final || 0);
 
                 row.innerHTML = `
 
@@ -1147,7 +1148,7 @@ function renderBracket(bracketData) {
                     <td>${player.F8}</td>
                     <td>${player.F4}</td>
                     <td>${player.Final}</td>
-                    <td>${player.Total}</td>
+                    <td><strong>${totalPoints}</strong></td>
 
                 `;
 
