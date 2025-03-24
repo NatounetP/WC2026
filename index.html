@@ -129,39 +129,178 @@
         font-size: 16px;
         color: #777;
     }
-    /* Styles pour le bracket */
+    /* Enhanced Bracket Styles */
+    .bracket-section {
+        width: 100%;
+        overflow-x: auto;
+        padding-bottom: 20px;
+        -webkit-overflow-scrolling: touch;
+    }
+    
     .bracket-container {
         display: flex;
-        justify-content: space-around;
-        flex-wrap: wrap;
-        gap: 15px;
-        margin-top: 15px;
-        width: 100%;
+        justify-content: flex-start;
+        gap: 10px;
+        min-width: fit-content;
+        padding: 15px 10px;
     }
+    
     .bracket-round {
         display: flex;
         flex-direction: column;
-        gap: 10px;
-        flex: 1;
-        min-width: 200px;
+        justify-content: space-around;
+        min-width: 160px;
     }
+    
+    .bracket-round-title {
+        text-align: center;
+        font-weight: bold;
+        color: #3d195b;
+        margin-bottom: 15px;
+        padding: 8px 5px;
+        background-color: #f8f5ff;
+        border-radius: 4px;
+        font-size: 0.9rem;
+        position: sticky;
+        left: 0;
+    }
+    
     .bracket-match {
         background-color: white;
-        border-radius: 5px;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        border-radius: 6px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         padding: 10px;
-        width: 100%;
-        text-align: center;
-        box-sizing: border-box;
+        margin-bottom: 20px;
+        position: relative;
+        transition: all 0.3s ease;
+        min-height: 80px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
     }
+    
+    .bracket-match:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    
     .bracket-match.winner {
+        background-color: rgba(61, 25, 91, 0.1);
+        border: 1px solid #3d195b;
+    }
+    
+    .bracket-team {
+        display: flex;
+        align-items: center;
+        padding: 6px 8px;
+        margin: 3px 0;
+        border-radius: 4px;
+        position: relative;
+        min-height: 28px;
+    }
+    
+    .bracket-team.winner {
+        font-weight: bold;
+        color: #3d195b;
+    }
+    
+    .bracket-team.winner::before {
+        content: "✓";
+        margin-right: 5px;
+        color: #4caf50;
+    }
+    
+    /* Connector lines between rounds */
+    .bracket-team::before {
+        content: "";
+        position: absolute;
+        left: -10px;
+        top: 50%;
+        width: 10px;
+        height: 2px;
+        background: #aaa;
+        display: none;
+    }
+    
+    .bracket-team::after {
+        content: "";
+        position: absolute;
+        left: -10px;
+        width: 2px;
+        background: #aaa;
+        display: none;
+    }
+    
+    .bracket-team.top::after {
+        top: 50%;
+        bottom: -20px;
+    }
+    
+    .bracket-team.bottom::after {
+        top: -20px;
+        bottom: 50%;
+    }
+    
+    .bracket-round:not(:first-child) .bracket-team::before,
+    .bracket-round:not(:first-child) .bracket-team::after {
+        display: block;
+    }
+    
+    .bracket-score {
+        margin-left: auto;
+        padding-left: 8px;
+        font-weight: bold;
+        color: #666;
+    }
+    
+    .bracket-team.winner .bracket-score {
+        color: #e90052;
+    }
+    
+    /* Special styling for different rounds */
+    .bracket-round-32 .bracket-round-title {
+        background-color: #e8f5e9;
+    }
+    
+    .bracket-round-16 .bracket-round-title {
+        background-color: #e3f2fd;
+    }
+    
+    .bracket-round-8 .bracket-round-title {
+        background-color: #fff8e1;
+    }
+    
+    .bracket-round-4 .bracket-round-title {
+        background-color: #fce4ec;
+    }
+    
+    .bracket-round-2 .bracket-round-title {
+        background-color: #f3e5f5;
+        font-size: 1rem;
+    }
+    
+    .bracket-final {
+        background-color: #f5f5f5;
+    }
+    
+    .bracket-final .bracket-match {
         background-color: #3d195b;
         color: white;
     }
-    .bracket-match span {
-        display: block;
-        margin: 5px 0;
+    
+    .bracket-final .bracket-team {
+        color: white;
     }
+    
+    .bracket-final .bracket-team.winner {
+        color: #ffeb3b;
+    }
+    
+    .bracket-final .bracket-score {
+        color: #ccc;
+    }
+    
+    
     /* Styles pour le terrain de football */
     .field-container {
         margin-top: 15px;
@@ -498,7 +637,7 @@
             <div class="bracket-container" id="bracket-container">
                 <!-- Round of 32 -->
                 <div class="bracket-round bracket-round-32">
-                    <div class="bracket-round-title">ROUND OF 32</div>
+                    <div class="bracket-round-title">1/16</div>
                     <div class="bracket-match">
                         <div class="bracket-team top winner">
                             <span>Team A</span>
@@ -524,7 +663,7 @@
                 
                 <!-- Round of 16 -->
                 <div class="bracket-round bracket-round-16">
-                    <div class="bracket-round-title">ROUND OF 16</div>
+                    <div class="bracket-round-title">1/8</div>
                     <div class="bracket-match">
                         <div class="bracket-team top winner">
                             <span>Team A</span>
@@ -540,7 +679,7 @@
                 
                 <!-- Quarter Finals -->
                 <div class="bracket-round bracket-round-8">
-                    <div class="bracket-round-title">QUARTER FINALS</div>
+                    <div class="bracket-round-title">1/4</div>
                     <div class="bracket-match">
                         <div class="bracket-team top winner">
                             <span>Team A</span>
@@ -556,7 +695,7 @@
                 
                 <!-- Semi Finals -->
                 <div class="bracket-round bracket-round-4">
-                    <div class="bracket-round-title">SEMI FINALS</div>
+                    <div class="bracket-round-title">1/2</div>
                     <div class="bracket-match">
                         <div class="bracket-team top">
                             <span>Team A</span>
@@ -1168,10 +1307,10 @@ function renderBracket(bracketData) {
     
     // Create rounds from Round of 32 to Final
     const rounds = [
-        { name: "ROUND OF 32", class: "bracket-round-32", matches: bracketData.roundOf32 },
-        { name: "ROUND OF 16", class: "bracket-round-16", matches: bracketData.roundOf16 },
-        { name: "QUARTER FINALS", class: "bracket-round-8", matches: bracketData.quarterFinals },
-        { name: "SEMI FINALS", class: "bracket-round-4", matches: bracketData.semiFinals },
+        { name: "1/16", class: "bracket-round-32", matches: bracketData.roundOf32 },
+        { name: "1/8", class: "bracket-round-16", matches: bracketData.roundOf16 },
+        { name: "1/4", class: "bracket-round-8", matches: bracketData.quarterFinals },
+        { name: "1/2", class: "bracket-round-4", matches: bracketData.semiFinals },
         { name: "FINAL", class: "bracket-round-2 bracket-final", matches: [bracketData.final] }
     ];
     
