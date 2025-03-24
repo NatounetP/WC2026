@@ -1179,8 +1179,8 @@ function renderStandings(standings) {
 
     // Trier par points totaux (décroissant)
     const sortedStandings = [...standings].sort((a, b) => {
-        const totalPointsA = (a.results.M1 || 0) + (a.results.M2 || 0) + (a.results.M3 || 0) + (a.results.M4 || 0);
-        const totalPointsB = (b.results.M1 || 0) + (b.results.M2 || 0) + (b.results.M3 || 0) + (b.results.M4 || 0);
+        const totalPointsA = (a.results.M1 || 0) + (a.results.M2 || 0) + (a.results.M3 || 0) + (a.results.F32 || 0) + (a.results.F16 || 0) + (a.results.F8 || 0) + (a.results.F4 || 0) + (a.results.Final || 0);
+        const totalPointsB = (b.results.M1 || 0) + (b.results.M2 || 0) + (b.results.M3 || 0) + (b.results.F32 || 0) + (b.results.F16 || 0) + (b.results.F8 || 0) + (b.results.F4 || 0) + (b.results.Final || 0);
         return totalPointsB - totalPointsA;
     });
 
