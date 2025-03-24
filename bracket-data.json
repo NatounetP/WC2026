@@ -1,0 +1,338 @@
+{
+  "tournamentName": "Friends Fantasy WC 2026",
+  "teams": [
+    {"id": 1, "name": "Team Red", "shortName": "RED"},
+    {"id": 2, "name": "Team Blue", "shortName": "BLU"},
+    {"id": 3, "name": "Team Green", "shortName": "GRN"},
+    {"id": 4, "name": "Team Yellow", "shortName": "YLW"},
+    {"id": 5, "name": "Team Orange", "shortName": "ORG"},
+    {"id": 6, "name": "Team Purple", "shortName": "PUR"},
+    {"id": 7, "name": "Team White", "shortName": "WHT"},
+    {"id": 8, "name": "Team Black", "shortName": "BLK"},
+    {"id": 9, "name": "Team A", "shortName": "TMA"},
+    {"id": 10, "name": "Team B", "shortName": "TMB"},
+    {"id": 11, "name": "Team C", "shortName": "TMC"},
+    {"id": 12, "name": "Team D", "shortName": "TMD"},
+    {"id": 13, "name": "Team E", "shortName": "TME"},
+    {"id": 14, "name": "Team F", "shortName": "TMF"},
+    {"id": 15, "name": "Team G", "shortName": "TMG"},
+    {"id": 16, "name": "Team H", "shortName": "TMH"},
+    {"id": 17, "name": "Team I", "shortName": "TMI"},
+    {"id": 18, "name": "Team J", "shortName": "TMJ"},
+    {"id": 19, "name": "Team K", "shortName": "TMK"},
+    {"id": 20, "name": "Team L", "shortName": "TML"},
+    {"id": 21, "name": "Team M", "shortName": "TMM"},
+    {"id": 22, "name": "Team N", "shortName": "TMN"},
+    {"id": 23, "name": "Team O", "shortName": "TMO"},
+    {"id": 24, "name": "Team P", "shortName": "TMP"},
+    {"id": 25, "name": "Team Q", "shortName": "TMQ"},
+    {"id": 26, "name": "Team R", "shortName": "TMR"},
+    {"id": 27, "name": "Team S", "shortName": "TMS"},
+    {"id": 28, "name": "Team T", "shortName": "TMT"},
+    {"id": 29, "name": "Team U", "shortName": "TMU"},
+    {"id": 30, "name": "Team V", "shortName": "TMV"},
+    {"id": 31, "name": "Team W", "shortName": "TMW"},
+    {"id": 32, "name": "Team X", "shortName": "TMX"}
+  ],
+  "bracket": {
+    "roundOf32": [
+      {
+        "matchId": 1,
+        "team1Id": 1,
+        "team2Id": 32,
+        "score1": 2,
+        "score2": 1,
+        "winnerId": 1,
+        "date": "2025-03-01"
+      },
+      {
+        "matchId": 2,
+        "team1Id": 16,
+        "team2Id": 17,
+        "score1": 0,
+        "score2": 3,
+        "winnerId": 17,
+        "date": "2025-03-01"
+      },
+      {
+        "matchId": 3,
+        "team1Id": 8,
+        "team2Id": 25,
+        "score1": 1,
+        "score2": 1,
+        "winnerId": 8,
+        "penaltyScore1": 4,
+        "penaltyScore2": 3,
+        "date": "2025-03-02"
+      },
+      {
+        "matchId": 4,
+        "team1Id": 9,
+        "team2Id": 24,
+        "score1": 2,
+        "score2": 0,
+        "winnerId": 9,
+        "date": "2025-03-02"
+      },
+      {
+        "matchId": 5,
+        "team1Id": 4,
+        "team2Id": 29,
+        "score1": 3,
+        "score2": 2,
+        "winnerId": 4,
+        "date": "2025-03-03"
+      },
+      {
+        "matchId": 6,
+        "team1Id": 13,
+        "team2Id": 20,
+        "score1": 1,
+        "score2": 1,
+        "winnerId": 20,
+        "penaltyScore1": 2,
+        "penaltyScore2": 4,
+        "date": "2025-03-03"
+      },
+      {
+        "matchId": 7,
+        "team1Id": 5,
+        "team2Id": 28,
+        "score1": 0,
+        "score2": 2,
+        "winnerId": 28,
+        "date": "2025-03-04"
+      },
+      {
+        "matchId": 8,
+        "team1Id": 12,
+        "team2Id": 21,
+        "score1": 3,
+        "score2": 1,
+        "winnerId": 12,
+        "date": "2025-03-04"
+      },
+      {
+        "matchId": 9,
+        "team1Id": 2,
+        "team2Id": 31,
+        "score1": 4,
+        "score2": 0,
+        "winnerId": 2,
+        "date": "2025-03-05"
+      },
+      {
+        "matchId": 10,
+        "team1Id": 15,
+        "team2Id": 18,
+        "score1": 1,
+        "score2": 2,
+        "winnerId": 18,
+        "date": "2025-03-05"
+      },
+      {
+        "matchId": 11,
+        "team1Id": 7,
+        "team2Id": 26,
+        "score1": 0,
+        "score2": 0,
+        "winnerId": 7,
+        "penaltyScore1": 5,
+        "penaltyScore2": 4,
+        "date": "2025-03-06"
+      },
+      {
+        "matchId": 12,
+        "team1Id": 10,
+        "team2Id": 23,
+        "score1": 2,
+        "score2": 1,
+        "winnerId": 10,
+        "date": "2025-03-06"
+      },
+      {
+        "matchId": 13,
+        "team1Id": 3,
+        "team2Id": 30,
+        "score1": 1,
+        "score2": 3,
+        "winnerId": 30,
+        "date": "2025-03-07"
+      },
+      {
+        "matchId": 14,
+        "team1Id": 14,
+        "team2Id": 19,
+        "score1": 2,
+        "score2": 2,
+        "winnerId": 14,
+        "penaltyScore1": 3,
+        "penaltyScore2": 1,
+        "date": "2025-03-07"
+      },
+      {
+        "matchId": 15,
+        "team1Id": 6,
+        "team2Id": 27,
+        "score1": 0,
+        "score2": 1,
+        "winnerId": 27,
+        "date": "2025-03-08"
+      },
+      {
+        "matchId": 16,
+        "team1Id": 11,
+        "team2Id": 22,
+        "score1": 3,
+        "score2": 0,
+        "winnerId": 11,
+        "date": "2025-03-08"
+      }
+    ],
+    "roundOf16": [
+      {
+        "matchId": 17,
+        "team1Id": 1,
+        "team2Id": 17,
+        "score1": 2,
+        "score2": 1,
+        "winnerId": 1,
+        "date": "2025-03-15"
+      },
+      {
+        "matchId": 18,
+        "team1Id": 8,
+        "team2Id": 9,
+        "score1": 0,
+        "score2": 2,
+        "winnerId": 9,
+        "date": "2025-03-15"
+      },
+      {
+        "matchId": 19,
+        "team1Id": 4,
+        "team2Id": 20,
+        "score1": 3,
+        "score2": 0,
+        "winnerId": 4,
+        "date": "2025-03-16"
+      },
+      {
+        "matchId": 20,
+        "team1Id": 28,
+        "team2Id": 12,
+        "score1": 1,
+        "score2": 1,
+        "winnerId": 12,
+        "penaltyScore1": 3,
+        "penaltyScore2": 5,
+        "date": "2025-03-16"
+      },
+      {
+        "matchId": 21,
+        "team1Id": 2,
+        "team2Id": 18,
+        "score1": 4,
+        "score2": 2,
+        "winnerId": 2,
+        "date": "2025-03-17"
+      },
+      {
+        "matchId": 22,
+        "team1Id": 7,
+        "team2Id": 10,
+        "score1": 0,
+        "score2": 3,
+        "winnerId": 10,
+        "date": "2025-03-17"
+      },
+      {
+        "matchId": 23,
+        "team1Id": 30,
+        "team2Id": 14,
+        "score1": 2,
+        "score2": 1,
+        "winnerId": 30,
+        "date": "2025-03-18"
+      },
+      {
+        "matchId": 24,
+        "team1Id": 27,
+        "team2Id": 11,
+        "score1": 1,
+        "score2": 0,
+        "winnerId": 27,
+        "date": "2025-03-18"
+      }
+    ],
+    "quarterFinals": [
+      {
+        "matchId": 25,
+        "team1Id": 1,
+        "team2Id": 9,
+        "score1": 1,
+        "score2": 0,
+        "winnerId": 1,
+        "date": "2025-03-22"
+      },
+      {
+        "matchId": 26,
+        "team1Id": 4,
+        "team2Id": 12,
+        "score1": 2,
+        "score2": 2,
+        "winnerId": 4,
+        "penaltyScore1": 4,
+        "penaltyScore2": 2,
+        "date": "2025-03-22"
+      },
+      {
+        "matchId": 27,
+        "team1Id": 2,
+        "team2Id": 10,
+        "score1": 3,
+        "score2": 1,
+        "winnerId": 2,
+        "date": "2025-03-23"
+      },
+      {
+        "matchId": 28,
+        "team1Id": 30,
+        "team2Id": 27,
+        "score1": 0,
+        "score2": 1,
+        "winnerId": 27,
+        "date": "2025-03-23"
+      }
+    ],
+    "semiFinals": [
+      {
+        "matchId": 29,
+        "team1Id": 1,
+        "team2Id": 4,
+        "score1": 2,
+        "score2": 1,
+        "winnerId": 1,
+        "date": "2025-03-29"
+      },
+      {
+        "matchId": 30,
+        "team1Id": 2,
+        "team2Id": 27,
+        "score1": 0,
+        "score2": 2,
+        "winnerId": 27,
+        "date": "2025-03-29"
+      }
+    ],
+    "final": {
+      "matchId": 31,
+      "team1Id": 1,
+      "team2Id": 27,
+      "score1": 1,
+      "score2": 3,
+      "winnerId": 27,
+      "date": "2025-04-05"
+    }
+  }
+}
