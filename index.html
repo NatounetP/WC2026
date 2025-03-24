@@ -148,7 +148,7 @@
     .bracket-round {
         display: flex;
         flex-direction: column;
-        justify-content: space-around;
+        justify-content: flex-around;
         min-width: 160px;
     }
     
@@ -1256,22 +1256,22 @@ function renderBracket(tournamentData) {
     // Create rounds in order
     const rounds = [
         { 
-            name: "ROUND OF 32", 
+            name: "1/16", 
             class: "bracket-round-32",
             matches: tournamentData.bracket.roundOf32 
         },
         { 
-            name: "ROUND OF 16", 
+            name: "1/8", 
             class: "bracket-round-16",
             matches: tournamentData.bracket.roundOf16 
         },
         { 
-            name: "QUARTER FINALS", 
+            name: "1/4", 
             class: "bracket-round-8",
             matches: tournamentData.bracket.quarterFinals 
         },
         { 
-            name: "SEMI FINALS", 
+            name: "1/2", 
             class: "bracket-round-4",
             matches: tournamentData.bracket.semiFinals 
         },
