@@ -1127,7 +1127,7 @@ function renderBracket(bracketData) {
 
             // Trier les joueurs par nombre de buts (décroissant)
 
-            playerStats.sort((a, b) => b.goals - a.goals);
+            playerStats.sort((a, b) => b.Total - a.Total);
 
             
 
@@ -1138,18 +1138,16 @@ function renderBracket(bracketData) {
                 row.innerHTML = `
 
                     <td>${player.name}</td>
-
                     <td>${player.team}</td>
-
-                    <td>${player.goals}</td>
-
-                    <td>${player.assists}</td>
-
-                    <td>${player.matches}</td>
-
-                    <td>${player.yellowCards}</td>
-
-                    <td>${player.redCards}</td>
+                    <td>${player.M1}</td>
+                    <td>${player.M2}</td>
+                    <td>${player.M3}</td>
+                    <td>${player.F32}</td>
+                    <td>${player.F16}</td>
+                    <td>${player.F8}</td>
+                    <td>${player.F4}</td>
+                    <td>${player.Final}</td>
+                    <td>${player.Total}</td>
 
                 `;
 
