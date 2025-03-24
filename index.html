@@ -1239,14 +1239,14 @@ function renderStandings(standings) {
 
     // Trier par points totaux (décroissant)
     const sortedStandings = [...standings].sort((a, b) => {
-        const totalPointsA = (a.results.M1 || 0) + (a.results.M2 || 0) + (a.results.M3 || 0) + (a.results.M4 || 0);
-        const totalPointsB = (b.results.M1 || 0) + (b.results.M2 || 0) + (b.results.M3 || 0) + (b.results.M4 || 0);
+        const totalPointsA = (a.results.M1 || 0) + (a.results.M2 || 0) + (a.results.M3 || 0) + (a.results.1/16 || 0) + (a.results.1/8 || 0) + (a.results.1/4 || 0) + (a.results.1/2 || 0) + (a.results.Final || 0);
+        const totalPointsB = (b.results.M1 || 0) + (b.results.M2 || 0) + (b.results.M3 || 0) + (b.results.1/16 || 0) + (b.results.1/8 || 0) + (b.results.1/4 || 0) + (b.results.1/2 || 0) + (b.results.Final || 0);
         return totalPointsB - totalPointsA;
     });
 
     sortedStandings.forEach((team, index) => {
         const row = document.createElement('tr');
-        const totalPoints = (team.results.M1 || 0) + (team.results.M2 || 0) + (team.results.M3 || 0) + (team.results.M4 || 0);
+        const totalPoints = (team.results.M1 || 0) + (team.results.M2 || 0) + (team.results.M3 || 0) + (team.results.1/16 || 0) + (team.results.1/8 || 0) + (team.results.1/4 || 0) + (team.results.1/2 || 0) + (team.results.Final || 0);
 
         row.innerHTML = `
             <td>${index + 1}</td>
@@ -1254,7 +1254,11 @@ function renderStandings(standings) {
             <td>${team.results.M1 || 0}</td>
             <td>${team.results.M2 || 0}</td>
             <td>${team.results.M3 || 0}</td>
-            <td>${team.results.M4 || 0}</td>
+            <td>${team.results.1/16 || 0}</td>
+            <td>${team.results.1/8 || 0}</td>
+            <td>${team.results.1/4 || 0}</td>
+            <td>${team.results.1/2 || 0}</td>
+            <td>${team.results.Final || 0}</td>
             <td><strong>${totalPoints}</strong></td>
         `;
         standingsBody.appendChild(row);
