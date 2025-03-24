@@ -137,56 +137,74 @@
         {
             "name": "Alexandre Durand",
             "team": "Équipe Rouge",
-            "goals": 12,
-            "assists": 5,
-            "matches": 10,
-            "yellowCards": 1,
-            "redCards": 0
+            "M1": 0,
+            "M2": 0,
+            "M3": 3,
+            "F32": 3,
+            "F16": 4,
+            "F8":0,
+            "F4":0,
+            "Final":0
         },
         {
             "name": "Olivier Michel",
             "team": "Équipe Bleue",
-            "goals": 10,
-            "assists": 3,
-            "matches": 10,
-            "yellowCards": 2,
-            "redCards": 0
+            "M1": 0,
+            "M2": 0,
+            "M3": 3,
+            "F32": 3,
+            "F16": 4,
+            "F8":0,
+            "F4":0,
+            "Final":0
         },
         {
             "name": "Kylian Mbappé",
             "team": "Équipe Verte",
-            "goals": 15,
-            "assists": 7,
-            "matches": 10,
-            "yellowCards": 0,
-            "redCards": 0
+            "M1": 0,
+            "M2": 0,
+            "M3": 3,
+            "F32": 3,
+            "F16": 4,
+            "F8":0,
+            "F4":0,
+            "Final":0
         },
         {
             "name": "Thomas Müller",
             "team": "Équipe Jaune",
-            "goals": 8,
-            "assists": 6,
-            "matches": 10,
-            "yellowCards": 1,
-            "redCards": 0
+            "M1": 0,
+            "M2": 0,
+            "M3": 3,
+            "F32": 3,
+            "F16": 4,
+            "F8":0,
+            "F4":0,
+            "Final":0
         },
         {
             "name": "Kevin De Bruyne",
             "team": "Équipe Orange",
-            "goals": 7,
-            "assists": 10,
-            "matches": 10,
-            "yellowCards": 0,
-            "redCards": 0
+            "M1": 0,
+            "M2": 0,
+            "M3": 3,
+            "F32": 3,
+            "F16": 4,
+            "F8":0,
+            "F4":0,
+            "Final":0
         },
         {
             "name": "Ciro Immobile",
             "team": "Équipe Violette",
-            "goals": 9,
-            "assists": 4,
-            "matches": 10,
-            "yellowCards": 2,
-            "redCards": 0
+            "M1": 0,
+            "M2": 0,
+            "M3": 3,
+            "F32": 3,
+            "F16": 4,
+            "F8":0,
+            "F4":0,
+            "Final":0
         }
     ],
     "bracket": {
