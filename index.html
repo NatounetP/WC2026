@@ -1225,7 +1225,7 @@ function renderStandings(standings) {
 
     sortedStandings.forEach((team, index) => {
         const row = document.createElement('tr');
-        const totalPoints = (team.results.M1 || 0) + (team.results.M2 || 0) + (team.results.M3 || 0) + (team.results.M4 || 0);
+        const totalPoints = (team.results.M1 || 0) + (team.results.M2 || 0) + (team.results.M3 || 0) + (team.results.F32 || 0) + (team.results.F16 || 0) + (team.results.F8 || 0) + (team.results.F4 || 0) + (team.results.Final || 0);
 
         row.innerHTML = `
             <td>${index + 1}</td>
