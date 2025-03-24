@@ -489,11 +489,102 @@
 </div>
 
 	    <!-- Section Bracket -->
+
+<!-- Updated Bracket Section HTML -->
 <div id="bracket" class="tab-content">
     <div class="section">
-        <h2>Bracket</h2>
-        <div class="bracket-container" id="bracket-container">
-            <div class="loading">Chargement des données...</div>
+        <h2>Tournament Bracket</h2>
+        <div class="bracket-section">
+            <div class="bracket-container" id="bracket-container">
+                <!-- Round of 32 -->
+                <div class="bracket-round bracket-round-32">
+                    <div class="bracket-round-title">ROUND OF 32</div>
+                    <div class="bracket-match">
+                        <div class="bracket-team top winner">
+                            <span>Team A</span>
+                            <span class="bracket-score">2</span>
+                        </div>
+                        <div class="bracket-team bottom">
+                            <span>Team B</span>
+                            <span class="bracket-score">1</span>
+                        </div>
+                    </div>
+                    <div class="bracket-match">
+                        <div class="bracket-team top">
+                            <span>Team C</span>
+                            <span class="bracket-score">0</span>
+                        </div>
+                        <div class="bracket-team bottom winner">
+                            <span>Team D</span>
+                            <span class="bracket-score">3</span>
+                        </div>
+                    </div>
+                    <!-- Add more Round of 32 matches here -->
+                </div>
+                
+                <!-- Round of 16 -->
+                <div class="bracket-round bracket-round-16">
+                    <div class="bracket-round-title">ROUND OF 16</div>
+                    <div class="bracket-match">
+                        <div class="bracket-team top winner">
+                            <span>Team A</span>
+                            <span class="bracket-score">4</span>
+                        </div>
+                        <div class="bracket-team bottom">
+                            <span>Team D</span>
+                            <span class="bracket-score">2</span>
+                        </div>
+                    </div>
+                    <!-- Add more Round of 16 matches here -->
+                </div>
+                
+                <!-- Quarter Finals -->
+                <div class="bracket-round bracket-round-8">
+                    <div class="bracket-round-title">QUARTER FINALS</div>
+                    <div class="bracket-match">
+                        <div class="bracket-team top winner">
+                            <span>Team A</span>
+                            <span class="bracket-score">3</span>
+                        </div>
+                        <div class="bracket-team bottom">
+                            <span>Team E</span>
+                            <span class="bracket-score">1</span>
+                        </div>
+                    </div>
+                    <!-- Add more Quarter Final matches here -->
+                </div>
+                
+                <!-- Semi Finals -->
+                <div class="bracket-round bracket-round-4">
+                    <div class="bracket-round-title">SEMI FINALS</div>
+                    <div class="bracket-match">
+                        <div class="bracket-team top">
+                            <span>Team A</span>
+                            <span class="bracket-score">1</span>
+                        </div>
+                        <div class="bracket-team bottom winner">
+                            <span>Team F</span>
+                            <span class="bracket-score">2</span>
+                        </div>
+                    </div>
+                    <!-- Add more Semi Final matches here -->
+                </div>
+                
+                <!-- Final -->
+                <div class="bracket-round bracket-round-2 bracket-final">
+                    <div class="bracket-round-title">FINAL</div>
+                    <div class="bracket-match">
+                        <div class="bracket-team top">
+                            <span>Team F</span>
+                            <span class="bracket-score">1</span>
+                        </div>
+                        <div class="bracket-team bottom winner">
+                            <span>Team G</span>
+                            <span class="bracket-score">3</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -1070,49 +1161,54 @@ function renderStandings(standings) {
     });
 }
 
-/*	    // Fonction pour afficher le bracket
+	    // Fonction pour afficher le bracket
 function renderBracket(bracketData) {
-    const bracketContainer = document.getElementById('bracket-container');
-    bracketContainer.innerHTML = '';
-
-    // Rondes disponibles
-    const rounds = ["roundOf16", "quarterFinals", "semiFinals", "final"];
-
+    const container = document.getElementById('bracket-container');
+    container.innerHTML = '';
+    
+    // Create rounds from Round of 32 to Final
+    const rounds = [
+        { name: "ROUND OF 32", class: "bracket-round-32", matches: bracketData.roundOf32 },
+        { name: "ROUND OF 16", class: "bracket-round-16", matches: bracketData.roundOf16 },
+        { name: "QUARTER FINALS", class: "bracket-round-8", matches: bracketData.quarterFinals },
+        { name: "SEMI FINALS", class: "bracket-round-4", matches: bracketData.semiFinals },
+        { name: "FINAL", class: "bracket-round-2 bracket-final", matches: [bracketData.final] }
+    ];
+    
     rounds.forEach(round => {
+        if (!round.matches || round.matches.length === 0) return;
+        
         const roundDiv = document.createElement('div');
-        roundDiv.className = 'bracket-round';
-
-        const roundTitle = document.createElement('h3');
-        roundTitle.textContent = round.replace(/([A-Z])/g, ' $1').toUpperCase(); // Formatage du titre
-        roundDiv.appendChild(roundTitle);
-
-        bracketData[round].forEach(match => {
+        roundDiv.className = `bracket-round ${round.class}`;
+        
+        const titleDiv = document.createElement('div');
+        titleDiv.className = 'bracket-round-title';
+        titleDiv.textContent = round.name;
+        roundDiv.appendChild(titleDiv);
+        
+        round.matches.forEach(match => {
+            if (!match) return;
+            
             const matchDiv = document.createElement('div');
             matchDiv.className = 'bracket-match';
-
-            // Ajouter les équipes
-            const team1 = document.createElement('span');
-            team1.textContent = match.team1;
-            if (match.winner === match.team1) team1.style.fontWeight = 'bold';
-
-            const team2 = document.createElement('span');
-            team2.textContent = match.team2;
-            if (match.winner === match.team2) team2.style.fontWeight = 'bold';
-
-            matchDiv.appendChild(team1);
-            matchDiv.appendChild(team2);
-
-            // Mettre en évidence le gagnant
-            if (match.winner) {
-                matchDiv.classList.add('winner');
-            }
-
+            if (match.winner) matchDiv.classList.add('winner');
+            
+            const topTeam = document.createElement('div');
+            topTeam.className = `bracket-team top ${match.team1 === match.winner ? 'winner' : ''}`;
+            topTeam.innerHTML = `<span>${match.team1 || 'TBD'}</span><span class="bracket-score">${match.score1 || ''}</span>`;
+            
+            const bottomTeam = document.createElement('div');
+            bottomTeam.className = `bracket-team bottom ${match.team2 === match.winner ? 'winner' : ''}`;
+            bottomTeam.innerHTML = `<span>${match.team2 || 'TBD'}</span><span class="bracket-score">${match.score2 || ''}</span>`;
+            
+            matchDiv.appendChild(topTeam);
+            matchDiv.appendChild(bottomTeam);
             roundDiv.appendChild(matchDiv);
         });
-
-        bracketContainer.appendChild(roundDiv);
+        
+        container.appendChild(roundDiv);
     });
-}*/
+}
 
 
         // Fonction pour afficher les statistiques des joueurs
