@@ -12,7 +12,7 @@
                 { "name": "Alexandre Durand", "position": "FW", "nation": "FR" }
             ],
             "results": {
-                "M1": 0,
+                "M1": 1,
                 "M2": 0,
                 "M3": 3,
                 "F32": 3,
@@ -34,7 +34,7 @@
                 { "name": "Éric Garcia", "position": "FW", "nation": "ES" }
             ],
             "results": {
-                "M1": 0,
+                "M1": 2,
                 "M2": 0,
                 "M3": 3,
                 "F32": 3,
@@ -57,7 +57,7 @@
             ],
             "results": {
                 "M1": 0,
-                "M2": 0,
+                "M2": 3,
                 "M3": 3,
                 "F32": 3,
                 "F16": 2,
@@ -80,7 +80,7 @@
             "results": {
                 "M1": 0,
                 "M2": 0,
-                "M3": 3,
+                "M3": 1,
                 "F32": 3,
                 "F16": 2,
                 "F8":0,
