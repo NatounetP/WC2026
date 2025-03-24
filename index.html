@@ -877,12 +877,16 @@
                     { name: "Thomas Petit", position: "FW", nation: "LU" },
                     { name: "Alexandre Durand", position: "FW", nation: "FR" }
                 ],
-                results: {
-                    M1: 3,
-                    M2: 1,
-                    M3: 0,
-                    M4: 3
-                }
+                 "results": {
+                "M1": 0,
+                "M2": 0,
+                "M3": 3,
+                "F32": 3,
+                "F16": 2,
+                "F8":0,
+                "F4":0,
+                "Final":0
+            }
             },
             {
                 name: "Équipe Bleue",
@@ -895,12 +899,16 @@
                     { name: "Olivier Michel", position: "FW", nation: "FR" },
                     { name: "Éric Garcia", position: "FW", nation: "ES" }
                 ],
-                results: {
-                    M1: 1,
-                    M2: 3,
-                    M3: 1,
-                    M4: 0
-                }
+                 "results": {
+                "M1": 0,
+                "M2": 0,
+                "M3": 3,
+                "F32": 3,
+                "F16": 2,
+                "F8":0,
+                "F4":0,
+                "Final":0
+            }
             }
         ],
         playerStats: [
@@ -1254,8 +1262,11 @@ function renderStandings(standings) {
             <td>${team.results.M1 || 0}</td>
             <td>${team.results.M2 || 0}</td>
             <td>${team.results.M3 || 0}</td>
-            <td>${team.results.1/16 || 0}</td>
-	    <td>${team.results.M5 || 0}</td>
+            <td>${team.results.F32 || 0}</td>
+	    <td>${team.results.F16 || 0}</td>
+            <td>${team.results.F8 || 0}</td>
+	    <td>${team.results.F4 || 0}</td>
+            <td>${team.results.Final || 0}</td>
             <td><strong>${totalPoints}</strong></td>
         `;
         standingsBody.appendChild(row);
