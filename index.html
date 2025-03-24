@@ -1322,16 +1322,7 @@ function renderBracket(tournamentData) {
             `;
             
             matchDiv.appendChild(topTeam);
-            matchDiv.appendChild(bottomTeam);
-            
-            // Add match date if available
-            if (match.date) {
-                const dateDiv = document.createElement('div');
-                dateDiv.className = 'match-date';
-                dateDiv.textContent = new Date(match.date).toLocaleDateString('fr-FR');
-                matchDiv.appendChild(dateDiv);
-            }
-            
+            matchDiv.appendChild(bottomTeam);            
             roundDiv.appendChild(matchDiv);
         });
         
