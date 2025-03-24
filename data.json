@@ -12,10 +12,14 @@
                 { "name": "Alexandre Durand", "position": "FW", "nation": "FR" }
             ],
             "results": {
-                "M1": 3,
-                "M2": 1,
-                "M3": 0,
-                "M4": 3
+                "M1": 0,
+                "M2": 0,
+                "M3": 3,
+                "1/16": 3,
+                "1/8": 2,
+                "1/4":0,
+                "1/2":0,
+                "Final":0
             }
         },
         {
@@ -30,10 +34,14 @@
                 { "name": "Éric Garcia", "position": "FW", "nation": "ES" }
             ],
             "results": {
-                "M1": 1,
-                "M2": 3,
-                "M3": 1,
-                "M4": 0
+                "M1": 0,
+                "M2": 0,
+                "M3": 3,
+                "1/16": 3,
+                "1/8": 2,
+                "1/4":0,
+                "1/2":0,
+                "Final":0
             }
         },
         {
@@ -49,9 +57,13 @@
             ],
             "results": {
                 "M1": 0,
-                "M2": 3,
+                "M2": 0,
                 "M3": 3,
-                "M4": 1
+                "1/16": 3,
+                "1/8": 2,
+                "1/4":0,
+                "1/2":0,
+                "Final":0
             }
         },
         {
@@ -66,10 +78,14 @@
                 { "name": "Thomas Müller", "position": "FW", "nation": "DE" }
             ],
             "results": {
-                "M1": 3,
+                "M1": 0,
                 "M2": 0,
                 "M3": 3,
-                "M4": 3
+                "1/16": 3,
+                "1/8": 2,
+                "1/4":0,
+                "1/2":0,
+                "Final":0
             }
         },
         {
@@ -84,10 +100,14 @@
                 { "name": "Eden Hazard", "position": "FW", "nation": "BE" }
             ],
             "results": {
-                "M1": 1,
-                "M2": 1,
-                "M3": 1,
-                "M4": 1
+                "M1": 0,
+                "M2": 0,
+                "M3": 3,
+                "1/16": 3,
+                "1/8": 2,
+                "1/4":0,
+                "1/2":0,
+                "Final":0
             }
         },
         {
@@ -105,7 +125,11 @@
                 "M1": 0,
                 "M2": 0,
                 "M3": 3,
-                "M4": 3
+                "1/16": 3,
+                "1/8": 2,
+                "1/4":0,
+                "1/2":0,
+                "Final":0
             }
         }
     ],
@@ -166,7 +190,7 @@
         }
     ],
     "bracket": {
-        "roundOf16": [
+        "1/16": [
             { "team1": "Équipe Rouge", "team2": "Équipe Bleue", "winner": "Équipe Rouge" },
             { "team1": "Équipe Verte", "team2": "Équipe Jaune", "winner": "Équipe Verte" },
             { "team1": "Équipe Orange", "team2": "Équipe Violette", "winner": "Équipe Orange" },
@@ -176,13 +200,19 @@
             { "team1": "Équipe G", "team2": "Équipe H", "winner": "Équipe G" },
             { "team1": "Équipe I", "team2": "Équipe J", "winner": "Équipe I" }
         ],
-        "quarterFinals": [
+        "1/8": [
             { "team1": "Équipe Rouge", "team2": "Équipe Verte", "winner": "Équipe Rouge" },
             { "team1": "Équipe Orange", "team2": "Équipe A", "winner": "Équipe Orange" },
             { "team1": "Équipe C", "team2": "Équipe E", "winner": "Équipe C" },
             { "team1": "Équipe G", "team2": "Équipe I", "winner": "Équipe G" }
         ],
-        "semiFinals": [
+        "1/4": [
+            { "team1": "Équipe Rouge", "team2": "Équipe Verte", "winner": "Équipe Rouge" },
+            { "team1": "Équipe Orange", "team2": "Équipe A", "winner": "Équipe Orange" },
+            { "team1": "Équipe C", "team2": "Équipe E", "winner": "Équipe C" },
+            { "team1": "Équipe G", "team2": "Équipe I", "winner": "Équipe G" }
+        ],
+        "1/2": [
             { "team1": "Équipe Rouge", "team2": "Équipe Orange", "winner": "Équipe Rouge" },
             { "team1": "Équipe C", "team2": "Équipe G", "winner": "Équipe C" }
         ],
