@@ -197,12 +197,23 @@
             </div>
         </div>
         
-        <div class="auto-fill-section">
-            <h3>Remplissage Automatique</h3>
-            <button class="auto-fill-btn" id="auto-fill-winner">Remplir victoires</button>
-            <button class="auto-fill-btn" id="auto-fill-clean-sheets">Remplir clean sheets</button>
-            <button class="auto-fill-btn" id="auto-fill-reset">Réinitialiser</button>
-        </div>
+        <!-- Add this button to the auto-fill section -->
+<div class="auto-fill-section">
+    <h3>Remplissage Automatique</h3>
+    <button class="auto-fill-btn" id="auto-fill-all">Remplir Tout Automatiquement</button>
+    <button class="auto-fill-btn" id="auto-fill-winner">Remplir victoires</button>
+    <button class="auto-fill-btn" id="auto-fill-clean-sheets">Remplir clean sheets</button>
+    <button class="auto-fill-btn" id="auto-fill-reset">Réinitialiser</button>
+    
+    <!-- Add shots received input -->
+    <div style="margin-top: 15px;">
+        <label for="team1-shots-received">Tirs reçus par Équipe 1:</label>
+        <input type="number" id="team1-shots-received" min="0" value="0" style="width: 60px; margin-right: 15px;">
+        
+        <label for="team2-shots-received">Tirs reçus par Équipe 2:</label>
+        <input type="number" id="team2-shots-received" min="0" value="0" style="width: 60px;">
+    </div>
+</div>
         
         <h2>Statistiques des Joueurs</h2>
         <table class="players-table" id="players-table">
@@ -345,6 +356,7 @@
             document.getElementById('auto-fill-winner').addEventListener('click', autoFillWinner);
             document.getElementById('auto-fill-clean-sheets').addEventListener('click', autoFillCleanSheets);
             document.getElementById('auto-fill-reset').addEventListener('click', resetPlayerInputs);
+            document.getElementById('auto-fill-all').addEventListener('click', autoFillAll);
             
             elements.saveBtn.addEventListener('click', saveResults);
         }
@@ -572,6 +584,68 @@
             alert("Clean sheets et statistiques défensives remplies automatiquement");
         }
 
+
+        function autoFillAll() {
+    const team1Score = parseInt(elements.team1Score.value) || 0;
+    const team2Score = parseInt(elements.team2Score.value) || 0;
+    const team1ShotsReceived = parseInt(document.getElementById('team1-shots-received').value) || 0;
+    const team2ShotsReceived = parseInt(document.getElementById('team2-shots-received').value) || 0;
+    
+    if (!elements.team1Select.value || !elements.team2Select.value) {
+        alert("Veuillez sélectionner deux équipes");
+        return;
+    }
+    
+    const winnerNation = team1Score > team2Score ? elements.team1Select.value :
+                        team2Score > team1Score ? elements.team2Select.value : null;
+    
+    const goalDiff = winnerNation ? 
+                   (winnerNation === elements.team1Select.value ? 
+                    team1Score - team2Score : team2Score - team1Score) : 0;
+    
+    const rows = elements.playersBody.querySelectorAll('tr');
+    rows.forEach(row => {
+        const playerTeam = row.dataset.teamNation;
+        const position = row.dataset.position;
+        
+        // Victory and big win
+        const victoryCheckbox = row.querySelector('.victory');
+        const bigWinCheckbox = row.querySelector('.big-win');
+        
+        if (winnerNation) {
+            victoryCheckbox.checked = playerTeam === winnerNation;
+            bigWinCheckbox.checked = playerTeam === winnerNation && goalDiff >= 4;
+        } else {
+            victoryCheckbox.checked = false;
+            bigWinCheckbox.checked = false;
+        }
+        
+        // Clean sheet (only for GK and DF)
+        const cleanSheetCheckbox = row.querySelector('.clean-sheet');
+        if (position === "GK" || position === "DF") {
+            const isTeam1Player = playerTeam === elements.team1Select.value;
+            const opponentScore = isTeam1Player ? team2Score : team1Score;
+            cleanSheetCheckbox.checked = opponentScore === 0;
+        } else {
+            cleanSheetCheckbox.checked = false;
+        }
+        
+        // +10 shots conceded but still won (only for GK)
+        const shotsConcededWinCheckbox = row.querySelector('.shots-conceded-win');
+        if (position === "GK" && winnerNation === playerTeam) {
+            const shotsReceived = playerTeam === elements.team1Select.value ? 
+                                 team1ShotsReceived : team2ShotsReceived;
+            shotsConcededWinCheckbox.checked = shotsReceived >= 10;
+        } else {
+            shotsConcededWinCheckbox.checked = false;
+        }
+        
+        // Update points after changes
+        updatePlayerPoints(row);
+    });
+    
+    alert("Toutes les statistiques ont été remplies automatiquement");
+}
         // Reset all player inputs
         function resetPlayerInputs() {
             const inputs = elements.playersBody.querySelectorAll('input');
