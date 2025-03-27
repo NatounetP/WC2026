@@ -663,57 +663,75 @@
         }
 
         // Save results (simulated - would need server-side in production)
-        function saveResults() {
-            // Validate inputs
-            if (!elements.team1Select.value || !elements.team2Select.value) {
-                alert("Veuillez sélectionner deux équipes");
-                return;
-            }
-            
-            const round = elements.roundSelect.value;
-            const team1Nation = elements.team1Select.value;
-            const team2Nation = elements.team2Select.value;
-            const team1Score = parseInt(elements.team1Score.value) || 0;
-            const team2Score = parseInt(elements.team2Score.value) || 0;
-            
-            // Prepare data to save
-            const resultData = {
-                round,
-                team1: team1Nation,
-                team2: team2Nation,
-                score1: team1Score,
-                score2: team2Score,
-                players: []
-            };
-            
-            // Collect player stats
-            const rows = elements.playersBody.querySelectorAll('tr');
-            rows.forEach(row => {
-                if (row.cells.length > 1) { // Skip header/message rows
-                    resultData.players.push({
-                        name: row.cells[0].textContent,
-                        position: row.cells[1].textContent,
-                        goals: parseInt(row.querySelector('.goals').value) || 0,
-                        assists: parseInt(row.querySelector('.assists').value) || 0,
-                        hatTrick: row.querySelector('.hat-trick').checked,
-                        cleanSheet: row.querySelector('.clean-sheet').checked,
-                        victory: row.querySelector('.victory').checked,
-                        bigWin: row.querySelector('.big-win').checked,
-                        penaltySave: row.querySelector('.penalty-save').checked,
-                        extraTimeGoal: row.querySelector('.extra-time-goal').checked,
-                        shotsConcededWin: row.querySelector('.shots-conceded-win').checked,
-                        yellowCard: row.querySelector('.yellow-card').checked,
-                        redCard: row.querySelector('.red-card').checked,
-                        points: parseInt(row.querySelector('.total-points').textContent) || 0,
-                        nation: row.dataset.teamNation
-                    });
-                }
+        // Modified saveResults function
+function saveResults() {
+    // Validate inputs
+    if (!elements.team1Select.value || !elements.team2Select.value) {
+        alert("Veuillez sélectionner deux équipes");
+        return;
+    }
+    
+    const round = elements.roundSelect.value;
+    const team1Nation = elements.team1Select.value;
+    const team2Nation = elements.team2Select.value;
+    const team1Score = parseInt(elements.team1Score.value) || 0;
+    const team2Score = parseInt(elements.team2Score.value) || 0;
+    
+    // Prepare data to save - simplified to only store points per round
+    const resultData = {
+        round,
+        team1: team1Nation,
+        team2: team2Nation,
+        score1: team1Score,
+        score2: team2Score,
+        playerPoints: []
+    };
+    
+    // Collect player points
+    const rows = elements.playersBody.querySelectorAll('tr');
+    rows.forEach(row => {
+        if (row.cells.length > 1) { // Skip header/message rows
+            resultData.playerPoints.push({
+                name: row.cells[0].textContent,
+                nation: row.dataset.teamNation,
+                position: row.cells[1].textContent,
+                points: parseInt(row.querySelector('.total-points').textContent) || 0
             });
-            
-            // In a real app, you would send resultData to your server here
-            console.log('Data to save:', resultData);
-            alert("Données prêtes à être enregistrées!\n(En production, cela enverrait les données au serveur)");
         }
+    });
+    
+    // In a real app, you would send resultData to your server here
+    console.log('Data to save:', resultData);
+    
+    // Here's how the data would be structured in data.json
+    const dataJsonStructure = {
+        teams: tournamentData.teams.map(team => {
+            if (team.nation === team1Nation || team.nation === team2Nation) {
+                return {
+                    ...team,
+                    players: team.players.map(player => {
+                        const playerPoints = resultData.playerPoints.find(p => 
+                            p.name === player.name && p.nation === team.nation);
+                        return {
+                            ...player,
+                            // Add points for this round
+                            [round]: playerPoints ? playerPoints.points : 0
+                        };
+                    })
+                };
+            }
+            return team;
+        }),
+        // Preserve other data
+        playerStats: tournamentData.playerStats,
+        bracket: tournamentData.bracket
+    };
+    
+    console.log('Updated data.json structure:', dataJsonStructure);
+    alert("Points des joueurs prêts à être enregistrés pour ce match!\n\n" + 
+          "Dans data.json, chaque joueur aura un champ '" + round + 
+          "' avec ses points pour ce match.");
+}
 
         // Initialize the app when DOM is loaded
         document.addEventListener('DOMContentLoaded', init);
