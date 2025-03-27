@@ -212,15 +212,21 @@
                     <th>Position</th>
                     <th>But</th>
                     <th>Assist</th>
+                    <th>Hat Trick</th>
                     <th>Clean Sheet</th>
                     <th>Victoire</th>
-                    <th>Carton Jaune</th>
+                    <th>+4 Goal Diff</th>
+                    <th>Arrêt Penalty</th>
+                    <th>Goal Prolongation</th>
+                    <th>+10 Tir Cadré</th>
+                    <th>Jaune</th>
+                    <th>Rouge</th>
                     <th>Points Totaux</th>
                 </tr>
             </thead>
             <tbody id="players-body">
                 <tr>
-                    <td colspan="8" class="no-players-message">Sélectionnez deux équipes nationales pour afficher les joueurs</td>
+                    <td colspan="14" class="no-players-message">Sélectionnez deux équipes nationales pour afficher les joueurs</td>
                 </tr>
             </tbody>
         </table>
@@ -234,6 +240,66 @@
             teams: [],
             playerStats: [],
             bracket: {}
+        };
+
+        // Point values by position (Garden/Défenseur/Offensif)
+        const pointSystem = {
+            'GK': { // Garden (Goalkeeper)
+                'groupWin': 2,
+                'knockoutWin': 3,
+                'goal': 15,
+                'assist': 7,
+                'hatTrick': 5,
+                'cleanSheet': 5,
+                'yellow': -3,
+                'red': -10,
+                'bigWin': 2,
+                'penaltySave': 3,
+                'extraTimeGoal': 2,
+                'shotsConcededWin': 2
+            },
+            'DF': { // Défenseur (Defender)
+                'groupWin': 2,
+                'knockoutWin': 3,
+                'goal': 10,
+                'assist': 5,
+                'hatTrick': 5,
+                'cleanSheet': 2,
+                'yellow': -3,
+                'red': -10,
+                'bigWin': 2,
+                'penaltySave': 0,
+                'extraTimeGoal': 2,
+                'shotsConcededWin': 2
+            },
+            'MF': { // Milieu (Midfielder) - Uses same as Offensif
+                'groupWin': 2,
+                'knockoutWin': 3,
+                'goal': 9,
+                'assist': 5,
+                'hatTrick': 5,
+                'cleanSheet': 0,
+                'yellow': -3,
+                'red': -10,
+                'bigWin': 2,
+                'penaltySave': 0,
+                'extraTimeGoal': 2,
+                'shotsConcededWin': 0
+            },
+            'FW': { // Offensif (Forward)
+                'groupWin': 2,
+                'knockoutWin': 3,
+                'goal': 9,
+                'assist': 5,
+                'hatTrick': 5,
+                'cleanSheet': 0,
+                'yellow': -3,
+                'red': -10,
+                'bigWin': 2,
+                'penaltySave': 0,
+                'extraTimeGoal': 2,
+                'shotsConcededWin': 0
+            }
         };
 
         // DOM elements
@@ -336,7 +402,7 @@
         }
 
         // Add a player row to the table
-       function addPlayerRow(player, teamNation) {
+        function addPlayerRow(player, teamNation) {
             const row = document.createElement('tr');
             
             row.innerHTML = `
@@ -344,14 +410,21 @@
                 <td>${player.position}</td>
                 <td><input type="number" class="number-input goals" min="0" value="0"></td>
                 <td><input type="number" class="number-input assists" min="0" value="0"></td>
+                <td><input type="checkbox" class="checkbox-input hat-trick"></td>
                 <td><input type="checkbox" class="checkbox-input clean-sheet"></td>
                 <td><input type="checkbox" class="checkbox-input victory"></td>
+                <td><input type="checkbox" class="checkbox-input big-win"></td>
+                <td><input type="checkbox" class="checkbox-input penalty-save"></td>
+                <td><input type="checkbox" class="checkbox-input extra-time-goal"></td>
+                <td><input type="checkbox" class="checkbox-input shots-conceded-win"></td>
                 <td><input type="checkbox" class="checkbox-input yellow-card"></td>
-                <td class="total-points">0</td> <!-- Points will be calculated dynamically -->
+                <td><input type="checkbox" class="checkbox-input red-card"></td>
+                <td class="total-points">0</td>
             `;
             
-            // Store team nation as data attribute
+            // Store team nation and position as data attributes
             row.dataset.teamNation = teamNation;
+            row.dataset.position = player.position;
             
             // Add event listeners to update points when inputs change
             const inputs = row.querySelectorAll('input');
@@ -365,21 +438,47 @@
             updatePlayerPoints(row);
         }
 
-        // Calculate and update player points
+        // Calculate and update player points based on position
         function updatePlayerPoints(row) {
+            const position = row.dataset.position;
+            const pointsConfig = pointSystem[position] || pointSystem['FW']; // Default to forward if position not found
+            
+            // Get all input values
             const goals = parseInt(row.querySelector('.goals').value) || 0;
             const assists = parseInt(row.querySelector('.assists').value) || 0;
+            const hatTrick = row.querySelector('.hat-trick').checked;
             const cleanSheet = row.querySelector('.clean-sheet').checked;
             const victory = row.querySelector('.victory').checked;
+            const bigWin = row.querySelector('.big-win').checked;
+            const penaltySave = row.querySelector('.penalty-save').checked;
+            const extraTimeGoal = row.querySelector('.extra-time-goal').checked;
+            const shotsConcededWin = row.querySelector('.shots-conceded-win').checked;
             const yellowCard = row.querySelector('.yellow-card').checked;
+            const redCard = row.querySelector('.red-card').checked;
             
-            // Calculate points based on your scoring system
+            // Get round type
+            const round = elements.roundSelect.value;
+            const isGroupMatch = round.startsWith('M');
+            
+            // Calculate points
             let points = 0;
-            points += goals * 5;        // 5 points per goal
-            points += assists * 3;      // 3 points per assist
-            points += cleanSheet ? 4 : 0; // 4 points for clean sheet (for goalkeepers)
-            points += victory ? 3 : 0;  // 3 points for victory
-            points -= yellowCard ? 1 : 0; // -1 point for yellow card
+            
+            // Goals and assists
+            points += goals * pointsConfig.goal;
+            points += assists * pointsConfig.assist;
+            
+            // Special achievements
+            if (hatTrick) points += pointsConfig.hatTrick;
+            if (cleanSheet) points += pointsConfig.cleanSheet;
+            if (victory) points += isGroupMatch ? pointsConfig.groupWin : pointsConfig.knockoutWin;
+            if (bigWin) points += pointsConfig.bigWin;
+            if (penaltySave) points += pointsConfig.penaltySave;
+            if (extraTimeGoal) points += pointsConfig.extraTimeGoal;
+            if (shotsConcededWin) points += pointsConfig.shotsConcededWin;
+            
+            // Disciplinary
+            if (yellowCard) points += pointsConfig.yellow;
+            if (redCard) points += pointsConfig.red;
             
             // Update the points display
             row.querySelector('.total-points').textContent = points;
@@ -413,12 +512,24 @@
                 } else {
                     victoryCheckbox.checked = false;
                 }
+                
+                // Also check for big win (+4 goal difference)
+                const goalDiff = Math.abs(team1Score - team2Score);
+                const bigWinCheckbox = row.querySelector('.big-win');
+                if (playerTeam === winnerNation && goalDiff >= 4) {
+                    bigWinCheckbox.checked = true;
+                } else {
+                    bigWinCheckbox.checked = false;
+                }
+                
+                // Update points after changes
+                updatePlayerPoints(row);
             });
             
-            alert("Victoires remplies automatiquement");
+            alert("Victoires et grandes victoires remplies automatiquement");
         }
 
-        // Auto-fill clean sheets for goalkeepers
+        // Auto-fill clean sheets for goalkeepers and defenders
         function autoFillCleanSheets() {
             const team1Score = parseInt(elements.team1Score.value) || 0;
             const team2Score = parseInt(elements.team2Score.value) || 0;
@@ -433,19 +544,32 @@
                 const position = row.cells[1].textContent;
                 const playerTeam = row.dataset.teamNation;
                 const cleanSheetCheckbox = row.querySelector('.clean-sheet');
+                const shotsConcededWinCheckbox = row.querySelector('.shots-conceded-win');
                 
-                // Only for goalkeepers
-                if (position === "GK") {
+                // For goalkeepers and defenders only
+                if (position === "GK" || position === "DF") {
                     const isTeam1Player = playerTeam === elements.team1Select.value;
                     const opponentScore = isTeam1Player ? team2Score : team1Score;
                     
                     cleanSheetCheckbox.checked = opponentScore === 0;
+                    
+                    // For +10 shots conceded but still won
+                    if (position === "GK") {
+                        // This would need actual shot data - here we just base it on score difference
+                        shotsConcededWinCheckbox.checked = opponentScore === 0 && isTeam1Player ? 
+                                                         (team1Score - team2Score >= 1) : 
+                                                         (team2Score - team1Score >= 1);
+                    }
                 } else {
                     cleanSheetCheckbox.checked = false;
+                    shotsConcededWinCheckbox.checked = false;
                 }
+                
+                // Update points after changes
+                updatePlayerPoints(row);
             });
             
-            alert("Clean sheets remplis automatiquement");
+            alert("Clean sheets et statistiques défensives remplies automatiquement");
         }
 
         // Reset all player inputs
@@ -458,6 +582,10 @@
                     input.checked = false;
                 }
             });
+            
+            // Update all points after reset
+            const rows = elements.playersBody.querySelectorAll('tr');
+            rows.forEach(row => updatePlayerPoints(row));
         }
 
         // Save results (simulated - would need server-side in production)
@@ -487,15 +615,22 @@
             // Collect player stats
             const rows = elements.playersBody.querySelectorAll('tr');
             rows.forEach(row => {
-                if (row.cells.length === 7) { // Skip header/message rows
+                if (row.cells.length > 1) { // Skip header/message rows
                     resultData.players.push({
                         name: row.cells[0].textContent,
                         position: row.cells[1].textContent,
                         goals: parseInt(row.querySelector('.goals').value) || 0,
                         assists: parseInt(row.querySelector('.assists').value) || 0,
+                        hatTrick: row.querySelector('.hat-trick').checked,
                         cleanSheet: row.querySelector('.clean-sheet').checked,
                         victory: row.querySelector('.victory').checked,
+                        bigWin: row.querySelector('.big-win').checked,
+                        penaltySave: row.querySelector('.penalty-save').checked,
+                        extraTimeGoal: row.querySelector('.extra-time-goal').checked,
+                        shotsConcededWin: row.querySelector('.shots-conceded-win').checked,
                         yellowCard: row.querySelector('.yellow-card').checked,
+                        redCard: row.querySelector('.red-card').checked,
+                        points: parseInt(row.querySelector('.total-points').textContent) || 0,
                         nation: row.dataset.teamNation
                     });
                 }
