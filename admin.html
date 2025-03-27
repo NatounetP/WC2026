@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Entrer les Résultats</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f7f6;
+            color: #333;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1, h2, h3 {
+            color: #3d195b;
+        }
+        .match-info {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f8f5ff;
+            border-radius: 5px;
+            gap: 15px;
+        }
+        .team-select {
+            flex: 1;
+            min-width: 200px;
+        }
+        .team-name {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .score-input {
+            width: 50px;
+            padding: 8px;
+            text-align: center;
+            font-size: 18px;
+            border: 2px solid #3d195b;
+            border-radius: 4px;
+        }
+        .vs {
+            display: flex;
+            align-items: center;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .round-select {
+            padding: 8px 12px;
+            font-size: 16px;
+            border: 2px solid #3d195b;
+            border-radius: 4px;
+            background-color: white;
+            margin-bottom: 15px;
+            width: 100%;
+        }
+        .team-selector {
+            padding: 8px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        .players-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        .players-table th, .players-table td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        .players-table th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        .players-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .checkbox-input {
+            width: 20px;
+            height: 20px;
+        }
+        .number-input {
+            width: 40px;
+            padding: 5px;
+            text-align: center;
+        }
+        .save-btn {
+            background-color: #3d195b;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background-color 0.3s;
+            width: 100%;
+        }
+        .save-btn:hover {
+            background-color: #2a1041;
+        }
+        .auto-fill-section {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f0f7ff;
+            border-radius: 5px;
+        }
+        .auto-fill-btn {
+            background-color: #1e88e5;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            font-size: 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        .no-players-message {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+        @media (max-width: 600px) {
+            .match-info {
+                flex-direction: column;
+            }
+            .vs {
+                justify-content: center;
+                margin: 10px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Entrer les Résultats du Match</h1>
+        
+        <select class="round-select" id="round-select">
+            <option value="M1">Match 1</option>
+            <option value="M2">Match 2</option>
+            <option value="M3">Match 3</option>
+            <option value="F32">1/16 de Finale</option>
+            <option value="F16">1/8 de Finale</option>
+            <option value="F8">1/4 de Finale</option>
+            <option value="F4">1/2 Finale</option>
+            <option value="Final">Finale</option>
+        </select>
+        
+        <div class="match-info">
+            <div class="team-select">
+                <div class="team-name" id="team1-name">Équipe 1</div>
+                <select class="team-selector" id="team1-select">
+                    <option value="">Sélectionner une équipe</option>
+                    <option value="FRA">France</option>
+                    <option value="BRA">Brésil</option>
+                    <option value="ARG">Argentine</option>
+                    <option value="GER">Allemagne</option>
+                    <option value="ESP">Espagne</option>
+                    <option value="ENG">Angleterre</option>
+                    <option value="POR">Portugal</option>
+                    <option value="BEL">Belgique</option>
+                    <option value="ITA">Italie</option>
+                    <option value="NED">Pays-Bas</option>
+                </select>
+                <input type="number" class="score-input" id="team1-score" min="0" value="0">
+            </div>
+            
+            <div class="vs">vs</div>
+            
+            <div class="team-select">
+                <div class="team-name" id="team2-name">Équipe 2</div>
+                <select class="team-selector" id="team2-select">
+                    <option value="">Sélectionner une équipe</option>
+                    <option value="FRA">France</option>
+                    <option value="BRA">Brésil</option>
+                    <option value="ARG">Argentine</option>
+                    <option value="GER">Allemagne</option>
+                    <option value="ESP">Espagne</option>
+                    <option value="ENG">Angleterre</option>
+                    <option value="POR">Portugal</option>
+                    <option value="BEL">Belgique</option>
+                    <option value="ITA">Italie</option>
+                    <option value="NED">Pays-Bas</option>
+                </select>
+                <input type="number" class="score-input" id="team2-score" min="0" value="0">
+            </div>
+        </div>
+        
+        <div class="auto-fill-section">
+            <h3>Remplissage Automatique</h3>
+            <button class="auto-fill-btn" id="auto-fill-winner">Remplir victoires</button>
+            <button class="auto-fill-btn" id="auto-fill-clean-sheets">Remplir clean sheets</button>
+            <button class="auto-fill-btn" id="auto-fill-reset">Réinitialiser</button>
+        </div>
+        
+        <h2>Statistiques des Joueurs</h2>
+        <table class="players-table" id="players-table">
+            <thead>
+                <tr>
+                    <th>Nom</th>
+                    <th>Position</th>
+                    <th>But</th>
+                    <th>Assist</th>
+                    <th>Clean Sheet</th>
+                    <th>Victoire</th>
+                    <th>Carton Jaune</th>
+                </tr>
+            </thead>
+            <tbody id="players-body">
+                <tr>
+                    <td colspan="7" class="no-players-message">Sélectionnez deux équipes nationales pour afficher les joueurs</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <button class="save-btn" id="save-btn">Enregistrer les Résultats</button>
+    </div>
+
+    <script>
+        // Data structure to hold tournament data
+        const tournamentData = {
+            teams: [],
+            playerStats: [],
+            bracket: {}
+        };
+
+        // DOM elements
+        const elements = {
+            roundSelect: document.getElementById('round-select'),
+            team1Select: document.getElementById('team1-select'),
+            team2Select: document.getElementById('team2-select'),
+            team1Name: document.getElementById('team1-name'),
+            team2Name: document.getElementById('team2-name'),
+            team1Score: document.getElementById('team1-score'),
+            team2Score: document.getElementById('team2-score'),
+            playersBody: document.getElementById('players-body'),
+            saveBtn: document.getElementById('save-btn')
+        };
+
+        // Hardcoded national teams data in French
+        const nationalTeams = [
+            { id: "FRA", name: "France" },
+            { id: "BRA", name: "Brésil" },
+            { id: "ARG", name: "Argentine" },
+            { id: "GER", name: "Allemagne" },
+            { id: "ESP", name: "Espagne" },
+            { id: "ENG", name: "Angleterre" },
+            { id: "POR", name: "Portugal" },
+            { id: "BEL", name: "Belgique" },
+            { id: "ITA", name: "Italie" },
+            { id: "NED", name: "Pays-Bas" }
+        ];
+
+        // Load teams data from data.json
+        async function loadTeamsData() {
+            try {
+                const response = await fetch('data.json');
+                const data = await response.json();
+                tournamentData.teams = data.teams || [];
+                tournamentData.playerStats = data.playerStats || [];
+                tournamentData.bracket = data.bracket || {};
+            } catch (error) {
+                console.error('Error loading teams data:', error);
+                alert('Erreur lors du chargement des données des équipes');
+            }
+        }
+
+        // Initialize the application
+        async function init() {
+            await loadTeamsData();
+            setupEventListeners();
+        }
+
+        // Setup all event listeners
+        function setupEventListeners() {
+            elements.team1Select.addEventListener('change', () => updateTeamDisplay('team1'));
+            elements.team2Select.addEventListener('change', () => updateTeamDisplay('team2'));
+            
+            document.getElementById('auto-fill-winner').addEventListener('click', autoFillWinner);
+            document.getElementById('auto-fill-clean-sheets').addEventListener('click', autoFillCleanSheets);
+            document.getElementById('auto-fill-reset').addEventListener('click', resetPlayerInputs);
+            
+            elements.saveBtn.addEventListener('click', saveResults);
+        }
+
+        // Update team display when a team is selected
+        function updateTeamDisplay(teamPrefix) {
+            const selectElement = elements[`${teamPrefix}Select`];
+            const nameElement = elements[`${teamPrefix}Name`];
+            
+            const selectedTeam = nationalTeams.find(
+                team => team.id === selectElement.value
+            );
+            
+            nameElement.textContent = selectedTeam ? selectedTeam.name : `Équipe ${teamPrefix === 'team1' ? '1' : '2'}`;
+            
+            // Update player table if both teams are selected
+            if (elements.team1Select.value && elements.team2Select.value) {
+                updatePlayerTable();
+            } else {
+                showNoPlayersMessage();
+            }
+        }
+
+        // Update player table based on selected teams
+        function updatePlayerTable() {
+            const team1 = getTeamFromData(elements.team1Select.value);
+            const team2 = getTeamFromData(elements.team2Select.value);
+
+            elements.playersBody.innerHTML = '';
+
+            // Add players from both teams
+            if (team1 && team1.players) {
+                team1.players.forEach(player => {
+                    addPlayerRow(player, team1.name);
+                });
+            }
+            
+            if (team2 && team2.players) {
+                team2.players.forEach(player => {
+                    addPlayerRow(player, team2.name);
+                });
+            }
+        }
+
+        // Get team from loaded data.json
+        function getTeamFromData(teamId) {
+            // First try to find exact match by FIFA code
+            let team = tournamentData.teams.find(t => t.fifaCode === teamId);
+            
+            // If not found, try to find by name match
+            if (!team) {
+                const nationalTeam = nationalTeams.find(t => t.id === teamId);
+                if (nationalTeam) {
+                    team = tournamentData.teams.find(t => 
+                        t.name.toLowerCase().includes(nationalTeam.name.toLowerCase())
+                    );
+                }
+            }
+            
+            return team;
+        }
+
+        // Add a player row to the table
+        function addPlayerRow(player, teamName) {
+            const row = document.createElement('tr');
+            
+            row.innerHTML = `
+                <td>${player.name}</td>
+                <td>${player.position}</td>
+                <td><input type="number" class="number-input goals" min="0" value="0"></td>
+                <td><input type="number" class="number-input assists" min="0" value="0"></td>
+                <td><input type="checkbox" class="checkbox-input clean-sheet"></td>
+                <td><input type="checkbox" class="checkbox-input victory"></td>
+                <td><input type="checkbox" class="checkbox-input yellow-card"></td>
+            `;
+            
+            elements.playersBody.appendChild(row);
+        }
+
+        // Show message when no teams are selected
+        function showNoPlayersMessage() {
+            elements.playersBody.innerHTML = `
+                <tr>
+                    <td colspan="7" class="no-players-message">Sélectionnez deux équipes nationales pour afficher les joueurs</td>
+                </tr>
+            `;
+        }
+
+        // Auto-fill victory checkboxes based on match result
+        function autoFillWinner() {
+            const team1Score = parseInt(elements.team1Score.value) || 0;
+            const team2Score = parseInt(elements.team2Score.value) || 0;
+            
+            if (!elements.team1Select.value || !elements.team2Select.value) {
+                alert("Veuillez sélectionner deux équipes");
+                return;
+            }
+            
+            const winnerId = team1Score > team2Score ? elements.team1Select.value :
+                              team2Score > team1Score ? elements.team2Select.value : null;
+            
+            if (!winnerId) {
+                alert("Match nul - pas de victoires à remplir");
+                return;
+            }
+            
+            const rows = elements.playersBody.querySelectorAll('tr');
+            rows.forEach(row => {
+                const playerTeam = getPlayerTeamFromRow(row);
+                const victoryCheckbox = row.querySelector('.victory');
+                
+                if (playerTeam && playerTeam.id === winnerId) {
+                    victoryCheckbox.checked = true;
+                } else {
+                    victoryCheckbox.checked = false;
+                }
+            });
+            
+            alert("Victoires remplies automatiquement");
+        }
+
+        // Get player's team from row data
+        function getPlayerTeamFromRow(row) {
+            // This is a simplified version - you might need to adjust based on your actual data structure
+            const playerName = row.cells[0].textContent;
+            const team1 = getTeamFromData(elements.team1Select.value);
+            const team2 = getTeamFromData(elements.team2Select.value);
+            
+            if (team1 && team1.players.some(p => p.name === playerName)) {
+                return { id: elements.team1Select.value, name: team1.name };
+            }
+            if (team2 && team2.players.some(p => p.name === playerName)) {
+                return { id: elements.team2Select.value, name: team2.name };
+            }
+            return null;
+        }
+
+        // Auto-fill clean sheets for goalkeepers
+        function autoFillCleanSheets() {
+            const team1Score = parseInt(elements.team1Score.value) || 0;
+            const team2Score = parseInt(elements.team2Score.value) || 0;
+            
+            if (!elements.team1Select.value || !elements.team2Select.value) {
+                alert("Veuillez sélectionner deux équipes");
+                return;
+            }
+            
+            const rows = elements.playersBody.querySelectorAll('tr');
+            rows.forEach(row => {
+                const position = row.cells[1].textContent;
+                const playerTeam = getPlayerTeamFromRow(row);
+                const cleanSheetCheckbox = row.querySelector('.clean-sheet');
+                
+                // Only for goalkeepers
+                if (position === "GK" && playerTeam) {
+                    const isTeam1Player = playerTeam.id === elements.team1Select.value;
+                    const opponentScore = isTeam1Player ? team2Score : team1Score;
+                    
+                    cleanSheetCheckbox.checked = opponentScore === 0;
+                } else {
+                    cleanSheetCheckbox.checked = false;
+                }
+            });
+            
+            alert("Clean sheets remplis automatiquement");
+        }
+
+        // Reset all player inputs
+        function resetPlayerInputs() {
+            const inputs = elements.playersBody.querySelectorAll('input');
+            inputs.forEach(input => {
+                if (input.type === 'number') {
+                    input.value = 0;
+                } else if (input.type === 'checkbox') {
+                    input.checked = false;
+                }
+            });
+        }
+
+        // Save results (simulated - would need server-side in production)
+        function saveResults() {
+            // Validate inputs
+            if (!elements.team1Select.value || !elements.team2Select.value) {
+                alert("Veuillez sélectionner deux équipes");
+                return;
+            }
+            
+            const round = elements.roundSelect.value;
+            const team1Id = elements.team1Select.value;
+            const team2Id = elements.team2Select.value;
+            const team1Score = parseInt(elements.team1Score.value) || 0;
+            const team2Score = parseInt(elements.team2Score.value) || 0;
+            
+            // Prepare data to save
+            const resultData = {
+                round,
+                team1: team1Id,
+                team2: team2Id,
+                score1: team1Score,
+                score2: team2Score,
+                players: []
+            };
+            
+            // Collect player stats
+            const rows = elements.playersBody.querySelectorAll('tr');
+            rows.forEach(row => {
+                if (row.cells.length === 7) { // Skip header/message rows
+                    resultData.players.push({
+                        name: row.cells[0].textContent,
+                        position: row.cells[1].textContent,
+                        goals: parseInt(row.querySelector('.goals').value) || 0,
+                        assists: parseInt(row.querySelector('.assists').value) || 0,
+                        cleanSheet: row.querySelector('.clean-sheet').checked,
+                        victory: row.querySelector('.victory').checked,
+                        yellowCard: row.querySelector('.yellow-card').checked
+                    });
+                }
+            });
+            
+            // In a real app, you would send resultData to your server here
+            console.log('Data to save:', resultData);
+            alert("Données prêtes à être enregistrées!\n(En production, cela enverrait les données au serveur)");
+        }
+
+        // Initialize the app when DOM is loaded
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
