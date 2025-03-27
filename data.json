@@ -136,35 +136,40 @@
     "playerStats": [
         {
             "name": "Alexandre Durand",
-            "team": "Équipe Rouge",
+            "nation": "France",
+            "position": "DF",
             "matches": {
               "M1": 12
             }
         },
         {
             "name": "Olivier Michel",
-            "team": "Équipe Bleue",
+            "nation": "France",
+            "position": "FW",
             "matches": {
               "M1": 12
             }
         },
         {
             "name": "Kylian Mbappé",
-            "team": "Équipe Verte",
-            "matches": {
+          "nation": "France",
+          "position": "FW",
+          "matches": {
               "M1": 12
             }
         },
         {
             "name": "Thomas Müller",
-            "team": "Équipe Jaune",
+            "nation": "Allemagne",
+            "position": "FW",
             "matches": {
               "M1": 12
             }
         },
         {
             "name": "Kevin De Bruyne",
-            "team": "Équipe Orange",
+            "nation": "Belgique",
+            "position": "FW",
             "matches": {
               "M1": 12,
               "M2": 0,
@@ -178,7 +183,8 @@
         },
         {
             "name": "Ciro Immobile",
-            "team": "Équipe Violette",
+            "nation": "Italie",
+            "position": "FW",
             "matches": {
               "M1": 12,
               "M2": 0,
