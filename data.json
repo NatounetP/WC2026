@@ -136,6 +136,8 @@
     "playerStats": [
         {
             "name": "Alexandre Durand",
+            "position": "GK",
+            "nation": "France",
             "team": "Équipe Rouge",
             "M1": 0
         },
