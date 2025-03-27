@@ -700,7 +700,7 @@ async function saveResults() {
         let data = await response.json();
 
         // Update player points
-        data.teams = data.teams.map(team => {
+        data.teams = data.playerStats.map(team => {
             if (team.nation === team1Nation || team.nation === team2Nation) {
                 return {
                     ...team,
