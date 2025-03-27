@@ -329,18 +329,57 @@
         // Load teams data from data.json
         async function loadTeamsData() {
             try {
-                const response = await fetch('data.json');
-                const data = await response.json();
-                tournamentData.teams = data.teams || [];
-                tournamentData.playerStats = data.playerStats || [];
-                tournamentData.bracket = data.bracket || {};
-                
-                console.log("Loaded teams:", tournamentData.teams);
-            } catch (error) {
-                console.error('Error loading teams data:', error);
-                alert('Erreur lors du chargement des données des équipes');
-            }
+            const response = await fetch('data.json');
+            if (!response.ok) throw new Error("File not found or server error");
+            const data = await response.json();
+            
+            // Merge with default data to ensure all required fields exist
+            tournamentData = {
+                teams: data.teams || defaultData.teams,
+                playerStats: data.playerStats || defaultData.playerStats,
+                bracket: data.bracket || defaultData.bracket
+            };
+            
+            console.log("Loaded teams:", tournamentData.teams);
+        } catch (fetchError) {
+            console.warn("Using default data (data.json not available):", fetchError);
+            tournamentData = defaultData;
         }
+        }
+
+        updateTeamSelectors();
+        
+    } catch (error) {
+        console.error('Error initializing team data:', error);
+        alert("Erreur d'initialisation: " + error.message);
+    }
+}
+
+
+        function updateTeamSelectors() {
+    // Get unique team names from loaded data
+    const uniqueTeams = [...new Set(tournamentData.teams.map(team => team.nation))];
+    
+    // Update both team selectors
+    [elements.team1Select, elements.team2Select].forEach(selector => {
+        // Save current selection
+        const currentValue = selector.value;
+        selector.innerHTML = '<option value="">Sélectionner une équipe</option>';
+        
+        // Add teams from loaded data
+        uniqueTeams.forEach(team => {
+            const option = document.createElement('option');
+            option.value = team;
+            option.textContent = team;
+            selector.appendChild(option);
+        });
+        
+        // Restore selection if still valid
+        if (currentValue && uniqueTeams.includes(currentValue)) {
+            selector.value = currentValue;
+        }
+    });
+}
 
         // Initialize the application
         async function init() {
