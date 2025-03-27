@@ -632,7 +632,7 @@
         
         // +10 shots conceded but still won (only for GK)
         const shotsConcededWinCheckbox = row.querySelector('.shots-conceded-win');
-        if (position === "GK" && winnerNation === playerTeam) {
+        if (position === "GK" || position === "DF" && winnerNation === playerTeam) {
             const shotsReceived = playerTeam === elements.team1Select.value ? 
                                  team1ShotsReceived : team2ShotsReceived;
             shotsConcededWinCheckbox.checked = shotsReceived >= 10;
