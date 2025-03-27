@@ -676,19 +676,15 @@ async function saveResults() {
     const team1Nation = elements.team1Select.value;
     const team2Nation = elements.team2Select.value;
 
-    // Confirm before overwriting
-    if (!confirm(`Enregistrer les points pour ${round}? Les données existantes seront mises à jour.`)) {
-        return;
-    }
-
     // Collect player points from UI
-    const playerPoints = [];
+    const currentMatchPoints = [];
     const rows = elements.playersBody.querySelectorAll('tr');
     rows.forEach(row => {
         if (row.cells.length > 1) { // Skip header/message rows
-            playerPoints.push({
+            currentMatchPoints.push({
                 name: row.cells[0].textContent,
                 nation: row.dataset.teamNation,
+                position: row.cells[1].textContent,
                 points: parseInt(row.querySelector('.total-points').textContent) || 0
             });
         }
@@ -699,40 +695,44 @@ async function saveResults() {
         const response = await fetch('data.json');
         let data = await response.json();
 
-        // Update player points
-        data.teams = data.playerStats.map(team => {
-            if (team.nation === team1Nation || team.nation === team2Nation) {
-                return {
-                    ...team,
-                    players: team.players.map(player => {
-                        // Find matching player from UI
-                        const uiPlayer = playerPoints.find(p => 
-                            p.name === player.name && p.nation === team.nation);
-                        
-                        return {
-                            ...player,
-                            // Preserve existing data, update current round points
-                            [round]: uiPlayer ? uiPlayer.points : (player[round] || 0)
-                        };
-                    })
+        // Update playerStats (main structure for points)
+        if (!data.playerStats) data.playerStats = [];
+        
+        currentMatchPoints.forEach(player => {
+            // Find existing player stats or initialize
+            let playerStats = data.playerStats.find(p => 
+                p.name === player.name && p.nation === player.nation);
+            
+            if (!playerStats) {
+                playerStats = {
+                    name: player.name,
+                    nation: player.nation,
+                    position: player.position,
+                    matches: {}
                 };
+                data.playerStats.push(playerStats);
             }
-            return team;
+
+            // Initialize matches if doesn't exist
+            if (!playerStats.matches) playerStats.matches = {};
+            
+            // Update points for this round
+            playerStats.matches[round] = player.points;
         });
 
-        // In a real app, you would send this updated data back to the server
-        console.log('Data to save:', data);
+        // In production: Send updated data back to server
+        console.log('Updated data.json structure:', data);
         
-        // Simulated save (replace with actual fetch PUT/POST in production)
-        alert(`Points enregistrés pour ${round}!\n\n` +
-              `Chaque joueur a maintenant un champ '${round}' avec ses points.`);
+        // Simulated success (replace with actual fetch PUT/POST)
+        alert(`Points enregistrés dans playerStats!\n\n` +
+              `Structure:\nplayerStats[n].matches["${round}"] = points`);
 
-        // Update local tournamentData with the new data
+        // Update local data
         tournamentData = data;
 
     } catch (error) {
         console.error('Error saving data:', error);
-        alert("Erreur lors de l'enregistrement des données");
+        alert("Erreur lors de l'enregistrement: " + error.message);
     }
 }
 
