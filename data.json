@@ -137,14 +137,7 @@
         {
             "name": "Alexandre Durand",
             "team": "Équipe Rouge",
-            "M1": 0,
-            "M2": 0,
-            "M3": 3,
-            "F32": 3,
-            "F16": 4,
-            "F8":0,
-            "F4":0,
-            "Final":0
+            "M1": 0
         },
         {
             "name": "Olivier Michel",
@@ -185,14 +178,7 @@
         {
             "name": "Kevin De Bruyne",
             "team": "Équipe Orange",
-            "M1": 0,
-            "M2": 0,
-            "M3": 3,
-            "F32": 3,
-            "F16": 4,
-            "F8":0,
-            "F4":0,
-            "Final":0
+            "M1": 0
         },
         {
             "name": "Ciro Immobile",
