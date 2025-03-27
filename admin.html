@@ -166,16 +166,14 @@
                 <div class="team-name" id="team1-name">Équipe 1</div>
                 <select class="team-selector" id="team1-select">
                     <option value="">Sélectionner une équipe</option>
-                    <option value="FRA">France</option>
-                    <option value="BRA">Brésil</option>
-                    <option value="ARG">Argentine</option>
-                    <option value="GER">Allemagne</option>
-                    <option value="ESP">Espagne</option>
-                    <option value="ENG">Angleterre</option>
-                    <option value="POR">Portugal</option>
-                    <option value="BEL">Belgique</option>
-                    <option value="ITA">Italie</option>
-                    <option value="NED">Pays-Bas</option>
+                    <option value="France">France</option>
+                    <option value="Belgique">Belgique</option>
+                    <option value="Suisse">Suisse</option>
+                    <option value="Italie">Italie</option>
+                    <option value="Espagne">Espagne</option>
+                    <option value="Allemagne">Allemagne</option>
+                    <option value="Brésil">Brésil</option>
+                    <option value="Argentine">Argentine</option>
                 </select>
                 <input type="number" class="score-input" id="team1-score" min="0" value="0">
             </div>
@@ -186,16 +184,14 @@
                 <div class="team-name" id="team2-name">Équipe 2</div>
                 <select class="team-selector" id="team2-select">
                     <option value="">Sélectionner une équipe</option>
-                    <option value="FRA">France</option>
-                    <option value="BRA">Brésil</option>
-                    <option value="ARG">Argentine</option>
-                    <option value="GER">Allemagne</option>
-                    <option value="ESP">Espagne</option>
-                    <option value="ENG">Angleterre</option>
-                    <option value="POR">Portugal</option>
-                    <option value="BEL">Belgique</option>
-                    <option value="ITA">Italie</option>
-                    <option value="NED">Pays-Bas</option>
+                    <option value="France">France</option>
+                    <option value="Belgique">Belgique</option>
+                    <option value="Suisse">Suisse</option>
+                    <option value="Italie">Italie</option>
+                    <option value="Espagne">Espagne</option>
+                    <option value="Allemagne">Allemagne</option>
+                    <option value="Brésil">Brésil</option>
+                    <option value="Argentine">Argentine</option>
                 </select>
                 <input type="number" class="score-input" id="team2-score" min="0" value="0">
             </div>
@@ -233,7 +229,7 @@
 
     <script>
         // Data structure to hold tournament data
-        const tournamentData = {
+        let tournamentData = {
             teams: [],
             playerStats: [],
             bracket: {}
@@ -252,20 +248,6 @@
             saveBtn: document.getElementById('save-btn')
         };
 
-        // Hardcoded national teams data in French
-        const nationalTeams = [
-            { id: "FRA", name: "France" },
-            { id: "BRA", name: "Brésil" },
-            { id: "ARG", name: "Argentine" },
-            { id: "GER", name: "Allemagne" },
-            { id: "ESP", name: "Espagne" },
-            { id: "ENG", name: "Angleterre" },
-            { id: "POR", name: "Portugal" },
-            { id: "BEL", name: "Belgique" },
-            { id: "ITA", name: "Italie" },
-            { id: "NED", name: "Pays-Bas" }
-        ];
-
         // Load teams data from data.json
         async function loadTeamsData() {
             try {
@@ -274,6 +256,8 @@
                 tournamentData.teams = data.teams || [];
                 tournamentData.playerStats = data.playerStats || [];
                 tournamentData.bracket = data.bracket || {};
+                
+                console.log("Loaded teams:", tournamentData.teams);
             } catch (error) {
                 console.error('Error loading teams data:', error);
                 alert('Erreur lors du chargement des données des équipes');
@@ -303,11 +287,7 @@
             const selectElement = elements[`${teamPrefix}Select`];
             const nameElement = elements[`${teamPrefix}Name`];
             
-            const selectedTeam = nationalTeams.find(
-                team => team.id === selectElement.value
-            );
-            
-            nameElement.textContent = selectedTeam ? selectedTeam.name : `Équipe ${teamPrefix === 'team1' ? '1' : '2'}`;
+            nameElement.textContent = selectElement.value || `Équipe ${teamPrefix === 'team1' ? '1' : '2'}`;
             
             // Update player table if both teams are selected
             if (elements.team1Select.value && elements.team2Select.value) {
@@ -319,45 +299,43 @@
 
         // Update player table based on selected teams
         function updatePlayerTable() {
-            const team1 = getTeamFromData(elements.team1Select.value);
-            const team2 = getTeamFromData(elements.team2Select.value);
+            const team1Nation = elements.team1Select.value;
+            const team2Nation = elements.team2Select.value;
+
+            // Filter players from all teams where nation matches selected nations
+            const team1Players = [];
+            const team2Players = [];
+            
+            tournamentData.teams.forEach(team => {
+                if (team.players) {
+                    team.players.forEach(player => {
+                        if (player.nation === team1Nation) {
+                            team1Players.push(player);
+                        } else if (player.nation === team2Nation) {
+                            team2Players.push(player);
+                        }
+                    });
+                }
+            });
 
             elements.playersBody.innerHTML = '';
 
             // Add players from both teams
-            if (team1 && team1.players) {
-                team1.players.forEach(player => {
-                    addPlayerRow(player, team1.name);
-                });
-            }
+            team1Players.forEach(player => {
+                addPlayerRow(player, team1Nation);
+            });
             
-            if (team2 && team2.players) {
-                team2.players.forEach(player => {
-                    addPlayerRow(player, team2.name);
-                });
-            }
-        }
+            team2Players.forEach(player => {
+                addPlayerRow(player, team2Nation);
+            });
 
-        // Get team from loaded data.json
-        function getTeamFromData(teamId) {
-            // First try to find exact match by FIFA code
-            let team = tournamentData.teams.find(t => t.fifaCode === teamId);
-            
-            // If not found, try to find by name match
-            if (!team) {
-                const nationalTeam = nationalTeams.find(t => t.id === teamId);
-                if (nationalTeam) {
-                    team = tournamentData.teams.find(t => 
-                        t.name.toLowerCase().includes(nationalTeam.name.toLowerCase())
-                    );
-                }
+            if (team1Players.length === 0 && team2Players.length === 0) {
+                showNoPlayersMessage();
             }
-            
-            return team;
         }
 
         // Add a player row to the table
-        function addPlayerRow(player, teamName) {
+        function addPlayerRow(player, teamNation) {
             const row = document.createElement('tr');
             
             row.innerHTML = `
@@ -370,6 +348,8 @@
                 <td><input type="checkbox" class="checkbox-input yellow-card"></td>
             `;
             
+            // Store team nation as data attribute for easier filtering
+            row.dataset.teamNation = teamNation;
             elements.playersBody.appendChild(row);
         }
 
@@ -392,20 +372,20 @@
                 return;
             }
             
-            const winnerId = team1Score > team2Score ? elements.team1Select.value :
+            const winnerNation = team1Score > team2Score ? elements.team1Select.value :
                               team2Score > team1Score ? elements.team2Select.value : null;
             
-            if (!winnerId) {
+            if (!winnerNation) {
                 alert("Match nul - pas de victoires à remplir");
                 return;
             }
             
             const rows = elements.playersBody.querySelectorAll('tr');
             rows.forEach(row => {
-                const playerTeam = getPlayerTeamFromRow(row);
+                const playerTeam = row.dataset.teamNation;
                 const victoryCheckbox = row.querySelector('.victory');
                 
-                if (playerTeam && playerTeam.id === winnerId) {
+                if (playerTeam === winnerNation) {
                     victoryCheckbox.checked = true;
                 } else {
                     victoryCheckbox.checked = false;
@@ -413,22 +393,6 @@
             });
             
             alert("Victoires remplies automatiquement");
-        }
-
-        // Get player's team from row data
-        function getPlayerTeamFromRow(row) {
-            // This is a simplified version - you might need to adjust based on your actual data structure
-            const playerName = row.cells[0].textContent;
-            const team1 = getTeamFromData(elements.team1Select.value);
-            const team2 = getTeamFromData(elements.team2Select.value);
-            
-            if (team1 && team1.players.some(p => p.name === playerName)) {
-                return { id: elements.team1Select.value, name: team1.name };
-            }
-            if (team2 && team2.players.some(p => p.name === playerName)) {
-                return { id: elements.team2Select.value, name: team2.name };
-            }
-            return null;
         }
 
         // Auto-fill clean sheets for goalkeepers
@@ -444,12 +408,12 @@
             const rows = elements.playersBody.querySelectorAll('tr');
             rows.forEach(row => {
                 const position = row.cells[1].textContent;
-                const playerTeam = getPlayerTeamFromRow(row);
+                const playerTeam = row.dataset.teamNation;
                 const cleanSheetCheckbox = row.querySelector('.clean-sheet');
                 
                 // Only for goalkeepers
-                if (position === "GK" && playerTeam) {
-                    const isTeam1Player = playerTeam.id === elements.team1Select.value;
+                if (position === "GK") {
+                    const isTeam1Player = playerTeam === elements.team1Select.value;
                     const opponentScore = isTeam1Player ? team2Score : team1Score;
                     
                     cleanSheetCheckbox.checked = opponentScore === 0;
@@ -482,16 +446,16 @@
             }
             
             const round = elements.roundSelect.value;
-            const team1Id = elements.team1Select.value;
-            const team2Id = elements.team2Select.value;
+            const team1Nation = elements.team1Select.value;
+            const team2Nation = elements.team2Select.value;
             const team1Score = parseInt(elements.team1Score.value) || 0;
             const team2Score = parseInt(elements.team2Score.value) || 0;
             
             // Prepare data to save
             const resultData = {
                 round,
-                team1: team1Id,
-                team2: team2Id,
+                team1: team1Nation,
+                team2: team2Nation,
                 score1: team1Score,
                 score2: team2Score,
                 players: []
@@ -508,7 +472,8 @@
                         assists: parseInt(row.querySelector('.assists').value) || 0,
                         cleanSheet: row.querySelector('.clean-sheet').checked,
                         victory: row.querySelector('.victory').checked,
-                        yellowCard: row.querySelector('.yellow-card').checked
+                        yellowCard: row.querySelector('.yellow-card').checked,
+                        nation: row.dataset.teamNation
                     });
                 }
             });
