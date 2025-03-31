@@ -778,6 +778,9 @@
 
         // URL du fichier JSON avec les données (à modifier selon votre configuration)
         const dataUrl = 'data.json';
+
+        // URL du fichier JSON avec les données stats des joueurs
+        const dataUrl = 'players.json';
 	    
 	// URL for the bracket data
         const bracketDataUrl = 'bracket-data.json';
@@ -1380,20 +1383,20 @@ document.addEventListener('DOMContentLoaded', () => {
             playerStats.forEach(player => {
 
                 const row = document.createElement('tr');
-		const totalPoints = (player.M1 || 0) + (player.M2 || 0) + (player.M3 || 0) + (player.F32 || 0) + (player.F16 || 0) + (player.F8 || 0) + (player.F4 || 0) + (player.Final || 0);
+		const totalPoints = (player.matches.M1 || 0) + (player.matches.M2 || 0) + (player.matches.M3 || 0) + (player.matches.F32 || 0) + (player.matches.F16 || 0) + (player.matches.F8 || 0) + (player.matches.F4 || 0) + (player.matches.Final || 0);
 
                 row.innerHTML = `
 
                     <td>${player.name}</td>
                     <td>${player.team}</td>
-                    <td>${player.M1}</td>
-                    <td>${player.M2}</td>
-                    <td>${player.M3}</td>
-                    <td>${player.F32}</td>
-                    <td>${player.F16}</td>
-                    <td>${player.F8}</td>
-                    <td>${player.F4}</td>
-                    <td>${player.Final}</td>
+                    <td>${player.matches.M1}</td>
+                    <td>${player.matches.M2}</td>
+                    <td>${player.matches.M3}</td>
+                    <td>${player.matches.F32}</td>
+                    <td>${player.matches.F16}</td>
+                    <td>${player.matches.F8}</td>
+                    <td>${player.matches.F4}</td>
+                    <td>${player.matches.Final}</td>
                     <td><strong>${totalPoints}</strong></td>
 
                 `;
