@@ -21,147 +21,143 @@
   "bracket": {
     "roundOf16": [
       {
-        "matchId": 17,
+        "matchId": 1,
         "team1Id": 1,
-        "team2Id": 17,
+        "team2Id": 16,
         "score1": 2,
         "score2": 1,
-        "winnerId": 1,
+        "winnerId": w1,
         "date": "2025-03-15"
       },
       {
-        "matchId": 18,
+        "matchId": 2,
         "team1Id": 8,
         "team2Id": 9,
         "score1": 0,
         "score2": 2,
-        "winnerId": 9,
+        "winnerId": w2,
         "date": "2025-03-15"
       },
       {
-        "matchId": 19,
-        "team1Id": 4,
-        "team2Id": 20,
+        "matchId": 3,
+        "team1Id": 5,
+        "team2Id": 12,
         "score1": 3,
         "score2": 0,
-        "winnerId": 4,
+        "winnerId": w3,
         "date": "2025-03-16"
       },
       {
-        "matchId": 20,
-        "team1Id": 28,
-        "team2Id": 12,
+        "matchId": 4,
+        "team1Id": 13,
+        "team2Id": 4,
         "score1": 1,
         "score2": 1,
-        "winnerId": 12,
-        "penaltyScore1": 3,
-        "penaltyScore2": 5,
+        "winnerId": w4,
         "date": "2025-03-16"
       },
       {
-        "matchId": 21,
-        "team1Id": 2,
-        "team2Id": 18,
+        "matchId": 5,
+        "team1Id": 3,
+        "team2Id": 14,
         "score1": 4,
         "score2": 2,
-        "winnerId": 2,
+        "winnerId": w5,
         "date": "2025-03-17"
       },
       {
-        "matchId": 22,
-        "team1Id": 7,
-        "team2Id": 10,
+        "matchId": 6,
+        "team1Id": 6,
+        "team2Id": 11,
         "score1": 0,
         "score2": 3,
-        "winnerId": 10,
+        "winnerId": w6,
         "date": "2025-03-17"
       },
       {
-        "matchId": 23,
-        "team1Id": 30,
-        "team2Id": 14,
+        "matchId": 7,
+        "team1Id": 7,
+        "team2Id": 10,
         "score1": 2,
         "score2": 1,
-        "winnerId": 30,
+        "winnerId": w7,
         "date": "2025-03-18"
       },
       {
-        "matchId": 24,
-        "team1Id": 27,
-        "team2Id": 11,
+        "matchId": 8,
+        "team1Id": 15,
+        "team2Id": 2,
         "score1": 1,
         "score2": 0,
-        "winnerId": 27,
+        "winnerId": w8,
         "date": "2025-03-18"
       }
     ],
     "quarterFinals": [
       {
-        "matchId": 25,
-        "team1Id": 1,
-        "team2Id": 9,
+        "matchId": 11,
+        "team1Id": w1,
+        "team2Id": w2,
         "score1": 1,
         "score2": 0,
-        "winnerId": 1,
+        "winnerId": w11,
         "date": "2025-03-22"
       },
       {
-        "matchId": 26,
-        "team1Id": 4,
-        "team2Id": 12,
+        "matchId": 12,
+        "team1Id": w3,
+        "team2Id": w4,
         "score1": 2,
         "score2": 2,
-        "winnerId": 4,
-        "penaltyScore1": 4,
-        "penaltyScore2": 2,
+        "winnerId": w12,
         "date": "2025-03-22"
       },
       {
-        "matchId": 27,
-        "team1Id": 2,
-        "team2Id": 10,
+        "matchId": 13,
+        "team1Id": w5,
+        "team2Id": w6,
         "score1": 3,
         "score2": 1,
-        "winnerId": 2,
+        "winnerId": w13,
         "date": "2025-03-23"
       },
       {
-        "matchId": 28,
-        "team1Id": 30,
-        "team2Id": 27,
+        "matchId": 14,
+        "team1Id": w7,
+        "team2Id": w8,
         "score1": 0,
         "score2": 1,
-        "winnerId": 27,
+        "winnerId": w14,
         "date": "2025-03-23"
       }
     ],
     "semiFinals": [
       {
-        "matchId": 29,
-        "team1Id": 1,
-        "team2Id": 4,
+        "matchId": 21,
+        "team1Id": w11,
+        "team2Id": w12,
         "score1": 2,
         "score2": 1,
-        "winnerId": 1,
+        "winnerId": w21,
         "date": "2025-03-29"
       },
       {
-        "matchId": 30,
-        "team1Id": 2,
-        "team2Id": 27,
+        "matchId": 22,
+        "team1Id": w13,
+        "team2Id": w14,
         "score1": 0,
         "score2": 2,
-        "winnerId": 27,
+        "winnerId": w22,
         "date": "2025-03-29"
       }
     ],
     "final": {
       "matchId": 31,
-      "team1Id": 1,
-      "team2Id": 27,
+      "team1Id": w21,
+      "team2Id": w22,
       "score1": 1,
       "score2": 3,
-      "winnerId": 27,
+      "winnerId": w31,
       "date": "2025-04-05"
     }
   }
