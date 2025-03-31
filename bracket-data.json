@@ -16,7 +16,22 @@
     {"id": 13, "name": "Team E", "shortName": "TME"},
     {"id": 14, "name": "Team F", "shortName": "TMF"},
     {"id": 15, "name": "Team G", "shortName": "TMG"},
-    {"id": 16, "name": "Team H", "shortName": "TMH"}
+    {"id": 16, "name": "Team H", "shortName": "TMH"},
+    {"id": w1, "name": "Winner 1", "shortName": "W1"},
+    {"id": w2, "name": "Winner 2", "shortName": "W2"},
+    {"id": w3, "name": "Winner 3", "shortName": "W3"},
+    {"id": w4, "name": "Winner 4", "shortName": "W4"},
+    {"id": w5, "name": "Winner 5", "shortName": "W5"},
+    {"id": w6, "name": "Winner 6", "shortName": "W6"},
+    {"id": w7, "name": "Winner 7", "shortName": "W7"},
+    {"id": w8, "name": "Winner 8", "shortName": "W8"},
+    {"id": w11, "name": "Winner 11", "shortName": "W11"},
+    {"id": w12, "name": "Winner 12", "shortName": "W12"},
+    {"id": w13, "name": "Winner 13", "shortName": "W13"},
+    {"id": w14, "name": "Winner 14", "shortName": "W14"},
+    {"id": w21, "name": "Winner 21", "shortName": "W21"},
+    {"id": w22, "name": "Winner 22", "shortName": "W22"},
+    {"id": w31, "name": "Winner 31", "shortName": "WIN"}    
   ],
   "bracket": {
     "roundOf16": [
