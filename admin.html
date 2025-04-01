@@ -360,27 +360,27 @@
             saveLoading: document.getElementById('save-loading')
         };
 
-        // Load teams data from data.json
+        // Load teams data from players.json
         async function loadTeamsData() {
-            try {
-                const response = await fetch('players.json');
-                if (!response.ok) throw new Error("File not found or server error");
-                const data = await response.json();
-                
-                // Merge with default data to ensure all required fields exist
-                tournamentData = {
-                    teams: defaultData.teams, // Always use default teams structure
-                    playerStats: data.playerStats || defaultData.playerStats,
-                    bracket: data.bracket || defaultData.bracket
-                };
-                
-                console.log("Loaded teams:", tournamentData.teams);
-                console.log("Loaded player stats:", tournamentData.playerStats);
-            } catch (fetchError) {
-                console.warn("Using default data (players.json not available):", fetchError);
-                tournamentData = defaultData;
-            }
-        }
+  try {
+    // Load from GitHub API
+    const response = await fetch(
+      `https://api.github.com/repos/YOUR_GITHUB_USERNAME/YOUR_REPO_NAME/contents/players.json`
+    );
+    const data = await response.json();
+    const content = JSON.parse(atob(data.content)); // Decode Base64
+
+    tournamentData = {
+      teams: defaultData.teams,
+      playerStats: content.playerStats || [],
+      bracket: {}
+    };
+
+  } catch (error) {
+    console.warn("Using default data (API failed):", error);
+    tournamentData = defaultData;
+  }
+}
 
         // Update team selectors with available teams
         function updateTeamSelectors() {
@@ -695,83 +695,89 @@
 
         // Save results to the JSON file
         async function saveResults() {
-            // Validate inputs
-            if (!elements.team1Select.value || !elements.team2Select.value) {
-                alert("Veuillez sélectionner deux équipes");
-                return;
-            }
+  // Validate inputs
+  if (!elements.team1Select.value || !elements.team2Select.value) {
+    alert("Select two teams first!");
+    return;
+  }
 
-            if (!confirm("Êtes-vous sûr de vouloir enregistrer ces résultats? Cette action est irréversible.")) {
-                return;
-            }
+  // Show loading state
+  elements.saveLoading.style.display = 'inline-block';
+  elements.saveBtn.disabled = true;
 
-            const round = elements.roundSelect.value;
-            const team1Nation = elements.team1Select.value;
-            const team2Nation = elements.team2Select.value;
+  try {
+    // Collect player data from the table
+    const currentMatchPoints = [];
+    const rows = elements.playersBody.querySelectorAll('tr');
+    
+    rows.forEach(row => {
+      if (row.cells.length > 1) {
+        currentMatchPoints.push({
+          name: row.cells[0].textContent,
+          nation: row.dataset.teamNation,
+          position: row.cells[1].textContent,
+          points: parseInt(row.querySelector('.total-points').textContent) || 0
+        });
+      }
+    });
 
-            // Show loading indicator
-            elements.saveLoading.style.display = 'inline-block';
-            elements.saveBtn.disabled = true;
+    // Merge new stats with existing data
+    const updatedPlayerStats = tournamentData.playerStats.map(player => {
+      const updatedPlayer = currentMatchPoints.find(p => 
+        p.name === player.name && p.nation === player.nation);
+      if (updatedPlayer) {
+        return { 
+          ...player, 
+          matches: { 
+            ...player.matches, 
+            [elements.roundSelect.value]: updatedPlayer.points 
+          } 
+        };
+      }
+      return player;
+    });
 
-            try {
-                // Collect player points from UI
-                const currentMatchPoints = [];
-                const rows = elements.playersBody.querySelectorAll('tr');
-                
-                rows.forEach(row => {
-                    if (row.cells.length > 1) { // Skip header/message rows
-                        currentMatchPoints.push({
-                            name: row.cells[0].textContent,
-                            nation: row.dataset.teamNation,
-                            position: row.cells[1].textContent,
-                            points: parseInt(row.querySelector('.total-points').textContent) || 0
-                        });
-                    }
-                });
+    // Prepare the API request
+    const response = await fetch(
+      `https://api.github.com/repos/YOUR_GITHUB_USERNAME/YOUR_REPO_NAME/contents/players.json`,
+      {
+        method: "PUT",
+        headers: {
+          "Authorization": `token YOUR_GITHUB_TOKEN`, // Replace with your token
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          message: "Update player stats via admin",
+          content: btoa(JSON.stringify({ playerStats: updatedPlayerStats }, null, 2)),
+          sha: await getFileSHA() // Required to avoid conflicts
+        })
+      }
+    );
 
-                // Create updated player stats
-                const updatedPlayerStats = [...tournamentData.playerStats];
-                
-                currentMatchPoints.forEach(player => {
-                    // Find existing player stats or create new
-                    let playerStats = updatedPlayerStats.find(p => 
-                        p.name === player.name && p.nation === player.nation);
-                    
-                    if (!playerStats) {
-                        playerStats = {
-                            name: player.name,
-                            nation: player.nation,
-                            position: player.position,
-                            matches: {}
-                        };
-                        updatedPlayerStats.push(playerStats);
-                    }
+    if (!response.ok) {
+      throw new Error(`GitHub API error: ${response.status}`);
+    }
 
-                    // Initialize matches if doesn't exist
-                    if (!playerStats.matches) playerStats.matches = {};
-                    
-                    // Update points for this round
-                    playerStats.matches[round] = player.points;
-                });
+    alert("Data saved to players.json!");
+    tournamentData.playerStats = updatedPlayerStats; // Update local copy
 
-                // In a real application, you would send this to your server
-                // Here we'll just update the local data and simulate a save
-                tournamentData.playerStats = updatedPlayerStats;
-                
-                // Simulate server delay
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                
-                alert("Résultats enregistrés avec succès!\n\n(Note: Dans un environnement réel, cette action enverrait les données au serveur)");
-                
-            } catch (error) {
-                console.error('Error saving data:', error);
-                alert("Erreur lors de l'enregistrement: " + error.message);
-            } finally {
-                // Hide loading indicator
-                elements.saveLoading.style.display = 'none';
-                elements.saveBtn.disabled = false;
-            }
-        }
+  } catch (error) {
+    console.error("Error:", error);
+    alert("Failed to save: " + error.message);
+  } finally {
+    elements.saveLoading.style.display = 'none';
+    elements.saveBtn.disabled = false;
+  }
+}
+
+// Helper function to get the latest file SHA (required by GitHub API)
+async function getFileSHA() {
+  const response = await fetch(
+    `https://api.github.com/repos/YOUR_GITHUB_USERNAME/YOUR_REPO_NAME/contents/players.json`
+  );
+  const data = await response.json();
+  return data.sha; // Unique identifier for the file version
+}
 
         // Initialize the app when DOM is loaded
         document.addEventListener('DOMContentLoaded', init);
