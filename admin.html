@@ -247,17 +247,11 @@
 
     <script>
         // Default data structure
-        const defaultData = {
-            teams: [
-                {
-                    nation: "Zimbabwe",
-                    players: [
-                        { name: "1", position: "FW" }
-                    ]
-                }
-            ],
-            playerStats: [] 
-        };
+       const defaultData = {
+  teams: [],  // Now empty - all teams come from players.json
+  playerStats: [],
+  bracket: {}
+};
 
         // Data structure to hold tournament data
         let tournamentData = {
@@ -347,44 +341,45 @@
     if (!response.ok) throw new Error("Failed to load players.json");
     const data = await response.json();
     
+    // ONLY use nations from players.json - ignore defaultData
     tournamentData = {
-      teams: data.teams || defaultData.teams, // Use teams from JSON if available
+      teams: data.teams || [],  // Empty array if no teams in JSON
       playerStats: data.playerStats || [],
       bracket: data.bracket || {}
     };
     
-    console.log("Loaded all players:", tournamentData);
+    // Update dropdowns immediately after loading
+    updateTeamSelectors();
+    
   } catch (error) {
-    console.warn("Using default data (players.json not available):", error);
-    tournamentData = defaultData;
+    console.error("Error loading players.json:", error);
+    alert("Error loading team data. Please check players.json format.");
   }
 }
 
         // Update team selectors with available teams
         function updateTeamSelectors() {
-            // Get unique team names from loaded data
-            const uniqueTeams = tournamentData.teams.map(team => team.nation);
-            
-            // Update both team selectors
-            [elements.team1Select, elements.team2Select].forEach(selector => {
-                // Save current selection
-                const currentValue = selector.value;
-                selector.innerHTML = '<option value="">Sélectionner une équipe</option>';
-                
-                // Add teams from loaded data
-                uniqueTeams.forEach(team => {
-                    const option = document.createElement('option');
-                    option.value = team;
-                    option.textContent = team;
-                    selector.appendChild(option);
-                });
-                
-                // Restore selection if still valid
-                if (currentValue && uniqueTeams.includes(currentValue)) {
-                    selector.value = currentValue;
-                }
-            });
-        }
+  // Get nations ONLY from players.json (not defaultData)
+  const availableNations = tournamentData.teams.map(team => team.nation);
+  
+  // Update both dropdowns
+  [elements.team1Select, elements.team2Select].forEach(select => {
+    const currentValue = select.value;
+    select.innerHTML = '<option value="">Sélectionner une équipe</option>';
+    
+    availableNations.forEach(nation => {
+      const option = document.createElement('option');
+      option.value = nation;
+      option.textContent = nation;
+      select.appendChild(option);
+    });
+    
+    // Restore selection if still valid
+    if (currentValue && availableNations.includes(currentValue)) {
+      select.value = currentValue;
+    }
+  });
+}
 
         // Initialize the application
         async function init() {
