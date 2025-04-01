@@ -641,58 +641,67 @@
         }
 
         // Auto-fill all relevant stats
-        function autoFillAll() {
+       function autoFillAll() {
   const team1Score = parseInt(elements.team1Score.value) || 0;
   const team2Score = parseInt(elements.team2Score.value) || 0;
-  const team1Shots = parseInt(document.getElementById('team1-shots-received').value) || 0;
-  const team2Shots = parseInt(document.getElementById('team2-shots-received').value) || 0;
+  const team1ShotsReceived = parseInt(document.getElementById('team1-shots-received').value) || 0;
+  const team2ShotsReceived = parseInt(document.getElementById('team2-shots-received').value) || 0;
 
   if (!elements.team1Select.value || !elements.team2Select.value) {
-    alert("Select both teams first!");
+    alert("Please select both teams first!");
     return;
   }
 
-  const team1Nation = elements.team1Select.value;
-  const team2Nation = elements.team2Select.value;
-  const winnerNation = team1Score > team2Score ? team1Nation :
-                     team2Score > team1Score ? team2Nation : null;
+  // Determine winner and goal difference
+  const winnerNation = team1Score > team2Score ? elements.team1Select.value :
+                     team2Score > team1Score ? elements.team2Select.value : null;
   const goalDiff = Math.abs(team1Score - team2Score);
 
+  // Process all player rows
   const rows = elements.playersBody.querySelectorAll('tr');
   rows.forEach(row => {
     const playerTeam = row.dataset.teamNation;
     const position = row.dataset.position;
-    const isWinner = playerTeam === winnerNation;
-    const isTeam1 = playerTeam === team1Nation;
+    const isTeam1Player = playerTeam === elements.team1Select.value;
 
-    // Get opponent stats
-    const opponentScore = isTeam1 ? team2Score : team1Score;
-    const shotsReceived = isTeam1 ? team1Shots : team2Shots;
+    // Get all input elements
+    const victoryCheckbox = row.querySelector('.victory');
+    const bigWinCheckbox = row.querySelector('.big-win');
+    const cleanSheetCheckbox = row.querySelector('.clean-sheet');
+    const shotsConcededWinCheckbox = row.querySelector('.shots-conceded-win');
 
-    // Get all checkboxes
-    const checkboxes = {
-      victory: row.querySelector('.victory'),
-      bigWin: row.querySelector('.big-win'),
-      cleanSheet: row.querySelector('.clean-sheet'),
-      shotsConceded: row.querySelector('.shots-conceded-win')
-    };
-
-    // Set values
-    checkboxes.victory.checked = isWinner;
-    checkboxes.bigWin.checked = isWinner && goalDiff >= 4;
+    // --- Auto-fill logic ---
     
-    if (position === "GK" || position === "DF") {
-      checkboxes.cleanSheet.checked = opponentScore === 0;
-      if (position === "GK") {
-        checkboxes.shotsConceded.checked = isWinner && shotsReceived >= 10;
-      }
+    // 1. Victory & Big Win (+4 goal difference)
+    if (winnerNation) {
+      victoryCheckbox.checked = (playerTeam === winnerNation);
+      bigWinCheckbox.checked = (playerTeam === winnerNation && goalDiff >= 4);
+    } else {
+      victoryCheckbox.checked = false;
+      bigWinCheckbox.checked = false;
     }
 
-    // Update points
+    // 2. Clean Sheet (GK and DF only)
+    if (position === "GK" || position === "DF") {
+      const opponentScore = isTeam1Player ? team2Score : team1Score;
+      cleanSheetCheckbox.checked = (opponentScore === 0);
+    } else {
+      cleanSheetCheckbox.checked = false;
+    }
+
+    // 3. Shots Conceded Win (GK only)
+    if (position === "GK") {
+      const shotsReceived = isTeam1Player ? team1ShotsReceived : team2ShotsReceived;
+      shotsConcededWinCheckbox.checked = (victoryCheckbox.checked && shotsReceived >= 10);
+    } else {
+      shotsConcededWinCheckbox.checked = false;
+    }
+
+    // Update points immediately
     updatePlayerPoints(row);
   });
 
-  alert("Auto-fill completed!");
+  alert("All stats auto-filled successfully!");
 }
 
         // Reset all player inputs
