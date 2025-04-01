@@ -1518,45 +1518,36 @@ document.addEventListener('DOMContentLoaded', () => {
         // Fonction pour afficher les statistiques des joueurs
 
         function renderPlayerStats(playerStats) {
+    const playerStatsBody = document.getElementById('player-stats-body');
+    playerStatsBody.innerHTML = '';
 
-            const playerStatsBody = document.getElementById('player-stats-body');
+    // Sort players by total points (descending)
+    playerStats.playerStats.sort((a, b) => {
+        const totalA = Object.values(a.matches).reduce((sum, val) => sum + val, 0);
+        const totalB = Object.values(b.matches).reduce((sum, val) => sum + val, 0);
+        return totalB - totalA;
+    });
 
-            playerStatsBody.innerHTML = '';
+    playerStats.playerStats.forEach(player => {
+        const row = document.createElement('tr');
+        const totalPoints = Object.values(player.matches).reduce((sum, val) => sum + val, 0);
 
-            
-
-            // Trier les joueurs par nombre de buts (décroissant)
-
-            playerStats.sort((a, b) => b.Total - a.Total);
-
-            
-
-            playerStats.forEach(player => {
-
-                const row = document.createElement('tr');
-		const totalPoints = (player.matches.M1 || 0) + (player.matches.M2 || 0) + (player.matches.M3 || 0) + (player.matches.F32 || 0) + (player.matches.F16 || 0) + (player.matches.F8 || 0) + (player.matches.F4 || 0) + (player.matches.Final || 0);
-
-                row.innerHTML = `
-
-                    <td>${player.name}</td>
-                    <td>${player.team}</td>
-                    <td>${player.matches.M1}</td>
-                    <td>${player.matches.M2}</td>
-                    <td>${player.matches.M3}</td>
-                    <td>${player.matches.F32}</td>
-                    <td>${player.matches.F16}</td>
-                    <td>${player.matches.F8}</td>
-                    <td>${player.matches.F4}</td>
-                    <td>${player.matches.Final}</td>
-                    <td><strong>${totalPoints}</strong></td>
-
-                `;
-
-                playerStatsBody.appendChild(row);
-
-            });
-
-        }
+        row.innerHTML = `
+            <td>${player.name}</td>
+            <td>${player.team}</td>
+            <td>${player.matches.M1 || 0}</td>
+            <td>${player.matches.M2 || 0}</td>
+            <td>${player.matches.M3 || 0}</td>
+            <td>${player.matches.F32 || 0}</td>
+            <td>${player.matches.F16 || 0}</td>
+            <td>${player.matches.F8 || 0}</td>
+            <td>${player.matches.F4 || 0}</td>
+            <td>${player.matches.Final || 0}</td>
+            <td><strong>${totalPoints}</strong></td>
+        `;
+        playerStatsBody.appendChild(row);
+    });
+}
 
 
 
