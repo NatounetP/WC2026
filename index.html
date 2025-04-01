@@ -1518,13 +1518,13 @@ document.addEventListener('DOMContentLoaded', () => {
     playerStatsBody.innerHTML = '';
 
     // Sort players by total points (descending)
-    playerStats.playerStats.sort((a, b) => {
+    playerStats.sort((a, b) => {
         const totalA = Object.values(a.matches).reduce((sum, val) => sum + val, 0);
         const totalB = Object.values(b.matches).reduce((sum, val) => sum + val, 0);
         return totalB - totalA;
     });
 
-    playerStats.playerStats.forEach(player => {
+    playerStats.forEach(player => {
         const row = document.createElement('tr');
         const totalPoints = Object.values(player.matches).reduce((sum, val) => sum + val, 0);
 
