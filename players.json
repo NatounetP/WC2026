@@ -10,6 +10,30 @@
             }
         },
         {
+            "name": "J-M Mariel",
+            "nation": "Suisse",
+            "position": "GK",
+            "matches": {
+              "M1": 0
+            }
+        },
+        {
+            "name": "Léo Fournier",
+            "nation": "France",
+            "position": "GK",
+            "matches": {
+              "M1": 2
+            }
+        },
+        {
+            "name": "Tourpin Tata",
+            "nation": "Cameroun",
+            "position": "DF",
+            "matches": {
+              "M1": 0
+            }
+        },
+        {
             "name": "Olivier Michel",
             "nation": "France",
             "position": "FW",
