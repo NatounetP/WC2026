@@ -700,42 +700,34 @@
 
         // Fonction pour charger les données depuis les fichiers externes
         async function loadData() {
-            try {
-                // Load team data
-                const teamResponse = await fetch(dataUrl);
-                if (!teamResponse.ok) throw new Error('Erreur lors du chargement des données des équipes');
-                const teamData = await teamResponse.json();
-                
-                // Load player data
-                const playerResponse = await fetch(playerUrl);
-                if (!playerResponse.ok) throw new Error('Erreur lors du chargement des données des joueurs');
-                const playerData = await playerResponse.json();
-                
-                renderTeams(teamData.teams);
-                renderStandings(teamData.teams);
-                renderPlayerStats(playerData.player);
-                
-                // Load bracket data
-                const bracketResponse = await fetch(bracketDataUrl);
-                if (!bracketResponse.ok) throw new Error('Erreur lors du chargement des données du bracket');
-                const bracketData = await bracketResponse.json();
-                renderBracket(bracketData);
-                
-            } catch (error) {
-                console.error('Erreur:', error);
-                // Fallback to demo data if files not found
-                if (error.message.includes('404')) {
-                    const demoData = getDemoData();
-                    renderTeams(demoData.teams);
-                    renderStandings(demoData.teams);
-                    renderPlayerStats(demoData.playerStats);
-                } else {
-                    document.getElementById('team-container').innerHTML = '<p>Erreur lors du chargement des données. Veuillez réessayer plus tard.</p>';
-                    document.getElementById('standings-body').innerHTML = '<tr><td colspan="11">Erreur lors du chargement des données.</td></tr>';
-                    document.getElementById('player-stats-body').innerHTML = '<tr><td colspan="12">Erreur lors du chargement des données.</td></tr>';
-                }
-            }
+    try {
+        // Load teams and standings
+        const response = await fetch(dataUrl);
+        if (!response.ok) throw new Error('Erreur lors du chargement des données');
+        const data = await response.json();
+        
+        // Load player stats
+        const playerResponse = await fetch(playerUrl);
+        if (!playerResponse.ok) throw new Error('Erreur lors du chargement des joueurs');
+        const playerData = await playerResponse.json();
+
+        renderTeams(data.teams);
+        renderStandings(data.teams);
+        renderPlayerStats(playerData);
+    } catch (error) {
+        console.error('Erreur:', error);
+        if (error.message.includes('404')) {
+            const demoData = getDemoData();
+            renderTeams(demoData.teams);
+            renderStandings(demoData.teams);
+            renderPlayerStats(demoData.playerStats || { playerStats: [] });
+        } else {
+            document.getElementById('team-container').innerHTML = '<p>Erreur lors du chargement des données. Veuillez réessayer plus tard.</p>';
+            document.getElementById('standings-body').innerHTML = '<tr><td colspan="7">Erreur lors du chargement des données.</td></tr>';
+            document.getElementById('player-stats-body').innerHTML = '<tr><td colspan="7">Erreur lors du chargement des données.</td></tr>';
         }
+    }
+}
 
         // Fonction pour obtenir des données de démonstration si les fichiers JSON n'existent pas encore
         function getDemoData() {
