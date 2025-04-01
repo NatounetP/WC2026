@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
     <title>Ligue de Football à 6</title>
     <style>
     body {
@@ -661,6 +663,7 @@
 
     <script>
 	document.addEventListener('DOMContentLoaded', () => {
+		firebase.initializeApp(firebaseConfig);
     loadData(); // Single function to load all data
 });
 	
@@ -733,19 +736,37 @@
     }
 }
 	    async function loadPlayerData() {
-    try {
-        const response = await fetch(playerUrl);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        renderPlayerStats(data.playerStats);
-    } catch (error) {
-        console.error('Error loading player stats:', error);
-        document.getElementById('player-stats-body').innerHTML = `
-            <tr><td colspan="12">Error loading player statistics</td></tr>
-        `;
+    async function loadPlayerData() {
+  try {
+    const playerStatsBody = document.getElementById('player-stats-body');
+    playerStatsBody.innerHTML = '<tr><td colspan="12" class="loading">Loading player stats...</td></tr>';
+    
+    // Fetch from Firestore
+    const snapshot = await db.collection("players").get();
+    
+    if (snapshot.empty) {
+      playerStatsBody.innerHTML = '<tr><td colspan="12">No player data found</td></tr>';
+      return;
     }
+    
+    // Process Firestore data
+    const playerStats = snapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        name: data.name,
+        team: data.nation || 'Unknown', // Fallback if nation missing
+        position: data.position || 'FW', // Fallback if position missing
+        matches: data.matches || {} // Ensure matches exists
+      };
+    });
+    
+    renderPlayerStats(playerStats);
+  } catch (error) {
+    console.error("Firebase error:", error);
+    document.getElementById('player-stats-body').innerHTML = `
+      <tr><td colspan="12">Error loading stats: ${error.message}</td></tr>
+    `;
+  }
 }
 
 	    // Function to load and render bracket data
@@ -1450,36 +1471,41 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Fonction pour afficher les statistiques des joueurs
 function renderPlayerStats(playerStats) {
-    const playerStatsBody = document.getElementById('player-stats-body');
-    playerStatsBody.innerHTML = '';
+  const playerStatsBody = document.getElementById('player-stats-body');
+  playerStatsBody.innerHTML = '';
 
-    // Sort players by total points (descending)
-    playerStats.sort((a, b) => {
-        const totalA = Object.values(a.matches).reduce((sum, val) => sum + val, 0);
-        const totalB = Object.values(b.matches).reduce((sum, val) => sum + val, 0);
-        return totalB - totalA;
-    });
+  // Sort by total points (descending)
+  const sortedPlayers = [...playerStats].sort((a, b) => {
+    const totalA = calculateTotalPoints(a.matches);
+    const totalB = calculateTotalPoints(b.matches);
+    return totalB - totalA;
+  });
 
-    playerStats.forEach(player => {
-        const row = document.createElement('tr');
-        const totalPoints = Object.values(player.matches).reduce((sum, val) => sum + val, 0);
+  sortedPlayers.forEach(player => {
+    const row = document.createElement('tr');
+    const totalPoints = calculateTotalPoints(player.matches);
+    
+    row.innerHTML = `
+      <td>${player.name}</td>
+      <td>${player.team}</td>
+      <td>${player.matches.M1 || 0}</td>
+      <td>${player.matches.M2 || 0}</td>
+      <td>${player.matches.M3 || 0}</td>
+      <td>${player.matches.F32 || 0}</td>
+      <td>${player.matches.F16 || 0}</td>
+      <td>${player.matches.F8 || 0}</td>
+      <td>${player.matches.F4 || 0}</td>
+      <td>${player.matches.Final || 0}</td>
+      <td><strong>${totalPoints}</strong></td>
+    `;
+    playerStatsBody.appendChild(row);
+  });
+}
 
-        row.innerHTML = `
-            <td>${player.name}</td>
-            <td>${player.nation}</td>
-	    <td>${player.position}</td>
-            <td>${player.matches.M1 || 0}</td>
-            <td>${player.matches.M2 || 0}</td>
-            <td>${player.matches.M3 || 0}</td>
-            <td>${player.matches.F32 || 0}</td>
-            <td>${player.matches.F16 || 0}</td>
-            <td>${player.matches.F8 || 0}</td>
-            <td>${player.matches.F4 || 0}</td>
-            <td>${player.matches.Final || 0}</td>
-            <td><strong>${totalPoints}</strong></td>
-        `;
-        playerStatsBody.appendChild(row);
-    });
+// Helper function to calculate total points
+function calculateTotalPoints(matches) {
+  if (!matches) return 0;
+  return Object.values(matches).reduce((sum, val) => sum + (val || 0), 0);
 }
 
 
@@ -1487,7 +1513,21 @@ function renderPlayerStats(playerStats) {
         // Charger les données au chargement de la page
 
         document.addEventListener('DOMContentLoaded', loadData);
+const firebaseConfig = { apiKey: "AIzaSyC3zpS_NT8sHN4j0upcAd8jmpfhsgXtdRw",
 
+  authDomain: "paris-entre-amis-598e9.firebaseapp.com",
+
+  projectId: "paris-entre-amis-598e9",
+
+  storageBucket: "paris-entre-amis-598e9.firebasestorage.app",
+
+  messagingSenderId: "638642602040",
+
+  appId: "1:638642602040:web:0f7557f7d4923b6aec26cd"
+ };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+	    
 </script>
 </body>
 </html>
