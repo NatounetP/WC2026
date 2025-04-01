@@ -1550,16 +1550,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const totalPoints = Object.values(player.matches).reduce((sum, val) => sum + val, 0);
 
         row.innerHTML = `
-            <td>${player.name}</td>
-            <td>${player.team}</td>
-            <td>${player.matches.M1 || 0}</td>
-            <td>${player.matches.M2 || 0}</td>
-            <td>${player.matches.M3 || 0}</td>
-            <td>${player.matches.F32 || 0}</td>
-            <td>${player.matches.F16 || 0}</td>
-            <td>${player.matches.F8 || 0}</td>
-            <td>${player.matches.F4 || 0}</td>
-            <td>${player.matches.Final || 0}</td>
+            <td>${playerStats.name}</td>
+            <td>${playerStats.team}</td>
+            <td>${playerStats.matches.M1 || 0}</td>
+            <td>${playerStats.matches.M2 || 0}</td>
+            <td>${playerStats.matches.M3 || 0}</td>
+            <td>${playerStats.matches.F32 || 0}</td>
+            <td>${playerStats.matches.F16 || 0}</td>
+            <td>${playerStats.matches.F8 || 0}</td>
+            <td>${playerStats.matches.F4 || 0}</td>
+            <td>${playerStats.matches.Final || 0}</td>
             <td><strong>${totalPoints}</strong></td>
         `;
         playerStatsBody.appendChild(row);
