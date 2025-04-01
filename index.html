@@ -708,6 +708,7 @@
         // Add timestamp to prevent caching issues during development
         const timestamp = new Date().getTime();
         const response = await fetch(`${dataUrl}?t=${timestamp}`);
+	const response = await fetch(bracketDataUrl); // ICI
         
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -1390,93 +1391,6 @@ function renderStandings(standings) {
             <td><strong>${totalPoints}</strong></td>
         `;
         standingsBody.appendChild(row);
-    });
-}
-
-	    // Fonction pour afficher le bracket
-// Function to render the complete tournament bracket
-function renderBracket(tournamentData) {
-    const container = document.getElementById('bracket-container');
-    const titleElement = document.getElementById('bracket-title');
-    
-    // Set tournament title
-    titleElement.textContent = tournamentData.tournamentName || 'Tournament Bracket';
-    
-    container.innerHTML = '';
-    
-    // Create rounds in order
-    const rounds = [
-        /*{ 
-            name: "1/16", 
-            class: "bracket-round-32",
-            matches: tournamentData.bracket.roundOf32 
-        },*/
-        { 
-            name: "1/8", 
-            class: "bracket-round-16",
-            matches: tournamentData.bracket.roundOf16 
-        },
-        { 
-            name: "1/4", 
-            class: "bracket-round-8",
-            matches: tournamentData.bracket.quarterFinals 
-        },
-        { 
-            name: "1/2", 
-            class: "bracket-round-4",
-            matches: tournamentData.bracket.semiFinals 
-        },
-        { 
-            name: "FINAL", 
-            class: "bracket-round-2 bracket-final",
-            matches: [tournamentData.bracket.final] 
-        }
-    ];
-    
-    rounds.forEach(round => {
-        if (!round.matches || round.matches.length === 0) return;
-        
-        const roundDiv = document.createElement('div');
-        roundDiv.className = `bracket-round ${round.class}`;
-        
-        const titleDiv = document.createElement('div');
-        titleDiv.className = 'bracket-round-title';
-        titleDiv.textContent = round.name;
-        roundDiv.appendChild(titleDiv);
-        
-        round.matches.forEach(match => {
-            if (!match) return;
-            
-            const matchDiv = document.createElement('div');
-            matchDiv.className = 'bracket-match';
-            
-            const team1 = findTeamById(tournamentData.teams, match.team1Id);
-            const team2 = findTeamById(tournamentData.teams, match.team2Id);
-            
-            const topTeam = document.createElement('div');
-            topTeam.className = `bracket-team top ${match.team1Id === match.winnerId ? 'winner' : ''}`;
-            topTeam.innerHTML = `
-                <span>${team1.name}</span>
-                ${match.score1 !== undefined ? 
-                    `<span class="bracket-score">${formatScore(match, true)}</span>` : ''
-                }
-            `;
-            
-            const bottomTeam = document.createElement('div');
-            bottomTeam.className = `bracket-team bottom ${match.team2Id === match.winnerId ? 'winner' : ''}`;
-            bottomTeam.innerHTML = `
-                <span>${team2.name}</span>
-                ${match.score2 !== undefined ? 
-                    `<span class="bracket-score">${formatScore(match, false)}</span>` : ''
-                }
-            `;
-            
-            matchDiv.appendChild(topTeam);
-            matchDiv.appendChild(bottomTeam);            
-            roundDiv.appendChild(matchDiv);
-        });
-        
-        container.appendChild(roundDiv);
     });
 }
 
