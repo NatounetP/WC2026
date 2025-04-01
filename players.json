@@ -1,112 +1,46 @@
 {
-
-    "player": [
+    "playerStats": [
         {
             "name": "Alexandre Durand",
-            "nation": "France",
-            "position": "DF",
+            "team": "Équipe Rouge",
             "matches": {
-              "M1": 12
-            }
-        },
-        {
-            "name": "J-M Mariel",
-            "nation": "Suisse",
-            "position": "GK",
-            "matches": {
-              "M1": 0
-            }
-        },
-        {
-            "name": "Léo Fournier",
-            "nation": "France",
-            "position": "GK",
-            "matches": {
-              "M1": 2
-            }
-        },
-        {
-            "name": "Tourpin Tata",
-            "nation": "Cameroun",
-            "position": "DF",
-            "matches": {
-              "M1": 0
+                "M1": 12,
+                "M2": 0,
+                "M3": 0,
+                "F32": 0,
+                "F16": 0,
+                "F8": 0,
+                "F4": 0,
+                "Final": 0
             }
         },
         {
             "name": "Olivier Michel",
-            "nation": "France",
-            "position": "FW",
+            "team": "Équipe Bleue",
             "matches": {
-              "M1": 12,
-              "M2": 0,
-              "M3": 3,
-              "F32": 3,
-              "F16": 4,
-              "F8": 0,
-              "F4": 0,
-              "Final": 0
+                "M1": 12,
+                "M2": 0,
+                "M3": 3,
+                "F32": 3,
+                "F16": 4,
+                "F8": 0,
+                "F4": 0,
+                "Final": 0
             }
         },
         {
             "name": "Kylian Mbappé",
-          "nation": "France",
-          "position": "FW",
-          "matches": {
-              "M1": 12,
-              "M2": 0,
-              "M3": 3,
-              "F32": 3,
-              "F16": 4,
-              "F8": 0,
-              "F4": 0,
-              "Final": 0
-            }
-        },
-        {
-            "name": "Thomas Müller",
-            "nation": "Allemagne",
-            "position": "FW",
+            "team": "Équipe Verte",
             "matches": {
-              "M1": 12,
-              "M2": 0,
-              "M3": 3,
-              "F32": 3,
-              "F16": 4,
-              "F8": 0,
-              "F4": 0,
-              "Final": 0
-            }
-        },
-        {
-            "name": "Kevin De Bruyne",
-            "nation": "Belgique",
-            "position": "FW",
-            "matches": {
-              "M1": 12,
-              "M2": 0,
-              "M3": 3,
-              "F32": 3,
-              "F16": 4,
-              "F8": 0,
-              "F4": 0,
-              "Final": 0
-            }
-        },
-        {
-            "name": "Ciro Immobile",
-            "nation": "Italie",
-            "position": "FW",
-            "matches": {
-              "M1": 12,
-              "M2": 0,
-              "M3": 3,
-              "F32": 3,
-              "F16": 4,
-              "F8": 0,
-              "F4": 0,
-              "Final": 0
+                "M1": 12,
+                "M2": 0,
+                "M3": 3,
+                "F32": 3,
+                "F16": 4,
+                "F8": 0,
+                "F4": 0,
+                "Final": 0
             }
         }
-    ],
+    ]
 }
