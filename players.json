@@ -6,14 +6,14 @@
             "matches": {
                 "M1": 12,
                 "M2": 0,
-                "M3": 0,
-                "F32": 0,
-                "F16": 0,
+                "M3": 3,
+                "F32": 3,
+                "F16": 2,
                 "F8": 0,
                 "F4": 0,
                 "Final": 0
             }
-        },
+        }
         {
             "name": "Olivier Michel",
             "team": "Équipe Bleue",
