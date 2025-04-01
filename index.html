@@ -732,6 +732,21 @@
         //renderPlayerStats(demoData.playerStats);
     }
 }
+	    async function loadPlayerData() {
+    try {
+        const response = await fetch(playerUrl);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        renderPlayerStats(data.playerStats);
+    } catch (error) {
+        console.error('Error loading player stats:', error);
+        document.getElementById('player-stats-body').innerHTML = `
+            <tr><td colspan="12">Error loading player statistics</td></tr>
+        `;
+    }
+}
 
 	    // Function to load and render bracket data
 	    async function loadBracketData() {
@@ -1427,7 +1442,7 @@ function formatScore(match, isTeam1) {
 document.addEventListener('DOMContentLoaded', () => {
     // First load the main data (teams, standings)
     loadData();
-    
+    loadPlayerData();
     // Then load the bracket data
     loadBracketData();
 });
@@ -1451,16 +1466,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const totalPoints = Object.values(player.matches).reduce((sum, val) => sum + val, 0);
 
         row.innerHTML = `
-            <td>${playerStats.name}</td>
-            <td>${playerStats.team}</td>
-            <td>${playerStats.matches.M1 || 0}</td>
-            <td>${playerStats.matches.M2 || 0}</td>
-            <td>${playerStats.matches.M3 || 0}</td>
-            <td>${playerStats.matches.F32 || 0}</td>
-            <td>${playerStats.matches.F16 || 0}</td>
-            <td>${playerStats.matches.F8 || 0}</td>
-            <td>${playerStats.matches.F4 || 0}</td>
-            <td>${playerStats.matches.Final || 0}</td>
+            <td>${player.name}</td>
+            <td>${player.team}</td>
+            <td>${player.matches.M1 || 0}</td>
+            <td>${player.matches.M2 || 0}</td>
+            <td>${player.matches.M3 || 0}</td>
+            <td>${player.matches.F32 || 0}</td>
+            <td>${player.matches.F16 || 0}</td>
+            <td>${player.matches.F8 || 0}</td>
+            <td>${player.matches.F4 || 0}</td>
+            <td>${player.matches.Final || 0}</td>
             <td><strong>${totalPoints}</strong></td>
         `;
         playerStatsBody.appendChild(row);
