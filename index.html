@@ -93,7 +93,6 @@
     }
     .goalkeeper {
         font-weight: bold;
-        color: #e90052;
     }
     .tabs {
         display: flex;
@@ -566,60 +565,38 @@
 <body>
 
     <div class="container">
-
         <header>
-
-            <h1>Ligue de Football à 6</h1>
-
-            <p>Résumé de notre championnat entre amis</p>
-
+            <h1>Paris entre amis</h1>
+            <p>WC 026</p>
         </header>
 
-
-
         <div class="tabs">
-
             <button class="tab active" onclick="openTab('teams')">Équipes</button>
-
             <button class="tab" onclick="openTab('standings')">Classement</button>
-
             <button class="tab" onclick="openTab('stats')">Statistiques</button>
 	    <button class="tab" onclick="openTab('bracket')">Bracket</button>
-
         </div>
 
-
-
-        <!-- Section Équipes -->
-
+        <!-- Section Équipes -->    
         <div id="teams" class="tab-content active">
-
             <div class="section">
-
                 <h2>Composition des Équipes</h2>
-
                 <div class="team-container" id="team-container">
-
                     <div class="loading">Chargement des données...</div>
-
                 </div>
-
             </div>
-
         </div>
-
-
 
         <!-- Section Classement -->
-<div id="standings" class="tab-content">
-    <div class="section">
-        <h2>Classement</h2>
-        <table id="standings-table">
-            <thead>
-                <tr>
-                    <th>Position</th>
-                    <th>Équipe</th>
-                    <th>M1</th>
+	<div id="standings" class="tab-content">
+		<div class="section">
+       			 <h2>Classement</h2>
+       				 <table id="standings-table">
+           			 <thead>
+            			    <tr>
+              			      <th>Position</th>
+             			       <th>Équipe</th>
+                  		 	<th>M1</th>
                     <th>M2</th>
                     <th>M3</th>
                     <th>1/16</th>
@@ -693,85 +670,46 @@
                     </tbody>
 
                 </table>
-
             </div>
-
         </div>
-
     </div>
-
-
 
     <script>
 
         // Fonction pour gérer les onglets
 
         function openTab(tabName) {
-
             const tabContents = document.getElementsByClassName("tab-content");
-
             for (let i = 0; i < tabContents.length; i++) {
-
                 tabContents[i].classList.remove("active");
-
             }
-
-            
-
             const tabs = document.getElementsByClassName("tab");
-
             for (let i = 0; i < tabs.length; i++) {
-
                 tabs[i].classList.remove("active");
-
-            }
-
-            
-
+            }         
             document.getElementById(tabName).classList.add("active");
-
             event.currentTarget.classList.add("active");
-
         }
 
 
 
         // Fonction pour basculer entre les vues (terrain/liste) pour chaque équipe
-
         function toggleView(teamId, viewType) {
-
             const fieldView = document.getElementById(`field-view-${teamId}`);
-
             const listView = document.getElementById(`list-view-${teamId}`);
-
             const fieldBtn = document.getElementById(`field-btn-${teamId}`);
-
             const listBtn = document.getElementById(`list-btn-${teamId}`);
-
-            
-
             if (viewType === 'field') {
-
                 fieldView.style.display = 'block';
-
                 listView.style.display = 'none';
-
                 fieldBtn.classList.add('active');
-
                 listBtn.classList.remove('active');
-
             } else {
-
                 fieldView.style.display = 'none';
-
                 listView.style.display = 'block';
-
                 fieldBtn.classList.remove('active');
-
                 listBtn.classList.add('active');
-
             }
-
         }
 
 
@@ -780,7 +718,7 @@
         const dataUrl = 'data.json';
 
         // URL du fichier JSON avec les données stats des joueurs
-        const dataUrl = 'players.json';
+        const playerUrl = 'players.json';
 	    
 	// URL for the bracket data
         const bracketDataUrl = 'bracket-data.json';
@@ -826,6 +764,21 @@
             } catch (error) {
                 console.error('Error loading bracket data:', error);
                 document.getElementById('bracket-container').innerHTML = 
+                    '<p>Error loading bracket data. Please try again later.</p>';
+            }
+        }
+
+	     async function loadPlayerData() {
+            try {
+                const response = await fetch(playerUrl);
+                if (!response.ok) {
+                    throw new Error('Failed to load players data');
+                }
+                const data = await response.json();
+                renderPlayer(data);
+            } catch (error) {
+                console.error('Error loading bracket data:', error);
+                document.getElementById('player-container').innerHTML = 
                     '<p>Error loading bracket data. Please try again later.</p>';
             }
         }
