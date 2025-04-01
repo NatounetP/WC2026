@@ -2,6 +2,7 @@
     "playerStats": [
         {
             "name": "Alexandre Durand",
+            "nation":"France",
             "team": "Équipe Rouge",
             "matches": {
                 "M1": 12,
@@ -16,6 +17,7 @@
         },
         {
             "name": "Olivier Michel",
+            "nation":"Belgique",
             "team": "Équipe Bleue",
             "matches": {
                 "M1": 12,
@@ -30,6 +32,7 @@
         },
         {
             "name": "Kylian Mbappé",
+            "nation":"France",
             "team": "Équipe Verte",
             "matches": {
                 "M1": 12,
