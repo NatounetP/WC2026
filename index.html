@@ -141,7 +141,7 @@
         justify-content: flex-start;
         gap: 10px;
         min-width: fit-content;
-	align-items: flex-start;
+        align-items: flex-start;
         padding: 15px 10px;
     }
     
@@ -210,17 +210,17 @@
         color: #4caf50;
     }
     .penalty-score {
-            font-size: 0.8em;
-            color: #888;
-            margin-left: 5px;
-        }
-        .match-date {
-            font-size: 0.7em;
-            color: #666;
-            text-align: center;
-            margin-top: 5px;
-            font-style: italic;
-        }
+        font-size: 0.8em;
+        color: #888;
+        margin-left: 5px;
+    }
+    .match-date {
+        font-size: 0.7em;
+        color: #666;
+        text-align: center;
+        margin-top: 5px;
+        font-style: italic;
+    }
     /* Connector lines between rounds */
     .bracket-team::before {
         content: "";
@@ -574,7 +574,7 @@
             <button class="tab active" onclick="openTab('teams')">Équipes</button>
             <button class="tab" onclick="openTab('standings')">Classement</button>
             <button class="tab" onclick="openTab('stats')">Statistiques</button>
-	    <button class="tab" onclick="openTab('bracket')">Bracket</button>
+            <button class="tab" onclick="openTab('bracket')">Bracket</button>
         </div>
 
         <!-- Section Équipes -->    
@@ -588,96 +588,79 @@
         </div>
 
         <!-- Section Classement -->
-	<div id="standings" class="tab-content">
-		<div class="section">
-       			 <h2>Classement</h2>
-       				 <table id="standings-table">
-           			 <thead>
-            			    <tr>
-              			      <th>Position</th>
-             			       <th>Équipe</th>
-                  		 	<th>M1</th>
-                    <th>M2</th>
-                    <th>M3</th>
-                    <th>1/16</th>
-		    <th>1/8</th>
-		    <th>1/4</th>
-		    <th>1/2</th>
-		    <th>Final</th>
-                    <th>Pts</th>
-                </tr>
-            </thead>
-            <tbody id="standings-body">
-                <tr>
-                    <td colspan="7" class="loading">Chargement des données...</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-</div>
+        <div id="standings" class="tab-content">
+            <div class="section">
+                <h2>Classement</h2>
+                <table id="standings-table">
+                    <thead>
+                        <tr>
+                            <th>Position</th>
+                            <th>Équipe</th>
+                            <th>M1</th>
+                            <th>M2</th>
+                            <th>M3</th>
+                            <th>1/16</th>
+                            <th>1/8</th>
+                            <th>1/4</th>
+                            <th>1/2</th>
+                            <th>Final</th>
+                            <th>Pts</th>
+                        </tr>
+                    </thead>
+                    <tbody id="standings-body">
+                        <tr>
+                            <td colspan="11" class="loading">Chargement des données...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
-	    <!-- Section Bracket -->
-
-<!-- Updated Bracket Section HTML -->
-<div id="bracket" class="tab-content">
-        <div class="section">
-            <h2 id="bracket-title">Tournament Bracket</h2>
-            <div class="bracket-section">
-                <div class="bracket-container" id="bracket-container">
-                    <div class="loading">Chargement des données...</div>
+        <!-- Section Bracket -->
+        <div id="bracket" class="tab-content">
+            <div class="section">
+                <h2 id="bracket-title">Tournament Bracket</h2>
+                <div class="bracket-section">
+                    <div class="bracket-container" id="bracket-container">
+                        <div class="loading">Chargement des données...</div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-
 
         <!-- Section Statistiques -->
-
         <div id="stats" class="tab-content">
-
             <div class="section">
-
                 <h2>Statistiques des Joueurs</h2>
-
                 <table id="player-stats-table">
-
                     <thead>
-
                         <tr>
-                    <th>Position</th>
-                    <th>Équipe</th>
-                    <th>M1</th>
-                    <th>M2</th>
-                    <th>M3</th>
-                    <th>1/16</th>
-		    <th>1/8</th>
-		    <th>1/4</th>
-		    <th>1/2</th>
-		    <th>Final</th>
-                    <th>Pts</th>
-                </tr>
-
-                    </thead>
-
-                    <tbody id="player-stats-body">
-
-                        <tr>
-
-                            <td colspan="7" class="loading">Chargement des données...</td>
-
+                            <th>Nom</th>
+                            <th>Nation</th>
+                            <th>Position</th>
+                            <th>M1</th>
+                            <th>M2</th>
+                            <th>M3</th>
+                            <th>1/16</th>
+                            <th>1/8</th>
+                            <th>1/4</th>
+                            <th>1/2</th>
+                            <th>Final</th>
+                            <th>Total</th>
                         </tr>
-
+                    </thead>
+                    <tbody id="player-stats-body">
+                        <tr>
+                            <td colspan="12" class="loading">Chargement des données...</td>
+                        </tr>
                     </tbody>
-
                 </table>
             </div>
         </div>
     </div>
 
     <script>
-
         // Fonction pour gérer les onglets
-
         function openTab(tabName) {
             const tabContents = document.getElementsByClassName("tab-content");
             for (let i = 0; i < tabContents.length; i++) {
@@ -690,8 +673,6 @@
             document.getElementById(tabName).classList.add("active");
             event.currentTarget.classList.add("active");
         }
-
-
 
         // Fonction pour basculer entre les vues (terrain/liste) pour chaque équipe
         function toggleView(teamId, viewType) {
@@ -712,155 +693,372 @@
             }
         }
 
-
-
-        // URL du fichier JSON avec les données (à modifier selon votre configuration)
+        // URL des fichiers JSON
         const dataUrl = 'data.json';
-
-        // URL du fichier JSON avec les données stats des joueurs
         const playerUrl = 'players.json';
-	    
-	// URL for the bracket data
         const bracketDataUrl = 'bracket-data.json';
 
-
-        // Fonction pour charger les données depuis le fichier externe
-
+        // Fonction pour charger les données depuis les fichiers externes
         async function loadData() {
-    try {
-        const response = await fetch(dataUrl);
-        if (!response.ok) {
-            throw new Error('Erreur lors du chargement des données');
-        }
-        const data = await response.json();
-        renderTeams(data.teams);
-        renderStandings(data.teams); // Passer les données des équipes avec leurs résultats
-        renderPlayerStats(data.playerStats);
-	//renderBracket(data.bracket);
-    } catch (error) {
-        console.error('Erreur:', error);
-        // Si l'erreur est due à l'absence de fichier data.json, utiliser des données de démonstration
-        if (error.message.includes('404')) {
-            const demoData = getDemoData();
-            renderTeams(demoData.teams);
-            renderStandings(demoData.teams); // Passer les données de démonstration
-            renderPlayerStats(demoData.playerStats);
-        } else {
-            document.getElementById('team-container').innerHTML = '<p>Erreur lors du chargement des données. Veuillez réessayer plus tard.</p>';
-            document.getElementById('standings-body').innerHTML = '<tr><td colspan="7">Erreur lors du chargement des données.</td></tr>';
-            document.getElementById('player-stats-body').innerHTML = '<tr><td colspan="7">Erreur lors du chargement des données.</td></tr>';
-        }
-    }
-}
-	    // Function to load and render bracket data
-	    async function loadBracketData() {
             try {
-                const response = await fetch(bracketDataUrl);
-                if (!response.ok) {
-                    throw new Error('Failed to load bracket data');
-                }
-                const data = await response.json();
-                renderBracket(data);
+                // Load team data
+                const teamResponse = await fetch(dataUrl);
+                if (!teamResponse.ok) throw new Error('Erreur lors du chargement des données des équipes');
+                const teamData = await teamResponse.json();
+                
+                // Load player data
+                const playerResponse = await fetch(playerUrl);
+                if (!playerResponse.ok) throw new Error('Erreur lors du chargement des données des joueurs');
+                const playerData = await playerResponse.json();
+                
+                renderTeams(teamData.teams);
+                renderStandings(teamData.teams);
+                renderPlayerStats(playerData.player);
+                
+                // Load bracket data
+                const bracketResponse = await fetch(bracketDataUrl);
+                if (!bracketResponse.ok) throw new Error('Erreur lors du chargement des données du bracket');
+                const bracketData = await bracketResponse.json();
+                renderBracket(bracketData);
+                
             } catch (error) {
-                console.error('Error loading bracket data:', error);
-                document.getElementById('bracket-container').innerHTML = 
-                    '<p>Error loading bracket data. Please try again later.</p>';
+                console.error('Erreur:', error);
+                // Fallback to demo data if files not found
+                if (error.message.includes('404')) {
+                    const demoData = getDemoData();
+                    renderTeams(demoData.teams);
+                    renderStandings(demoData.teams);
+                    renderPlayerStats(demoData.playerStats);
+                } else {
+                    document.getElementById('team-container').innerHTML = '<p>Erreur lors du chargement des données. Veuillez réessayer plus tard.</p>';
+                    document.getElementById('standings-body').innerHTML = '<tr><td colspan="11">Erreur lors du chargement des données.</td></tr>';
+                    document.getElementById('player-stats-body').innerHTML = '<tr><td colspan="12">Erreur lors du chargement des données.</td></tr>';
+                }
             }
         }
 
-	     async function loadPlayerData() {
-            try {
-                const response = await fetch(playerUrl);
-                if (!response.ok) {
-                    throw new Error('Failed to load players data');
-                }
-                const data = await response.json();
-                renderPlayer(data);
-            } catch (error) {
-                console.error('Error loading bracket data:', error);
-                document.getElementById('player-container').innerHTML = 
-                    '<p>Error loading bracket data. Please try again later.</p>';
-            }
+        // Fonction pour obtenir des données de démonstration si les fichiers JSON n'existent pas encore
+        function getDemoData() {
+            return {
+                teams: [
+                    {
+                        name: "Équipe Rouge",
+                        formation: "1-2-3",
+                        players: [
+                            { name: "Pierre Dubois", position: "GK", nation: "FR" },
+                            { name: "Jean Martin", position: "DF", nation: "FR" },
+                            { name: "Lucas Bernard", position: "DF", nation: "BE" },
+                            { name: "Mathieu Robert", position: "FW", nation: "CH" },
+                            { name: "Thomas Petit", position: "FW", nation: "LU" },
+                            { name: "Alexandre Durand", position: "FW", nation: "FR" }
+                        ],
+                        results: {
+                            "M1": 0,
+                            "M2": 0,
+                            "M3": 3,
+                            "F32": 3,
+                            "F16": 2,
+                            "F8": 0,
+                            "F4": 0,
+                            "Final": 0
+                        }
+                    }
+                ],
+                playerStats: [
+                    {
+                        name: "Alexandre Durand",
+                        nation: "France",
+                        position: "FW",
+                        matches: {
+                            "M1": 12,
+                            "M2": 0,
+                            "M3": 0,
+                            "F32": 0,
+                            "F16": 0,
+                            "F8": 0,
+                            "F4": 0,
+                            "Final": 0
+                        }
+                    }
+                ]
+            };
         }
-	// Function to find team by ID
+
+        // Fonction pour afficher les équipes avec le terrain de football
+        function renderTeams(teams) {
+            const teamContainer = document.getElementById('team-container');
+            teamContainer.innerHTML = '';
+
+            teams.forEach((team, teamIndex) => {
+                const teamCard = document.createElement('div');
+                teamCard.className = 'team-card';
+
+                // Vérifier si la formation est valide (1-2-3 ou 1-3-2)
+                let formation = team.formation;
+                if (formation !== "1-2-3" && formation !== "1-3-2") {
+                    formation = "1-2-3"; // Formation par défaut si invalide
+                }
+
+                // Créer la vue liste des joueurs
+                let playersListHtml = '';
+                team.players.forEach(player => {
+                    const isGoalkeeper = player.position === 'GK';
+                    const positionName = isGoalkeeper ? 'Gardien' : 
+                                        player.position === 'DF' ? 'Défenseur' : 'Attaquant';
+                    playersListHtml += `
+                        <div class="player ${isGoalkeeper ? 'goalkeeper' : ''}">
+                            ${player.name} (${positionName}, ${player.nation})
+                        </div>
+                    `;
+                });
+
+                // Créer le HTML pour l'équipe avec les deux vues
+                teamCard.innerHTML = `
+                    <h3>${team.name}</h3>
+                    <div class="view-toggle">
+                        <button id="field-btn-${teamIndex}" class="view-btn active" onclick="toggleView(${teamIndex}, 'field')">Vue Terrain</button>
+                        <button id="list-btn-${teamIndex}" class="view-btn" onclick="toggleView(${teamIndex}, 'list')">Vue Liste</button>
+                    </div>
+                    
+                    <div class="team-content">
+                        <div id="field-view-${teamIndex}" class="field-view">
+                            <div class="soccer-field">
+                                <!-- Lignes du terrain -->
+                                <div class="halfway-line"></div>
+                                <div class="center-circle"></div>
+                                <div class="center-spot"></div>
+                                <div class="penalty-box-left"></div>
+                                <div class="penalty-box-right"></div>
+                                <div class="goal-box-left"></div>
+                                <div class="goal-box-right"></div>
+                                <div class="goal-left"></div>
+                                <div class="goal-right"></div>
+                            </div>
+                        </div>
+                        
+                        <div id="list-view-${teamIndex}" class="list-view" style="display: none;">
+                            <div class="player-list">
+                                ${playersListHtml}
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                teamContainer.appendChild(teamCard);
+
+                // Ajouter les joueurs sur le terrain
+                const soccerField = teamCard.querySelector('.soccer-field');
+                placePlayersOnField(team.players, soccerField, formation);
+            });
+        }
+
+        // Fonction pour placer les joueurs sur le terrain selon la formation
+        function placePlayersOnField(players, fieldElement, formation) {
+            // Positions prédéfinies basées sur la formation 
+            let positionMapping;
+            
+            if (formation === "1-2-3") {
+                // Formation 1-2-3 (1 gardien, 2 défenseurs, 3 attaquants)
+                positionMapping = {
+                    'GK': { x: 15, y: 50 },    // Gardien
+                    'DF1': { x: 35, y: 25 },   // Défenseur gauche
+                    'DF2': { x: 35, y: 60 },   // Défenseur droit
+                    'FW1': { x: 65, y: 20 },   // Attaquant gauche
+                    'FW2': { x: 65, y: 45 },   // Attaquant central
+                    'FW3': { x: 65, y: 70 }    // Attaquant droit
+                };
+            } else {
+                // Formation 1-3-2 (1 gardien, 3 défenseurs, 2 attaquants)
+                positionMapping = {
+                    'GK': { x: 15, y: 50 },    // Gardien
+                    'DF1': { x: 35, y: 20 },   // Défenseur gauche
+                    'DF2': { x: 35, y: 45 },   // Défenseur central
+                    'DF3': { x: 35, y: 70 },   // Défenseur droit
+                    'FW1': { x: 65, y: 25 },   // Attaquant gauche
+                    'FW2': { x: 65, y: 60 }    // Attaquant droit
+                };
+            }
+            
+            // Trier les joueurs par position (GK, puis DF, puis FW)
+            const sortedPlayers = [...players].sort((a, b) => {
+                const posOrder = { 'GK': 0, 'DF': 1, 'FW': 2 };
+                return posOrder[a.position] - posOrder[b.position];
+            });
+            
+            // Compter les défenseurs et attaquants pour le placement
+            let dfCount = 0;
+            let fwCount = 0;
+            
+            sortedPlayers.forEach(player => {
+                const playerDot = document.createElement('div');
+                playerDot.className = `player-dot position-${player.position}`;
+                
+                // Déterminer la position sur le terrain
+                let position;
+                
+                if (player.position === 'GK') {
+                    position = positionMapping['GK'];
+                } else if (player.position === 'DF') {
+                    dfCount++;
+                    const posKey = `DF${dfCount}`;
+                    position = positionMapping[posKey] || positionMapping['DF1']; // Fallback
+                } else if (player.position === 'FW') {
+                    fwCount++;
+                    const posKey = `FW${fwCount}`;
+                    position = positionMapping[posKey] || positionMapping['FW1']; // Fallback
+                } else {
+                    // Position par défaut au milieu
+                    position = { x: 50, y: 50 };
+                }
+                
+                // Positionner le joueur
+                playerDot.style.left = `${position.x}%`;
+                playerDot.style.top = `${position.y}%`;
+                               
+                // Ajouter le nom du joueur en dessous
+                const playerName = document.createElement('div');
+                playerName.className = 'player-name';
+                playerName.textContent = player.name;
+                playerName.style.left = `${position.x}%`;
+                playerName.style.top = `${position.y}%`;
+                
+                fieldElement.appendChild(playerDot);
+                fieldElement.appendChild(playerName);
+            });
+        }
+
+        // Fonction pour afficher le classement
+        function renderStandings(standings) {
+            const standingsBody = document.getElementById('standings-body');
+            standingsBody.innerHTML = '';
+
+            // Trier par points totaux (décroissant)
+            const sortedStandings = [...standings].sort((a, b) => {
+                const totalPointsA = (a.results.M1 || 0) + (a.results.M2 || 0) + (a.results.M3 || 0) + 
+                                    (a.results.F32 || 0) + (a.results.F16 || 0) + (a.results.F8 || 0) + 
+                                    (a.results.F4 || 0) + (a.results.Final || 0);
+                const totalPointsB = (b.results.M1 || 0) + (b.results.M2 || 0) + (b.results.M3 || 0) + 
+                                    (b.results.F32 || 0) + (b.results.F16 || 0) + (b.results.F8 || 0) + 
+                                    (b.results.F4 || 0) + (b.results.Final || 0);
+                return totalPointsB - totalPointsA;
+            });
+
+            sortedStandings.forEach((team, index) => {
+                const row = document.createElement('tr');
+                const totalPoints = (team.results.M1 || 0) + (team.results.M2 || 0) + (team.results.M3 || 0) + 
+                                   (team.results.F32 || 0) + (team.results.F16 || 0) + (team.results.F8 || 0) + 
+                                   (team.results.F4 || 0) + (team.results.Final || 0);
+
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${team.name}</td>
+                    <td>${team.results.M1 || 0}</td>
+                    <td>${team.results.M2 || 0}</td>
+                    <td>${team.results.M3 || 0}</td>
+                    <td>${team.results.F32 || 0}</td>
+                    <td>${team.results.F16 || 0}</td>
+                    <td>${team.results.F8 || 0}</td>
+                    <td>${team.results.F4 || 0}</td>
+                    <td>${team.results.Final || 0}</td>
+                    <td><strong>${totalPoints}</strong></td>
+                `;
+                standingsBody.appendChild(row);
+            });
+        }
+
+        // Fonction pour afficher le bracket
+        function renderBracket(tournamentData) {
+            const container = document.getElementById('bracket-container');
+            const titleElement = document.getElementById('bracket-title');
+            
+            // Set tournament title
+            titleElement.textContent = tournamentData.tournamentName || 'Tournament Bracket';
+            
+            container.innerHTML = '';
+            
+            // Create rounds in order
+            const rounds = [
+                { 
+                    name: "1/8", 
+                    class: "bracket-round-16",
+                    matches: tournamentData.bracket.roundOf16 
+                },
+                { 
+                    name: "1/4", 
+                    class: "bracket-round-8",
+                    matches: tournamentData.bracket.quarterFinals 
+                },
+                { 
+                    name: "1/2", 
+                    class: "bracket-round-4",
+                    matches: tournamentData.bracket.semiFinals 
+                },
+                { 
+                    name: "FINAL", 
+                    class: "bracket-round-2 bracket-final",
+                    matches: [tournamentData.bracket.final] 
+                }
+            ];
+            
+            rounds.forEach(round => {
+                if (!round.matches || round.matches.length === 0) return;
+                
+                const roundDiv = document.createElement('div');
+                roundDiv.className = `bracket-round ${round.class}`;
+                
+                const titleDiv = document.createElement('div');
+                titleDiv.className = 'bracket-round-title';
+                titleDiv.textContent = round.name;
+                roundDiv.appendChild(titleDiv);
+                
+                round.matches.forEach(match => {
+                    if (!match) return;
+                    
+                    const matchDiv = document.createElement('div');
+                    matchDiv.className = 'bracket-match';
+                    
+                    const team1 = findTeamById(tournamentData.teams, match.team1Id);
+                    const team2 = findTeamById(tournamentData.teams, match.team2Id);
+                    
+                    const topTeam = document.createElement('div');
+                    topTeam.className = `bracket-team top ${match.team1Id === match.winnerId ? 'winner' : ''}`;
+                    topTeam.innerHTML = `
+                        <span>${team1.shortName}</span>
+                        ${match.score1 !== undefined ? 
+                            `<span class="bracket-score">${match.score1}</span>` : ''
+                        }
+                    `;
+                    
+                    const bottomTeam = document.createElement('div');
+                    bottomTeam.className = `bracket-team bottom ${match.team2Id === match.winnerId ? 'winner' : ''}`;
+                    bottomTeam.innerHTML = `
+                        <span>${team2.shortName}</span>
+                        ${match.score2 !== undefined ? 
+                            `<span class="bracket-score">${match.score2}</span>` : ''
+                        }
+                    `;
+                    
+                    // Add match date if available
+                    if (match.date) {
+                        const dateDiv = document.createElement('div');
+                        dateDiv.className = 'match-date';
+                        dateDiv.textContent = match.date;
+                        matchDiv.appendChild(dateDiv);
+                    }
+                    
+                    matchDiv.appendChild(topTeam);
+                    matchDiv.appendChild(bottomTeam);            
+                    roundDiv.appendChild(matchDiv);
+                });
+                
+                container.appendChild(roundDiv);
+            });
+        }
+
+        // Function to find team by ID
         function findTeamById(teams, id) {
             return teams.find(team => team.id === id) || { name: 'Unknown Team', shortName: 'UNK' };
         }
-	    
-        // Fonction pour obtenir des données de démonstration si le fichier data.json n'existe pas encore
-
-        function getDemoData() {
-    return {
-        teams: [
-            {
-                name: "Équipe Rouge",
-                formation: "1-2-3",
-                players: [
-                    { name: "Pierre Dubois", position: "GK", nation: "FR" },
-                    { name: "Jean Martin", position: "DF", nation: "FR" },
-                    { name: "Lucas Bernard", position: "DF", nation: "BE" },
-                    { name: "Mathieu Robert", position: "FW", nation: "CH" },
-                    { name: "Thomas Petit", position: "FW", nation: "LU" },
-                    { name: "Alexandre Durand", position: "FW", nation: "FR" }
-                ],
-                 "results": {
-                "M1": 0,
-                "M2": 0,
-                "M3": 3,
-                "F32": 3,
-                "F16": 2,
-                "F8":0,
-                "F4":0,
-                "Final":0
-            }
-            },
-            {
-                name: "Équipe Bleue",
-                formation: "1-3-2",
-                players: [
-                    { name: "Paul Moreau", position: "GK", nation: "BE" },
-                    { name: "Nicolas Leroy", position: "DF", nation: "CH" },
-                    { name: "Julien Simon", position: "DF", nation: "FR" },
-                    { name: "Raphaël Fournier", position: "DF", nation: "LU" },
-                    { name: "Olivier Michel", position: "FW", nation: "FR" },
-                    { name: "Éric Garcia", position: "FW", nation: "ES" }
-                ],
-                 "results": {
-                "M1": 0,
-                "M2": 0,
-                "M3": 3,
-                "F32": 3,
-                "F16": 2,
-                "F8":0,
-                "F4":0,
-                "Final":0
-            }
-            }
-        ],
-        playerStats: [
-            {
-                name: "Alexandre Durand",
-                team: "Équipe Rouge",
-                goals: 12,
-                assists: 5,
-                matches: 10,
-                yellowCards: 1,
-                redCards: 0
-            },
-            {
-                name: "Olivier Michel",
-                team: "Équipe Bleue",
-                goals: 10,
-                assists: 3,
-                matches: 10,
-                yellowCards: 2,
-                redCards: 0
-            }
-        ]
-    };
-}
-
-
 
         // Fonction pour afficher les équipes avec le terrain de football
 
@@ -1367,7 +1565,5 @@ document.addEventListener('DOMContentLoaded', () => {
         document.addEventListener('DOMContentLoaded', loadData);
 
     </script>
-
 </body>
-
 </html>
