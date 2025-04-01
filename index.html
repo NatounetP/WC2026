@@ -664,7 +664,9 @@
     <script>
 	document.addEventListener('DOMContentLoaded', () => {
 		firebase.initializeApp(firebaseConfig);
-    loadData(); // Single function to load all data
+   	loadData(); // Single function to load all data
+	loadPlayerData(); // Now loads from Firestore
+  	loadBracketData();
 });
 	
         // Fonction pour gérer les onglets
@@ -1512,7 +1514,7 @@ function calculateTotalPoints(matches) {
 
         // Charger les données au chargement de la page
 
-        document.addEventListener('DOMContentLoaded', loadData);
+        
 const firebaseConfig = { apiKey: "AIzaSyC3zpS_NT8sHN4j0upcAd8jmpfhsgXtdRw",
 
   authDomain: "paris-entre-amis-598e9.firebaseapp.com",
@@ -1527,7 +1529,8 @@ const firebaseConfig = { apiKey: "AIzaSyC3zpS_NT8sHN4j0upcAd8jmpfhsgXtdRw",
  };
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
-	    
+
+	document.addEventListener('DOMContentLoaded', loadData);
 </script>
 </body>
 </html>
