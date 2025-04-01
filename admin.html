@@ -638,10 +638,67 @@
 
         // Auto-fill all relevant stats
         function autoFillAll() {
-            autoFillWinner();
-            autoFillCleanSheets();
-            alert("Toutes les statistiques ont été remplies automatiquement");
-        }
+  const team1Score = parseInt(elements.team1Score.value) || 0;
+  const team2Score = parseInt(elements.team2Score.value) || 0;
+  const team1ShotsReceived = parseInt(document.getElementById('team1-shots-received').value) || 0;
+  const team2ShotsReceived = parseInt(document.getElementById('team2-shots-received').value) || 0;
+
+  if (!elements.team1Select.value || !elements.team2Select.value) {
+    alert("Please select both teams first!");
+    return;
+  }
+
+  // Determine winner and goal difference
+  const winnerNation = team1Score > team2Score ? elements.team1Select.value :
+                     team2Score > team1Score ? elements.team2Select.value : null;
+  const goalDiff = Math.abs(team1Score - team2Score);
+
+  // Process all player rows
+  const rows = elements.playersBody.querySelectorAll('tr');
+  rows.forEach(row => {
+    const playerTeam = row.dataset.teamNation;
+    const position = row.dataset.position;
+    const isTeam1Player = playerTeam === elements.team1Select.value;
+
+    // Get all input elements
+    const victoryCheckbox = row.querySelector('.victory');
+    const bigWinCheckbox = row.querySelector('.big-win');
+    const cleanSheetCheckbox = row.querySelector('.clean-sheet');
+    const shotsConcededWinCheckbox = row.querySelector('.shots-conceded-win');
+
+    // --- Auto-fill logic ---
+    
+    // 1. Victory & Big Win (+4 goal difference)
+    if (winnerNation) {
+      victoryCheckbox.checked = (playerTeam === winnerNation);
+      bigWinCheckbox.checked = (playerTeam === winnerNation && goalDiff >= 4);
+    } else {
+      victoryCheckbox.checked = false;
+      bigWinCheckbox.checked = false;
+    }
+
+    // 2. Clean Sheet (GK and DF only)
+    if (position === "GK" || position === "DF") {
+      const opponentScore = isTeam1Player ? team2Score : team1Score;
+      cleanSheetCheckbox.checked = (opponentScore === 0);
+    } else {
+      cleanSheetCheckbox.checked = false;
+    }
+
+    // 3. Shots Conceded Win (GK only)
+    if (position === "GK") {
+      const shotsReceived = isTeam1Player ? team1ShotsReceived : team2ShotsReceived;
+      shotsConcededWinCheckbox.checked = (victoryCheckbox.checked && shotsReceived >= 10);
+    } else {
+      shotsConcededWinCheckbox.checked = false;
+    }
+
+    // Update points immediately
+    updatePlayerPoints(row);
+  });
+
+  alert("All stats auto-filled successfully!");
+}
 
         // Reset all player inputs
         function resetPlayerInputs() {
