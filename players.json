@@ -1,4 +1,20 @@
 {
+    "teams": [
+    {
+      "nation": "France",
+      "players": [
+        {"name": "Kylian Mbappé", "position": "FW"},
+        {"name": "Hugo Lloris", "position": "GK"}
+      ]
+    },
+    {
+      "nation": "Belgique",
+      "players": [
+        {"name": "Kevin De Bruyne", "position": "FW"},
+        {"name": "Romelu Lukaku", "position": "FW"}
+      ]
+    }
+  ],
     "playerStats": [
         {
             "name": "Alexandre Durand",
