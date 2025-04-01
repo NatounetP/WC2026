@@ -704,53 +704,32 @@
 
         // Fonction pour charger les données depuis les fichiers externes
         async function loadData() {
-    const loadingElements = document.querySelectorAll('.loading');
-    
     try {
-        // Show loading indicators
-        loadingElements.forEach(el => el.style.display = 'block');
-
-        // Fetch all data in parallel
-        const [dataResponse, playerResponse, bracketResponse] = await Promise.all([
-            fetch(dataUrl),
-            fetch(playerUrl),
-            fetch(bracketDataUrl)
-        ]);
-
-        // Handle responses
-        if (!dataResponse.ok || !playerResponse.ok || !bracketResponse.ok) {
-            throw new Error('Failed to load one or more data sources');
+        // Add timestamp to prevent caching issues during development
+        const timestamp = new Date().getTime();
+        const response = await fetch(`${dataUrl}?t=${timestamp}`);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
-
-        const [data, playerData, bracketData] = await Promise.all([
-            dataResponse.json(),
-            playerResponse.json(),
-            bracketResponse.json()
-        ]);
-
-        // Hide loading indicators
-        loadingElements.forEach(el => el.style.display = 'none');
-
-        // Render content
+        
+        const data = await response.json();
+        console.log("Data loaded successfully:", data); // Debug log
+        
         renderTeams(data.teams);
         renderStandings(data.teams);
-        renderPlayerStats(playerData);
-        renderBracket(bracketData);
-
-    } catch (error) {
-        console.error('Error:', error);
-        loadingElements.forEach(el => {
-            el.style.display = 'none';
-            el.parentElement.innerHTML = `<p class="error">Error loading data: ${error.message}</p>`;
-        });
+        renderPlayerStats(data.playerStats || []); // Add fallback
         
-        // Load demo data if available
+    } catch (error) {
+        console.error('Error loading data:', error);
+        document.getElementById('team-container').innerHTML = `
+            <p class="error">Error loading data: ${error.message}</p>
+        `;
+        // Load demo data as fallback
         const demoData = getDemoData();
-        if (demoData) {
-            renderTeams(demoData.teams);
-            renderStandings(demoData.teams);
-            renderPlayerStats(demoData.playerStats || { playerStats: [] });
-        }
+        renderTeams(demoData.teams);
+        renderStandings(demoData.teams);
+        renderPlayerStats(demoData.playerStats);
     }
 }
 
