@@ -135,6 +135,19 @@
             padding: 20px;
             color: #666;
         }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-left: 10px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
         @media (max-width: 600px) {
             .match-info {
                 flex-direction: column;
@@ -166,14 +179,7 @@
                 <div class="team-name" id="team1-name">Équipe 1</div>
                 <select class="team-selector" id="team1-select">
                     <option value="">Sélectionner une équipe</option>
-                    <option value="France">France</option>
-                    <option value="Belgique">Belgique</option>
-                    <option value="Suisse">Suisse</option>
-                    <option value="Italie">Italie</option>
-                    <option value="Espagne">Espagne</option>
-                    <option value="Allemagne">Allemagne</option>
-                    <option value="Brésil">Brésil</option>
-                    <option value="Argentine">Argentine</option>
+                    <!-- Teams will be loaded dynamically -->
                 </select>
                 <input type="number" class="score-input" id="team1-score" min="0" value="0">
             </div>
@@ -184,36 +190,27 @@
                 <div class="team-name" id="team2-name">Équipe 2</div>
                 <select class="team-selector" id="team2-select">
                     <option value="">Sélectionner une équipe</option>
-                    <option value="France">France</option>
-                    <option value="Belgique">Belgique</option>
-                    <option value="Suisse">Suisse</option>
-                    <option value="Italie">Italie</option>
-                    <option value="Espagne">Espagne</option>
-                    <option value="Allemagne">Allemagne</option>
-                    <option value="Brésil">Brésil</option>
-                    <option value="Argentine">Argentine</option>
+                    <!-- Teams will be loaded dynamically -->
                 </select>
                 <input type="number" class="score-input" id="team2-score" min="0" value="0">
             </div>
         </div>
         
-        <!-- Add this button to the auto-fill section -->
-<div class="auto-fill-section">
-    <h3>Remplissage Automatique</h3>
-    <button class="auto-fill-btn" id="auto-fill-all">Remplir Tout Automatiquement</button>
-    <button class="auto-fill-btn" id="auto-fill-winner">Remplir victoires</button>
-    <button class="auto-fill-btn" id="auto-fill-clean-sheets">Remplir clean sheets</button>
-    <button class="auto-fill-btn" id="auto-fill-reset">Réinitialiser</button>
-    
-    <!-- Add shots received input -->
-    <div style="margin-top: 15px;">
-        <label for="team1-shots-received">Tirs reçus par Équipe 1:</label>
-        <input type="number" id="team1-shots-received" min="0" value="0" style="width: 60px; margin-right: 15px;">
-        
-        <label for="team2-shots-received">Tirs reçus par Équipe 2:</label>
-        <input type="number" id="team2-shots-received" min="0" value="0" style="width: 60px;">
-    </div>
-</div>
+        <div class="auto-fill-section">
+            <h3>Remplissage Automatique</h3>
+            <button class="auto-fill-btn" id="auto-fill-all">Remplir Tout Automatiquement</button>
+            <button class="auto-fill-btn" id="auto-fill-winner">Remplir victoires</button>
+            <button class="auto-fill-btn" id="auto-fill-clean-sheets">Remplir clean sheets</button>
+            <button class="auto-fill-btn" id="auto-fill-reset">Réinitialiser</button>
+            
+            <div style="margin-top: 15px;">
+                <label for="team1-shots-received">Tirs reçus par Équipe 1:</label>
+                <input type="number" id="team1-shots-received" min="0" value="0" style="width: 60px; margin-right: 15px;">
+                
+                <label for="team2-shots-received">Tirs reçus par Équipe 2:</label>
+                <input type="number" id="team2-shots-received" min="0" value="0" style="width: 60px;">
+            </div>
+        </div>
         
         <h2>Statistiques des Joueurs</h2>
         <table class="players-table" id="players-table">
@@ -242,10 +239,46 @@
             </tbody>
         </table>
         
-        <button class="save-btn" id="save-btn">Enregistrer les Résultats</button>
+        <button class="save-btn" id="save-btn">
+            Enregistrer les Résultats
+            <span class="loading" id="save-loading" style="display: none;"></span>
+        </button>
     </div>
 
     <script>
+        // Default data structure
+        const defaultData = {
+            teams: [
+                {
+                    nation: "France",
+                    players: [
+                        { name: "Kylian Mbappé", position: "FW" },
+                        { name: "Antoine Griezmann", position: "FW" },
+                        { name: "Hugo Lloris", position: "GK" },
+                        { name: "Raphaël Varane", position: "DF" }
+                    ]
+                },
+                {
+                    nation: "Belgique",
+                    players: [
+                        { name: "Kevin De Bruyne", position: "MF" },
+                        { name: "Romelu Lukaku", position: "FW" },
+                        { name: "Thibaut Courtois", position: "GK" }
+                    ]
+                },
+                {
+                    nation: "Brésil",
+                    players: [
+                        { name: "Neymar", position: "FW" },
+                        { name: "Vinícius Júnior", position: "FW" },
+                        { name: "Alisson", position: "GK" }
+                    ]
+                }
+            ],
+            playerStats: [],
+            bracket: {}
+        };
+
         // Data structure to hold tournament data
         let tournamentData = {
             teams: [],
@@ -283,7 +316,7 @@
                 'extraTimeGoal': 2,
                 'shotsConcededWin': 2
             },
-            'MF': { // Milieu (Midfielder) - Uses same as Offensif
+            'MF': { // Milieu (Midfielder)
                 'groupWin': 2,
                 'knockoutWin': 3,
                 'goal': 9,
@@ -323,68 +356,68 @@
             team1Score: document.getElementById('team1-score'),
             team2Score: document.getElementById('team2-score'),
             playersBody: document.getElementById('players-body'),
-            saveBtn: document.getElementById('save-btn')
+            saveBtn: document.getElementById('save-btn'),
+            saveLoading: document.getElementById('save-loading')
         };
 
         // Load teams data from data.json
         async function loadTeamsData() {
             try {
-            const response = await fetch('data.json');
-            if (!response.ok) throw new Error("File not found or server error");
-            const data = await response.json();
-            
-            // Merge with default data to ensure all required fields exist
-            tournamentData = {
-                teams: data.teams || defaultData.teams,
-                playerStats: data.playerStats || defaultData.playerStats,
-                bracket: data.bracket || defaultData.bracket
-            };
-            
-            console.log("Loaded teams:", tournamentData.teams);
-        } catch (fetchError) {
-            console.warn("Using default data (data.json not available):", fetchError);
-            tournamentData = defaultData;
+                const response = await fetch('players.json');
+                if (!response.ok) throw new Error("File not found or server error");
+                const data = await response.json();
+                
+                // Merge with default data to ensure all required fields exist
+                tournamentData = {
+                    teams: defaultData.teams, // Always use default teams structure
+                    playerStats: data.playerStats || defaultData.playerStats,
+                    bracket: data.bracket || defaultData.bracket
+                };
+                
+                console.log("Loaded teams:", tournamentData.teams);
+                console.log("Loaded player stats:", tournamentData.playerStats);
+            } catch (fetchError) {
+                console.warn("Using default data (players.json not available):", fetchError);
+                tournamentData = defaultData;
+            }
         }
-        }
 
-        updateTeamSelectors();
-        
-    } catch (error) {
-        console.error('Error initializing team data:', error);
-        alert("Erreur d'initialisation: " + error.message);
-    }
-}
-
-
+        // Update team selectors with available teams
         function updateTeamSelectors() {
-    // Get unique team names from loaded data
-    const uniqueTeams = [...new Set(tournamentData.teams.map(team => team.nation))];
-    
-    // Update both team selectors
-    [elements.team1Select, elements.team2Select].forEach(selector => {
-        // Save current selection
-        const currentValue = selector.value;
-        selector.innerHTML = '<option value="">Sélectionner une équipe</option>';
-        
-        // Add teams from loaded data
-        uniqueTeams.forEach(team => {
-            const option = document.createElement('option');
-            option.value = team;
-            option.textContent = team;
-            selector.appendChild(option);
-        });
-        
-        // Restore selection if still valid
-        if (currentValue && uniqueTeams.includes(currentValue)) {
-            selector.value = currentValue;
+            // Get unique team names from loaded data
+            const uniqueTeams = tournamentData.teams.map(team => team.nation);
+            
+            // Update both team selectors
+            [elements.team1Select, elements.team2Select].forEach(selector => {
+                // Save current selection
+                const currentValue = selector.value;
+                selector.innerHTML = '<option value="">Sélectionner une équipe</option>';
+                
+                // Add teams from loaded data
+                uniqueTeams.forEach(team => {
+                    const option = document.createElement('option');
+                    option.value = team;
+                    option.textContent = team;
+                    selector.appendChild(option);
+                });
+                
+                // Restore selection if still valid
+                if (currentValue && uniqueTeams.includes(currentValue)) {
+                    selector.value = currentValue;
+                }
+            });
         }
-    });
-}
 
         // Initialize the application
         async function init() {
-            await loadTeamsData();
-            setupEventListeners();
+            try {
+                await loadTeamsData();
+                updateTeamSelectors();
+                setupEventListeners();
+            } catch (error) {
+                console.error('Error initializing application:', error);
+                alert("Erreur d'initialisation: " + error.message);
+            }
         }
 
         // Setup all event listeners
@@ -407,6 +440,14 @@
             
             nameElement.textContent = selectElement.value || `Équipe ${teamPrefix === 'team1' ? '1' : '2'}`;
             
+            // Prevent selecting the same team for both sides
+            if (elements.team1Select.value && elements.team1Select.value === elements.team2Select.value) {
+                alert("Vous ne pouvez pas sélectionner la même équipe pour les deux côtés");
+                selectElement.value = "";
+                nameElement.textContent = `Équipe ${teamPrefix === 'team1' ? '1' : '2'}`;
+                return;
+            }
+            
             // Update player table if both teams are selected
             if (elements.team1Select.value && elements.team2Select.value) {
                 updatePlayerTable();
@@ -415,26 +456,23 @@
             }
         }
 
+        // Show message when no players are available
+        function showNoPlayersMessage() {
+            elements.playersBody.innerHTML = `
+                <tr>
+                    <td colspan="14" class="no-players-message">Sélectionnez deux équipes nationales pour afficher les joueurs</td>
+                </tr>
+            `;
+        }
+
         // Update player table based on selected teams
         function updatePlayerTable() {
             const team1Nation = elements.team1Select.value;
             const team2Nation = elements.team2Select.value;
 
-            // Filter players from all teams where nation matches selected nations
-            const team1Players = [];
-            const team2Players = [];
-            
-            tournamentData.teams.forEach(team => {
-                if (team.players) {
-                    team.players.forEach(player => {
-                        if (player.nation === team1Nation) {
-                            team1Players.push(player);
-                        } else if (player.nation === team2Nation) {
-                            team2Players.push(player);
-                        }
-                    });
-                }
-            });
+            // Find players for each team
+            const team1Players = tournamentData.teams.find(team => team.nation === team1Nation)?.players || [];
+            const team2Players = tournamentData.teams.find(team => team.nation === team2Nation)?.players || [];
 
             elements.playersBody.innerHTML = '';
 
@@ -456,6 +494,13 @@
         function addPlayerRow(player, teamNation) {
             const row = document.createElement('tr');
             
+            // Find existing stats for this player
+            const existingStats = tournamentData.playerStats.find(p => 
+                p.name === player.name && p.nation === teamNation);
+            
+            const round = elements.roundSelect.value;
+            const existingRoundStats = existingStats?.matches?.[round] || 0;
+            
             row.innerHTML = `
                 <td>${player.name}</td>
                 <td>${player.position}</td>
@@ -470,7 +515,7 @@
                 <td><input type="checkbox" class="checkbox-input shots-conceded-win"></td>
                 <td><input type="checkbox" class="checkbox-input yellow-card"></td>
                 <td><input type="checkbox" class="checkbox-input red-card"></td>
-                <td class="total-points">0</td>
+                <td class="total-points">${existingRoundStats}</td>
             `;
             
             // Store team nation and position as data attributes
@@ -484,9 +529,6 @@
             });
             
             elements.playersBody.appendChild(row);
-            
-            // Calculate initial points
-            updatePlayerPoints(row);
         }
 
         // Calculate and update player points based on position
@@ -584,6 +626,8 @@
         function autoFillCleanSheets() {
             const team1Score = parseInt(elements.team1Score.value) || 0;
             const team2Score = parseInt(elements.team2Score.value) || 0;
+            const team1ShotsReceived = parseInt(document.getElementById('team1-shots-received').value) || 0;
+            const team2ShotsReceived = parseInt(document.getElementById('team2-shots-received').value) || 0;
             
             if (!elements.team1Select.value || !elements.team2Select.value) {
                 alert("Veuillez sélectionner deux équipes");
@@ -592,7 +636,7 @@
             
             const rows = elements.playersBody.querySelectorAll('tr');
             rows.forEach(row => {
-                const position = row.cells[1].textContent;
+                const position = row.dataset.position;
                 const playerTeam = row.dataset.teamNation;
                 const cleanSheetCheckbox = row.querySelector('.clean-sheet');
                 const shotsConcededWinCheckbox = row.querySelector('.shots-conceded-win');
@@ -601,15 +645,14 @@
                 if (position === "GK" || position === "DF") {
                     const isTeam1Player = playerTeam === elements.team1Select.value;
                     const opponentScore = isTeam1Player ? team2Score : team1Score;
+                    const shotsReceived = isTeam1Player ? team1ShotsReceived : team2ShotsReceived;
                     
                     cleanSheetCheckbox.checked = opponentScore === 0;
                     
                     // For +10 shots conceded but still won
                     if (position === "GK") {
-                        // This would need actual shot data - here we just base it on score difference
-                        shotsConcededWinCheckbox.checked = opponentScore === 0 && isTeam1Player ? 
-                                                         (team1Score - team2Score >= 1) : 
-                                                         (team2Score - team1Score >= 1);
+                        const victoryCheckbox = row.querySelector('.victory');
+                        shotsConcededWinCheckbox.checked = victoryCheckbox.checked && shotsReceived >= 10;
                     }
                 } else {
                     cleanSheetCheckbox.checked = false;
@@ -623,70 +666,19 @@
             alert("Clean sheets et statistiques défensives remplies automatiquement");
         }
 
-
+        // Auto-fill all relevant stats
         function autoFillAll() {
-    const team1Score = parseInt(elements.team1Score.value) || 0;
-    const team2Score = parseInt(elements.team2Score.value) || 0;
-    const team1ShotsReceived = parseInt(document.getElementById('team1-shots-received').value) || 0;
-    const team2ShotsReceived = parseInt(document.getElementById('team2-shots-received').value) || 0;
-    
-    if (!elements.team1Select.value || !elements.team2Select.value) {
-        alert("Veuillez sélectionner deux équipes");
-        return;
-    }
-    
-    const winnerNation = team1Score > team2Score ? elements.team1Select.value :
-                        team2Score > team1Score ? elements.team2Select.value : null;
-    
-    const goalDiff = winnerNation ? 
-                   (winnerNation === elements.team1Select.value ? 
-                    team1Score - team2Score : team2Score - team1Score) : 0;
-    
-    const rows = elements.playersBody.querySelectorAll('tr');
-    rows.forEach(row => {
-        const playerTeam = row.dataset.teamNation;
-        const position = row.dataset.position;
-        
-        // Victory and big win
-        const victoryCheckbox = row.querySelector('.victory');
-        const bigWinCheckbox = row.querySelector('.big-win');
-        
-        if (winnerNation) {
-            victoryCheckbox.checked = playerTeam === winnerNation;
-            bigWinCheckbox.checked = playerTeam === winnerNation && goalDiff >= 4;
-        } else {
-            victoryCheckbox.checked = false;
-            bigWinCheckbox.checked = false;
+            autoFillWinner();
+            autoFillCleanSheets();
+            alert("Toutes les statistiques ont été remplies automatiquement");
         }
-        
-        // Clean sheet (only for GK and DF)
-        const cleanSheetCheckbox = row.querySelector('.clean-sheet');
-        if (position === "GK" || position === "DF") {
-            const isTeam1Player = playerTeam === elements.team1Select.value;
-            const opponentScore = isTeam1Player ? team2Score : team1Score;
-            cleanSheetCheckbox.checked = opponentScore === 0;
-        } else {
-            cleanSheetCheckbox.checked = false;
-        }
-        
-        // +10 shots conceded but still won (only for GK)
-        const shotsConcededWinCheckbox = row.querySelector('.shots-conceded-win');
-        if (position === "GK" || position === "DF" && winnerNation === playerTeam) {
-            const shotsReceived = playerTeam === elements.team1Select.value ? 
-                                 team1ShotsReceived : team2ShotsReceived;
-            shotsConcededWinCheckbox.checked = shotsReceived >= 10;
-        } else {
-            shotsConcededWinCheckbox.checked = false;
-        }
-        
-        // Update points after changes
-        updatePlayerPoints(row);
-    });
-    
-    alert("Toutes les statistiques ont été remplies automatiquement");
-}
+
         // Reset all player inputs
         function resetPlayerInputs() {
+            if (!confirm("Êtes-vous sûr de vouloir réinitialiser toutes les statistiques des joueurs?")) {
+                return;
+            }
+            
             const inputs = elements.playersBody.querySelectorAll('input');
             inputs.forEach(input => {
                 if (input.type === 'number') {
@@ -701,79 +693,85 @@
             rows.forEach(row => updatePlayerPoints(row));
         }
 
-        // Save results (simulated - would need server-side in production)
-        // Modified saveResults function
-// Modified saveResults function with proper data merging
-async function saveResults() {
-    // Validate inputs
-    if (!elements.team1Select.value || !elements.team2Select.value) {
-        alert("Veuillez sélectionner deux équipes");
-        return;
-    }
-
-    const round = elements.roundSelect.value;
-    const team1Nation = elements.team1Select.value;
-    const team2Nation = elements.team2Select.value;
-
-    // Collect player points from UI
-    const currentMatchPoints = [];
-    const rows = elements.playersBody.querySelectorAll('tr');
-    rows.forEach(row => {
-        if (row.cells.length > 1) { // Skip header/message rows
-            currentMatchPoints.push({
-                name: row.cells[0].textContent,
-                nation: row.dataset.teamNation,
-                position: row.cells[1].textContent,
-                points: parseInt(row.querySelector('.total-points').textContent) || 0
-            });
-        }
-    });
-
-    try {
-        // Load current data
-        const response = await fetch('data.json');
-        let data = await response.json();
-
-        // Update playerStats (main structure for points)
-        if (!data.playerStats) data.playerStats = [];
-        
-        currentMatchPoints.forEach(player => {
-            // Find existing player stats or initialize
-            let playerStats = data.playerStats.find(p => 
-                p.name === player.name && p.nation === player.nation);
-            
-            if (!playerStats) {
-                playerStats = {
-                    name: player.name,
-                    nation: player.nation,
-                    position: player.position,
-                    matches: {}
-                };
-                data.playerStats.push(playerStats);
+        // Save results to the JSON file
+        async function saveResults() {
+            // Validate inputs
+            if (!elements.team1Select.value || !elements.team2Select.value) {
+                alert("Veuillez sélectionner deux équipes");
+                return;
             }
 
-            // Initialize matches if doesn't exist
-            if (!playerStats.matches) playerStats.matches = {};
-            
-            // Update points for this round
-            playerStats.matches[round] = player.points;
-        });
+            if (!confirm("Êtes-vous sûr de vouloir enregistrer ces résultats? Cette action est irréversible.")) {
+                return;
+            }
 
-        // In production: Send updated data back to server
-        console.log('Updated data.json structure:', data);
-        
-        // Simulated success (replace with actual fetch PUT/POST)
-        alert(`Points enregistrés dans playerStats!\n\n` +
-              `Structure:\nplayerStats[n].matches["${round}"] = points`);
+            const round = elements.roundSelect.value;
+            const team1Nation = elements.team1Select.value;
+            const team2Nation = elements.team2Select.value;
 
-        // Update local data
-        tournamentData = data;
+            // Show loading indicator
+            elements.saveLoading.style.display = 'inline-block';
+            elements.saveBtn.disabled = true;
 
-    } catch (error) {
-        console.error('Error saving data:', error);
-        alert("Erreur lors de l'enregistrement: " + error.message);
-    }
-}
+            try {
+                // Collect player points from UI
+                const currentMatchPoints = [];
+                const rows = elements.playersBody.querySelectorAll('tr');
+                
+                rows.forEach(row => {
+                    if (row.cells.length > 1) { // Skip header/message rows
+                        currentMatchPoints.push({
+                            name: row.cells[0].textContent,
+                            nation: row.dataset.teamNation,
+                            position: row.cells[1].textContent,
+                            points: parseInt(row.querySelector('.total-points').textContent) || 0
+                        });
+                    }
+                });
+
+                // Create updated player stats
+                const updatedPlayerStats = [...tournamentData.playerStats];
+                
+                currentMatchPoints.forEach(player => {
+                    // Find existing player stats or create new
+                    let playerStats = updatedPlayerStats.find(p => 
+                        p.name === player.name && p.nation === player.nation);
+                    
+                    if (!playerStats) {
+                        playerStats = {
+                            name: player.name,
+                            nation: player.nation,
+                            position: player.position,
+                            matches: {}
+                        };
+                        updatedPlayerStats.push(playerStats);
+                    }
+
+                    // Initialize matches if doesn't exist
+                    if (!playerStats.matches) playerStats.matches = {};
+                    
+                    // Update points for this round
+                    playerStats.matches[round] = player.points;
+                });
+
+                // In a real application, you would send this to your server
+                // Here we'll just update the local data and simulate a save
+                tournamentData.playerStats = updatedPlayerStats;
+                
+                // Simulate server delay
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                alert("Résultats enregistrés avec succès!\n\n(Note: Dans un environnement réel, cette action enverrait les données au serveur)");
+                
+            } catch (error) {
+                console.error('Error saving data:', error);
+                alert("Erreur lors de l'enregistrement: " + error.message);
+            } finally {
+                // Hide loading indicator
+                elements.saveLoading.style.display = 'none';
+                elements.saveBtn.disabled = false;
+            }
+        }
 
         // Initialize the app when DOM is loaded
         document.addEventListener('DOMContentLoaded', init);
