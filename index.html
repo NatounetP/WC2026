@@ -660,6 +660,10 @@
     </div>
 
     <script>
+	document.addEventListener('DOMContentLoaded', () => {
+    loadData(); // Single function to load all data
+});
+	
         // Fonction pour gérer les onglets
         function openTab(tabName) {
             const tabContents = document.getElementsByClassName("tab-content");
