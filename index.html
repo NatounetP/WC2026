@@ -726,15 +726,15 @@
             <p class="error">Error loading data: ${error.message}</p>
         `;
         // Load demo data as fallback
-        const demoData = getDemoData();
-        renderTeams(demoData.teams);
-        renderStandings(demoData.teams);
-        renderPlayerStats(demoData.playerStats);
+        //const demoData = getDemoData();
+        //renderTeams(demoData.teams);
+        //renderStandings(demoData.teams);
+        //renderPlayerStats(demoData.playerStats);
     }
 }
 
         // Fonction pour obtenir des données de démonstration si les fichiers JSON n'existent pas encore
-        function getDemoData() {
+        /*function getDemoData() {
             return {
                 teams: [
                     {
@@ -778,7 +778,7 @@
                     }
                 ]
             };
-        }
+        }*/
 
         // Fonction pour afficher les équipes avec le terrain de football
         function renderTeams(teams) {
