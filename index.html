@@ -700,31 +700,52 @@
 
         // Fonction pour charger les données depuis les fichiers externes
         async function loadData() {
+    const loadingElements = document.querySelectorAll('.loading');
+    
     try {
-        // Load teams and standings
-        const response = await fetch(dataUrl);
-        if (!response.ok) throw new Error('Erreur lors du chargement des données');
-        const data = await response.json();
-        
-        // Load player stats
-        const playerResponse = await fetch(playerUrl);
-        if (!playerResponse.ok) throw new Error('Erreur lors du chargement des joueurs');
-        const playerData = await playerResponse.json();
+        // Show loading indicators
+        loadingElements.forEach(el => el.style.display = 'block');
 
+        // Fetch all data in parallel
+        const [dataResponse, playerResponse, bracketResponse] = await Promise.all([
+            fetch(dataUrl),
+            fetch(playerUrl),
+            fetch(bracketDataUrl)
+        ]);
+
+        // Handle responses
+        if (!dataResponse.ok || !playerResponse.ok || !bracketResponse.ok) {
+            throw new Error('Failed to load one or more data sources');
+        }
+
+        const [data, playerData, bracketData] = await Promise.all([
+            dataResponse.json(),
+            playerResponse.json(),
+            bracketResponse.json()
+        ]);
+
+        // Hide loading indicators
+        loadingElements.forEach(el => el.style.display = 'none');
+
+        // Render content
         renderTeams(data.teams);
         renderStandings(data.teams);
         renderPlayerStats(playerData);
+        renderBracket(bracketData);
+
     } catch (error) {
-        console.error('Erreur:', error);
-        if (error.message.includes('404')) {
-            const demoData = getDemoData();
+        console.error('Error:', error);
+        loadingElements.forEach(el => {
+            el.style.display = 'none';
+            el.parentElement.innerHTML = `<p class="error">Error loading data: ${error.message}</p>`;
+        });
+        
+        // Load demo data if available
+        const demoData = getDemoData();
+        if (demoData) {
             renderTeams(demoData.teams);
             renderStandings(demoData.teams);
             renderPlayerStats(demoData.playerStats || { playerStats: [] });
-        } else {
-            document.getElementById('team-container').innerHTML = '<p>Erreur lors du chargement des données. Veuillez réessayer plus tard.</p>';
-            document.getElementById('standings-body').innerHTML = '<tr><td colspan="7">Erreur lors du chargement des données.</td></tr>';
-            document.getElementById('player-stats-body').innerHTML = '<tr><td colspan="7">Erreur lors du chargement des données.</td></tr>';
         }
     }
 }
