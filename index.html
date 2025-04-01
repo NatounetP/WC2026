@@ -708,7 +708,6 @@
         // Add timestamp to prevent caching issues during development
         const timestamp = new Date().getTime();
         const response = await fetch(`${dataUrl}?t=${timestamp}`);
-	const response = await fetch(bracketDataUrl); // ICI
         
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -733,6 +732,23 @@
         //renderPlayerStats(demoData.playerStats);
     }
 }
+
+	    // Function to load and render bracket data
+	    async function loadBracketData() {
+            try {
+                const response = await fetch(bracketDataUrl);
+                if (!response.ok) {
+                    throw new Error('Failed to load bracket data');
+                }
+                const data = await response.json();
+                renderBracket(data);
+            } catch (error) {
+                console.error('Error loading bracket data:', error);
+                document.getElementById('bracket-container').innerHTML = 
+                    '<p>Error loading bracket data. Please try again later.</p>';
+            }
+        }
+
 
         // Fonction pour obtenir des données de démonstration si les fichiers JSON n'existent pas encore
         /*function getDemoData() {
