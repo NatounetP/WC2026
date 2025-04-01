@@ -199,8 +199,6 @@
         <div class="auto-fill-section">
             <h3>Remplissage Automatique</h3>
             <button class="auto-fill-btn" id="auto-fill-all">Remplir Tout Automatiquement</button>
-            <button class="auto-fill-btn" id="auto-fill-winner">Remplir victoires</button>
-            <button class="auto-fill-btn" id="auto-fill-clean-sheets">Remplir clean sheets</button>
             <button class="auto-fill-btn" id="auto-fill-reset">Réinitialiser</button>
             
             <div style="margin-top: 15px;">
@@ -398,8 +396,6 @@
             elements.team1Select.addEventListener('change', () => updateTeamDisplay('team1'));
             elements.team2Select.addEventListener('change', () => updateTeamDisplay('team2'));
             
-            document.getElementById('auto-fill-winner').addEventListener('click', autoFillWinner);
-            document.getElementById('auto-fill-clean-sheets').addEventListener('click', autoFillCleanSheets);
             document.getElementById('auto-fill-reset').addEventListener('click', resetPlayerInputs);
             document.getElementById('auto-fill-all').addEventListener('click', autoFillAll);
             
