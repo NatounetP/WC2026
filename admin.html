@@ -457,23 +457,20 @@
     return;
   }
 
-  // Find all players from both nations
-  const team1Players = tournamentData.teams
-    .find(team => team.nation === team1Nation)?.players || [];
-  
-  const team2Players = tournamentData.teams
-    .find(team => team.nation === team2Nation)?.players || [];
-
+            
+  // Clear existing rows
   elements.playersBody.innerHTML = '';
-
-  // Add players from both teams with their existing stats
-  [...team1Players, ...team2Players].forEach(player => {
-    addPlayerRow(player, player.nation);
+            
+  // Process both teams
+  [team1Nation, team2Nation].forEach(nation => {
+    const team = tournamentData.teams.find(t => t.nation === nation);
+    if (team && team.players) {
+      team.players.forEach(player => {
+        // Pass BOTH player object and nation explicitly
+        addPlayerRow({ ...player, nation }, nation); 
+      });
+    }
   });
-
-  if (team1Players.length === 0 && team2Players.length === 0) {
-    showNoPlayersMessage();
-  }
 }
         // Add a player row to the table
         function addPlayerRow(player, teamNation) {
