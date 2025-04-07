@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
     <title>Ligue de Football à 6</title>
     <style>
     body {
@@ -661,15 +661,26 @@
         </div>
     </div>
 
-    <script>
-	document.addEventListener('DOMContentLoaded', () => {
-		firebase.initializeApp(firebaseConfig);
-   	loadData(); // Single function to load all data
-	loadPlayerData(); // Now loads from Firestore
-  	loadBracketData();
-});
-	
-        // Fonction pour gérer les onglets
+     <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyC3zpS_NT8sHN4j0upcAd8jmpfhsgXtdRw",
+            authDomain: "paris-entre-amis-598e9.firebaseapp.com",
+            projectId: "paris-entre-amis-598e9",
+            storageBucket: "paris-entre-amis-598e9.firebasestorage.app",
+            messagingSenderId: "638642602040",
+            appId: "1:638642602040:web:0f7557f7d4923b6aec26cd"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadAllData();
+        });
+
+        // Function to handle tabs
         function openTab(tabName) {
             const tabContents = document.getElementsByClassName("tab-content");
             for (let i = 0; i < tabContents.length; i++) {
@@ -683,7 +694,7 @@
             event.currentTarget.classList.add("active");
         }
 
-        // Fonction pour basculer entre les vues (terrain/liste) pour chaque équipe
+        // Function to toggle between field/list views for each team
         function toggleView(teamId, viewType) {
             const fieldView = document.getElementById(`field-view-${teamId}`);
             const listView = document.getElementById(`list-view-${teamId}`);
@@ -702,140 +713,63 @@
             }
         }
 
-        // URL des fichiers JSON
-        const dataUrl = 'data.json';
-        const playerUrl = 'players.json';
-        const bracketDataUrl = 'bracket-data.json';
-
-        // Fonction pour charger les données depuis les fichiers externes
-        async function loadData() {
-    try {
-        // Add timestamp to prevent caching issues during development
-        const timestamp = new Date().getTime();
-        const response = await fetch(`${dataUrl}?t=${timestamp}`);
-        
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        console.log("Data loaded successfully:", data); // Debug log
-        
-        renderTeams(data.teams);
-        renderStandings(data.teams);
-        renderPlayerStats(data.playerStats || []); // Add fallback
-        
-    } catch (error) {
-        console.error('Error loading data:', error);
-        document.getElementById('team-container').innerHTML = `
-            <p class="error">Error loading data: ${error.message}</p>
-        `;
-        // Load demo data as fallback
-        //const demoData = getDemoData();
-        //renderTeams(demoData.teams);
-        //renderStandings(demoData.teams);
-        //renderPlayerStats(demoData.playerStats);
-    }
-}
-	    async function loadPlayerData() {
-    async function loadPlayerData() {
-  try {
-    const playerStatsBody = document.getElementById('player-stats-body');
-    playerStatsBody.innerHTML = '<tr><td colspan="12" class="loading">Loading player stats...</td></tr>';
-    
-    // Fetch from Firestore
-    const snapshot = await db.collection("players").get();
-    
-    if (snapshot.empty) {
-      playerStatsBody.innerHTML = '<tr><td colspan="12">No player data found</td></tr>';
-      return;
-    }
-    
-    // Process Firestore data
-    const playerStats = snapshot.docs.map(doc => {
-      const data = doc.data();
-      return {
-        name: data.name,
-        team: data.nation || 'Unknown', // Fallback if nation missing
-        position: data.position || 'FW', // Fallback if position missing
-        matches: data.matches || {} // Ensure matches exists
-      };
-    });
-    
-    renderPlayerStats(playerStats);
-  } catch (error) {
-    console.error("Firebase error:", error);
-    document.getElementById('player-stats-body').innerHTML = `
-      <tr><td colspan="12">Error loading stats: ${error.message}</td></tr>
-    `;
-  }
-}
-
-	    // Function to load and render bracket data
-	    async function loadBracketData() {
+        // Main function to load all data from Firestore
+        async function loadAllData() {
             try {
-                const response = await fetch(bracketDataUrl);
-                if (!response.ok) {
-                    throw new Error('Failed to load bracket data');
-                }
-                const data = await response.json();
-                renderBracket(data);
+                // Load teams data
+                const teamsSnapshot = await db.collection("teams").get();
+                const teams = teamsSnapshot.docs.map(doc => {
+                    const data = doc.data();
+                    return {
+                        id: doc.id,
+                        name: data.name,
+                        shortName: data.shortName || data.name.substring(0, 3).toUpperCase(),
+                        formation: data.formation || "1-2-3",
+                        players: data.players || [],
+                        results: data.results || {}
+                    };
+                });
+
+                // Load bracket data
+                const bracketDoc = await db.collection("tournament").doc("bracket").get();
+                const bracketData = bracketDoc.exists ? bracketDoc.data() : {};
+
+                // Load player stats
+                const playersSnapshot = await db.collection("players").get();
+                const playerStats = playersSnapshot.docs.map(doc => {
+                    const data = doc.data();
+                    return {
+                        name: data.name,
+                        team: data.team || data.nation || 'Unknown',
+                        position: data.position || 'FW',
+                        matches: data.matches || {}
+                    };
+                });
+
+                // Render all data
+                renderTeams(teams);
+                renderStandings(teams);
+                renderPlayerStats(playerStats);
+                renderBracket({
+                    teams: teams,
+                    bracket: bracketData
+                });
+
             } catch (error) {
-                console.error('Error loading bracket data:', error);
+                console.error("Error loading data:", error);
+                // Show error messages in each section
+                document.getElementById('team-container').innerHTML = 
+                    `<p class="error">Error loading team data: ${error.message}</p>`;
+                document.getElementById('standings-body').innerHTML = 
+                    `<tr><td colspan="11" class="error">Error loading standings: ${error.message}</td></tr>`;
+                document.getElementById('player-stats-body').innerHTML = 
+                    `<tr><td colspan="12" class="error">Error loading player stats: ${error.message}</td></tr>`;
                 document.getElementById('bracket-container').innerHTML = 
-                    '<p>Error loading bracket data. Please try again later.</p>';
+                    `<p class="error">Error loading bracket: ${error.message}</p>`;
             }
         }
 
-
-        // Fonction pour obtenir des données de démonstration si les fichiers JSON n'existent pas encore
-        /*function getDemoData() {
-            return {
-                teams: [
-                    {
-                        name: "Équipe Rouge",
-                        formation: "1-2-3",
-                        players: [
-                            { name: "Pierre Dubois", position: "GK", nation: "FR" },
-                            { name: "Jean Martin", position: "DF", nation: "FR" },
-                            { name: "Lucas Bernard", position: "DF", nation: "BE" },
-                            { name: "Mathieu Robert", position: "FW", nation: "CH" },
-                            { name: "Thomas Petit", position: "FW", nation: "LU" },
-                            { name: "Alexandre Durand", position: "FW", nation: "FR" }
-                        ],
-                        results: {
-                            M1: 0,
-                            M2: 0,
-                            M3: 3,
-                            F32: 3,
-                            F16: 2,
-                            F8: 0,
-                            F4: 0,
-                            Final: 0
-                        }
-                    }
-                ],
-                playerStats: [
-                    {
-                        name: "Alexandre Durand",
-                        nation: "France",
-                        position: "FW",
-                        matches: {
-                            M1 : 12,
-                            M2: 0,
-                            M3: 0,
-                            F32: 0,
-                            F16: 0,
-                            F8: 0,
-                            F4: 0,
-                            Final: 0
-                        }
-                    }
-                ]
-            };
-        }*/
-
-        // Fonction pour afficher les équipes avec le terrain de football
+        // Function to render teams with soccer field
         function renderTeams(teams) {
             const teamContainer = document.getElementById('team-container');
             teamContainer.innerHTML = '';
@@ -844,13 +778,13 @@
                 const teamCard = document.createElement('div');
                 teamCard.className = 'team-card';
 
-                // Vérifier si la formation est valide (1-2-3 ou 1-3-2)
+                // Validate formation (1-2-3 or 1-3-2)
                 let formation = team.formation;
                 if (formation !== "1-2-3" && formation !== "1-3-2") {
-                    formation = "1-2-3"; // Formation par défaut si invalide
+                    formation = "1-2-3"; // Default formation
                 }
 
-                // Créer la vue liste des joueurs
+                // Create players list view HTML
                 let playersListHtml = '';
                 team.players.forEach(player => {
                     const isGoalkeeper = player.position === 'GK';
@@ -858,12 +792,12 @@
                                         player.position === 'DF' ? 'Défenseur' : 'Attaquant';
                     playersListHtml += `
                         <div class="player ${isGoalkeeper ? 'goalkeeper' : ''}">
-                            ${player.name} (${positionName}, ${player.nation})
+                            ${player.name} (${positionName}, ${player.nation || team.shortName})
                         </div>
                     `;
                 });
 
-                // Créer le HTML pour l'équipe avec les deux vues
+                // Create team card HTML with both views
                 teamCard.innerHTML = `
                     <h3>${team.name}</h3>
                     <div class="view-toggle">
@@ -874,7 +808,7 @@
                     <div class="team-content">
                         <div id="field-view-${teamIndex}" class="field-view">
                             <div class="soccer-field">
-                                <!-- Lignes du terrain -->
+                                <!-- Field lines -->
                                 <div class="halfway-line"></div>
                                 <div class="center-circle"></div>
                                 <div class="center-spot"></div>
@@ -897,46 +831,46 @@
 
                 teamContainer.appendChild(teamCard);
 
-                // Ajouter les joueurs sur le terrain
+                // Add players to the field
                 const soccerField = teamCard.querySelector('.soccer-field');
                 placePlayersOnField(team.players, soccerField, formation);
             });
         }
 
-        // Fonction pour placer les joueurs sur le terrain selon la formation
+        // Function to place players on the field based on formation
         function placePlayersOnField(players, fieldElement, formation) {
-            // Positions prédéfinies basées sur la formation 
+            // Position mapping based on formation
             let positionMapping;
             
             if (formation === "1-2-3") {
-                // Formation 1-2-3 (1 gardien, 2 défenseurs, 3 attaquants)
+                // Formation 1-2-3 (1 GK, 2 DF, 3 FW)
                 positionMapping = {
-                    'GK': { x: 15, y: 50 },    // Gardien
-                    'DF1': { x: 35, y: 25 },   // Défenseur gauche
-                    'DF2': { x: 35, y: 60 },   // Défenseur droit
-                    'FW1': { x: 65, y: 20 },   // Attaquant gauche
-                    'FW2': { x: 65, y: 45 },   // Attaquant central
-                    'FW3': { x: 65, y: 70 }    // Attaquant droit
+                    'GK': { x: 15, y: 50 },
+                    'DF1': { x: 35, y: 25 },
+                    'DF2': { x: 35, y: 60 },
+                    'FW1': { x: 65, y: 20 },
+                    'FW2': { x: 65, y: 45 },
+                    'FW3': { x: 65, y: 70 }
                 };
             } else {
-                // Formation 1-3-2 (1 gardien, 3 défenseurs, 2 attaquants)
+                // Formation 1-3-2 (1 GK, 3 DF, 2 FW)
                 positionMapping = {
-                    'GK': { x: 15, y: 50 },    // Gardien
-                    'DF1': { x: 35, y: 20 },   // Défenseur gauche
-                    'DF2': { x: 35, y: 45 },   // Défenseur central
-                    'DF3': { x: 35, y: 70 },   // Défenseur droit
-                    'FW1': { x: 65, y: 25 },   // Attaquant gauche
-                    'FW2': { x: 65, y: 60 }    // Attaquant droit
+                    'GK': { x: 15, y: 50 },
+                    'DF1': { x: 35, y: 20 },
+                    'DF2': { x: 35, y: 45 },
+                    'DF3': { x: 35, y: 70 },
+                    'FW1': { x: 65, y: 25 },
+                    'FW2': { x: 65, y: 60 }
                 };
             }
             
-            // Trier les joueurs par position (GK, puis DF, puis FW)
+            // Sort players by position (GK, DF, FW)
             const sortedPlayers = [...players].sort((a, b) => {
                 const posOrder = { 'GK': 0, 'DF': 1, 'FW': 2 };
                 return posOrder[a.position] - posOrder[b.position];
             });
             
-            // Compter les défenseurs et attaquants pour le placement
+            // Count defenders and forwards for placement
             let dfCount = 0;
             let fwCount = 0;
             
@@ -944,7 +878,7 @@
                 const playerDot = document.createElement('div');
                 playerDot.className = `player-dot position-${player.position}`;
                 
-                // Déterminer la position sur le terrain
+                // Determine field position
                 let position;
                 
                 if (player.position === 'GK') {
@@ -952,21 +886,21 @@
                 } else if (player.position === 'DF') {
                     dfCount++;
                     const posKey = `DF${dfCount}`;
-                    position = positionMapping[posKey] || positionMapping['DF1']; // Fallback
+                    position = positionMapping[posKey] || positionMapping['DF1'];
                 } else if (player.position === 'FW') {
                     fwCount++;
                     const posKey = `FW${fwCount}`;
-                    position = positionMapping[posKey] || positionMapping['FW1']; // Fallback
+                    position = positionMapping[posKey] || positionMapping['FW1'];
                 } else {
-                    // Position par défaut au milieu
+                    // Default to center
                     position = { x: 50, y: 50 };
                 }
                 
-                // Positionner le joueur
+                // Position the player
                 playerDot.style.left = `${position.x}%`;
                 playerDot.style.top = `${position.y}%`;
                                
-                // Ajouter le nom du joueur en dessous
+                // Add player name below
                 const playerName = document.createElement('div');
                 playerName.className = 'player-name';
                 playerName.textContent = player.name;
@@ -978,27 +912,21 @@
             });
         }
 
-        // Fonction pour afficher le classement
-        function renderStandings(standings) {
+        // Function to render standings
+        function renderStandings(teams) {
             const standingsBody = document.getElementById('standings-body');
             standingsBody.innerHTML = '';
 
-            // Trier par points totaux (décroissant)
-            const sortedStandings = [...standings].sort((a, b) => {
-                const totalPointsA = (a.results.M1 || 0) + (a.results.M2 || 0) + (a.results.M3 || 0) + 
-                                    (a.results.F32 || 0) + (a.results.F16 || 0) + (a.results.F8 || 0) + 
-                                    (a.results.F4 || 0) + (a.results.Final || 0);
-                const totalPointsB = (b.results.M1 || 0) + (b.results.M2 || 0) + (b.results.M3 || 0) + 
-                                    (b.results.F32 || 0) + (b.results.F16 || 0) + (b.results.F8 || 0) + 
-                                    (b.results.F4 || 0) + (b.results.Final || 0);
-                return totalPointsB - totalPointsA;
+            // Sort by total points (descending)
+            const sortedStandings = [...teams].sort((a, b) => {
+                const totalA = calculateTeamTotalPoints(a.results);
+                const totalB = calculateTeamTotalPoints(b.results);
+                return totalB - totalA;
             });
 
             sortedStandings.forEach((team, index) => {
                 const row = document.createElement('tr');
-                const totalPoints = (team.results.M1 || 0) + (team.results.M2 || 0) + (team.results.M3 || 0) + 
-                                   (team.results.F32 || 0) + (team.results.F16 || 0) + (team.results.F8 || 0) + 
-                                   (team.results.F4 || 0) + (team.results.Final || 0);
+                const totalPoints = calculateTeamTotalPoints(team.results);
 
                 row.innerHTML = `
                     <td>${index + 1}</td>
@@ -1017,37 +945,43 @@
             });
         }
 
-        // Fonction pour afficher le bracket
+        // Helper function to calculate team total points
+        function calculateTeamTotalPoints(results) {
+            if (!results) return 0;
+            return Object.values(results).reduce((sum, val) => sum + (val || 0), 0);
+        }
+
+        // Function to render the tournament bracket
         function renderBracket(tournamentData) {
             const container = document.getElementById('bracket-container');
-            const titleElement = document.getElementById('bracket-title');
-            
-            // Set tournament title
-            // titleElement.textContent = tournamentData.tournamentName || 'Tournament Bracket';
-            
             container.innerHTML = '';
             
+            if (!tournamentData.bracket) {
+                container.innerHTML = '<p>No bracket data available</p>';
+                return;
+            }
+
             // Create rounds in order
             const rounds = [
                 { 
                     name: "1/8", 
                     class: "bracket-round-16",
-                    matches: tournamentData.bracket.roundOf16 
+                    matches: tournamentData.bracket.roundOf16 || [] 
                 },
                 { 
                     name: "1/4", 
                     class: "bracket-round-8",
-                    matches: tournamentData.bracket.quarterFinals 
+                    matches: tournamentData.bracket.quarterFinals || [] 
                 },
                 { 
                     name: "1/2", 
                     class: "bracket-round-4",
-                    matches: tournamentData.bracket.semiFinals 
+                    matches: tournamentData.bracket.semiFinals || [] 
                 },
                 { 
                     name: "FINAL", 
                     class: "bracket-round-2 bracket-final",
-                    matches: [tournamentData.bracket.final] 
+                    matches: tournamentData.bracket.final ? [tournamentData.bracket.final] : [] 
                 }
             ];
             
@@ -1078,6 +1012,9 @@
                         ${match.score1 !== undefined ? 
                             `<span class="bracket-score">${match.score1}</span>` : ''
                         }
+                        ${match.penaltyScore1 !== undefined ? 
+                            `<span class="penalty-score">(${match.penaltyScore1})</span>` : ''
+                        }
                     `;
                     
                     const bottomTeam = document.createElement('div');
@@ -1087,7 +1024,18 @@
                         ${match.score2 !== undefined ? 
                             `<span class="bracket-score">${match.score2}</span>` : ''
                         }
+                        ${match.penaltyScore2 !== undefined ? 
+                            `<span class="penalty-score">(${match.penaltyScore2})</span>` : ''
+                        }
                     `;
+                    
+                    // Add match date if available
+                    if (match.date) {
+                        const dateDiv = document.createElement('div');
+                        dateDiv.className = 'match-date';
+                        dateDiv.textContent = match.date;
+                        matchDiv.appendChild(dateDiv);
+                    }
                                         
                     matchDiv.appendChild(topTeam);
                     matchDiv.appendChild(bottomTeam);            
@@ -1098,439 +1046,53 @@
             });
         }
 
-        // Function to find team by ID
+        // Helper function to find team by ID
         function findTeamById(teams, id) {
-            return teams.find(team => team.id === id) || { name: 'Unknown Team', shortName: 'UNK' };
+            return teams.find(team => team.id === id) || { 
+                name: 'TBD', 
+                shortName: 'TBD' 
+            };
         }
 
-        // Fonction pour afficher les équipes avec le terrain de football
-
-        function renderTeams(teams) {
-
-            const teamContainer = document.getElementById('team-container');
-
-            teamContainer.innerHTML = '';
-
-            
-
-            teams.forEach((team, teamIndex) => {
-
-                const teamCard = document.createElement('div');
-
-                teamCard.className = 'team-card';
-
-                
-
-                // Vérifier si la formation est valide (1-2-3 ou 1-3-2)
-
-                let formation = team.formation;
-
-                if (formation !== "1-2-3" && formation !== "1-3-2") {
-
-                    formation = "1-2-3"; // Formation par défaut si invalide
-
-                }
-
-                
-
-                // Créer la vue liste des joueurs
-
-                let playersListHtml = '';
-
-                team.players.forEach(player => {
-
-                    const isGoalkeeper = player.position === 'GK';
-
-                    const positionName = isGoalkeeper ? 'Gardien' : 
-
-                                        player.position === 'DF' ? 'Défenseur' : 'Attaquant';
-
-                    playersListHtml += `
-
-                        <div class="player ${isGoalkeeper ? 'goalkeeper' : ''}">
-
-                            ${player.name} (${positionName})
-
-                        </div>
-
-                    `;
-
-                });
-
-                
-
-                // Créer le HTML pour l'équipe avec les deux vues
-
-                teamCard.innerHTML = `
-
-                    <h3>${team.name}</h3>
-
-                                      
-
-                    <div class="view-toggle">
-
-                        <button id="field-btn-${teamIndex}" class="view-btn active" onclick="toggleView(${teamIndex}, 'field')">Vue Terrain</button>
-
-                        <button id="list-btn-${teamIndex}" class="view-btn" onclick="toggleView(${teamIndex}, 'list')">Vue Liste</button>
-
-                    </div>
-
-                    
-
-                    <div class="team-content">
-
-                        <div id="field-view-${teamIndex}" class="field-view">
-
-                            <div class="soccer-field">
-
-                                <!-- Lignes du terrain -->
-
-                                <div class="halfway-line"></div>
-
-                                <div class="center-circle"></div>
-
-                                <div class="center-spot"></div>
-
-                                <div class="penalty-box-left"></div>
-
-                                <div class="penalty-box-right"></div>
-
-                                <div class="goal-box-left"></div>
-
-                                <div class="goal-box-right"></div>
-
-                                <div class="goal-left"></div>
-
-                                <div class="goal-right"></div>
-
-                                
-
-                                <!-- Les joueurs seront ajoutés ici en JavaScript -->
-
-                            </div>
-
-                        </div>
-
-                        
-
-                        <div id="list-view-${teamIndex}" class="list-view" style="display: none;">
-
-                            <div class="player-list">
-
-                                ${playersListHtml}
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                `;
-
-                
-
-                teamContainer.appendChild(teamCard);
-
-                
-
-                // Ajouter les joueurs sur le terrain
-
-                const soccerField = teamCard.querySelector('.soccer-field');
-
-                placePlayersOnField(team.players, soccerField, formation);
-
+        // Function to render player statistics
+        function renderPlayerStats(playerStats) {
+            const playerStatsBody = document.getElementById('player-stats-body');
+            playerStatsBody.innerHTML = '';
+
+            // Sort by total points (descending)
+            const sortedPlayers = [...playerStats].sort((a, b) => {
+                const totalA = calculatePlayerTotalPoints(a.matches);
+                const totalB = calculatePlayerTotalPoints(b.matches);
+                return totalB - totalA;
             });
-
-        }
-
-
-
-        // Fonction pour placer les joueurs sur le terrain selon la formation
-
-        function placePlayersOnField(players, fieldElement, formation) {
-
-            // Positions prédéfinies basées sur la formation 
-
-            let positionMapping;
-
-            
-
-            if (formation === "1-2-3") {
-
-                // Formation 1-2-3 (1 gardien, 2 défenseurs, 3 attaquants)
-
-                positionMapping = {
-
-                    'GK': { x: 15, y: 50 },    // Gardien
-
-                    'DF1': { x: 35, y: 25 },   // Défenseur gauche
-
-                    'DF2': { x: 35, y: 60 },   // Défenseur droit
-
-                    'FW1': { x: 65, y: 20 },   // Attaquant gauche
-
-                    'FW2': { x: 65, y: 45 },   // Attaquant central
-
-                    'FW3': { x: 65, y: 70 }    // Attaquant droit
-
-                };
-
-            } else {
-
-                // Formation 1-3-2 (1 gardien, 3 défenseurs, 2 attaquants)
-
-                positionMapping = {
-
-                    'GK': { x: 15, y: 50 },    // Gardien
-
-                    'DF1': { x: 35, y: 20 },   // Défenseur gauche
-
-                    'DF2': { x: 35, y: 45 },   // Défenseur central
-
-                    'DF3': { x: 35, y: 70 },   // Défenseur droit
-
-                    'FW1': { x: 65, y: 25 },   // Attaquant gauche
-
-                    'FW2': { x: 65, y: 60 }    // Attaquant droit
-
-                };
-
-            }
-
-            
-
-            // Trier les joueurs par position (GK, puis DF, puis FW)
-
-            const sortedPlayers = [...players].sort((a, b) => {
-
-                const posOrder = { 'GK': 0, 'DF': 1, 'FW': 2 };
-
-                return posOrder[a.position] - posOrder[b.position];
-
-            });
-
-            
-
-            // Compter les défenseurs et attaquants pour le placement
-
-            let dfCount = 0;
-
-            let fwCount = 0;
-
-            
 
             sortedPlayers.forEach(player => {
-
-                const playerDot = document.createElement('div');
-
-                playerDot.className = `player-dot position-${player.position}`;
-
+                const row = document.createElement('tr');
+                const totalPoints = calculatePlayerTotalPoints(player.matches);
                 
-
-                // Déterminer la position sur le terrain
-
-                let position;
-
-                
-
-                if (player.position === 'GK') {
-
-                    position = positionMapping['GK'];
-
-                } else if (player.position === 'DF') {
-
-                    dfCount++;
-
-                    const posKey = `DF${dfCount}`;
-
-                    position = positionMapping[posKey] || positionMapping['DF1']; // Fallback
-
-                } else if (player.position === 'FW') {
-
-                    fwCount++;
-
-                    const posKey = `FW${fwCount}`;
-
-                    position = positionMapping[posKey] || positionMapping['FW1']; // Fallback
-
-                } else {
-
-                    // Position par défaut au milieu
-
-                    position = { x: 50, y: 50 };
-
-                }
-
-                
-
-                // Positionner le joueur
-
-                playerDot.style.left = `${position.x}%`;
-
-                playerDot.style.top = `${position.y}%`;
-
-                               
-
-                // Ajouter le nom du joueur en dessous
-
-                const playerName = document.createElement('div');
-
-                playerName.className = 'player-name';
-
-                playerName.textContent = player.name;
-
-                playerName.style.left = `${position.x}%`;
-
-                playerName.style.top = `${position.y}%`;
-
-                
-
-                fieldElement.appendChild(playerDot);
-
-                fieldElement.appendChild(playerName);
-
+                row.innerHTML = `
+                    <td>${player.name}</td>
+                    <td>${player.team}</td>
+                    <td>${player.position}</td>
+                    <td>${player.matches.M1 || 0}</td>
+                    <td>${player.matches.M2 || 0}</td>
+                    <td>${player.matches.M3 || 0}</td>
+                    <td>${player.matches.F32 || 0}</td>
+                    <td>${player.matches.F16 || 0}</td>
+                    <td>${player.matches.F8 || 0}</td>
+                    <td>${player.matches.F4 || 0}</td>
+                    <td>${player.matches.Final || 0}</td>
+                    <td><strong>${totalPoints}</strong></td>
+                `;
+                playerStatsBody.appendChild(row);
             });
-
         }
 
-
-
-        // Fonction pour obtenir les initiales d'un nom
-
-        function getInitials(name) {
-
-            return name.split(' ').map(n => n[0]).join('');
-
+        // Helper function to calculate player total points
+        function calculatePlayerTotalPoints(matches) {
+            if (!matches) return 0;
+            return Object.values(matches).reduce((sum, val) => sum + (val || 0), 0);
         }
-
-
-
-        // Fonction pour afficher le classement
-
-        // Fonction pour afficher le classement
-function renderStandings(standings) {
-    const standingsBody = document.getElementById('standings-body');
-    standingsBody.innerHTML = '';
-
-    // Trier par points totaux (décroissant)
-    const sortedStandings = [...standings].sort((a, b) => {
-        const totalPointsA = (a.results.M1 || 0) + (a.results.M2 || 0) + (a.results.M3 || 0) + (a.results.F32 || 0) + (a.results.F16 || 0) + (a.results.F8 || 0) + (a.results.F4 || 0) + (a.results.Final || 0);
-        const totalPointsB = (b.results.M1 || 0) + (b.results.M2 || 0) + (b.results.M3 || 0) + (b.results.F32 || 0) + (b.results.F16 || 0) + (b.results.F8 || 0) + (b.results.F4 || 0) + (b.results.Final || 0);
-        return totalPointsB - totalPointsA;
-    });
-
-    sortedStandings.forEach((team, index) => {
-        const row = document.createElement('tr');
-        const totalPoints = (team.results.M1 || 0) + (team.results.M2 || 0) + (team.results.M3 || 0) + (team.results.F32 || 0) + (team.results.F16 || 0) + (team.results.F8 || 0) + (team.results.F4 || 0) + (team.results.Final || 0);
-
-        row.innerHTML = `
-            <td>${index + 1}</td>
-            <td>${team.name}</td>
-            <td>${team.results.M1 || 0}</td>
-            <td>${team.results.M2 || 0}</td>
-            <td>${team.results.M3 || 0}</td>
-            <td>${team.results.F32 || 0}</td>
-	    <td>${team.results.F16 || 0}</td>
-            <td>${team.results.F8 || 0}</td>
-	    <td>${team.results.F4 || 0}</td>
-            <td>${team.results.Final || 0}</td>
-            <td><strong>${totalPoints}</strong></td>
-        `;
-        standingsBody.appendChild(row);
-    });
-}
-
-// Helper function to find team by ID
-function findTeamById(teams, id) {
-    return teams.find(team => team.id === id) || { 
-        name: 'TBD', 
-        shortName: 'TBD' 
-    };
-}
-
-// Helper function to format score with penalties if applicable
-function formatScore(match, isTeam1) {
-    const score = isTeam1 ? match.score1 : match.score2;
-    const penScore = isTeam1 ? match.penaltyScore1 : match.penaltyScore2;
-    
-    if (score === undefined) return '';
-    
-    if (penScore !== undefined) {
-        return `${score} <span class="penalty-score">(${penScore})</span>`;
-    }
-    return score.toString();
-}
-
-// Load the bracket data when the page loads
-document.addEventListener('DOMContentLoaded', () => {
-    // First load the main data (teams, standings)
-    loadData();
-    loadPlayerData();
-    // Then load the bracket data
-    loadBracketData();
-});
-
-
-        // Fonction pour afficher les statistiques des joueurs
-function renderPlayerStats(playerStats) {
-  const playerStatsBody = document.getElementById('player-stats-body');
-  playerStatsBody.innerHTML = '';
-
-  // Sort by total points (descending)
-  const sortedPlayers = [...playerStats].sort((a, b) => {
-    const totalA = calculateTotalPoints(a.matches);
-    const totalB = calculateTotalPoints(b.matches);
-    return totalB - totalA;
-  });
-
-  sortedPlayers.forEach(player => {
-    const row = document.createElement('tr');
-    const totalPoints = calculateTotalPoints(player.matches);
-    
-    row.innerHTML = `
-      <td>${player.name}</td>
-      <td>${player.team}</td>
-      <td>${player.matches.M1 || 0}</td>
-      <td>${player.matches.M2 || 0}</td>
-      <td>${player.matches.M3 || 0}</td>
-      <td>${player.matches.F32 || 0}</td>
-      <td>${player.matches.F16 || 0}</td>
-      <td>${player.matches.F8 || 0}</td>
-      <td>${player.matches.F4 || 0}</td>
-      <td>${player.matches.Final || 0}</td>
-      <td><strong>${totalPoints}</strong></td>
-    `;
-    playerStatsBody.appendChild(row);
-  });
-}
-
-// Helper function to calculate total points
-function calculateTotalPoints(matches) {
-  if (!matches) return 0;
-  return Object.values(matches).reduce((sum, val) => sum + (val || 0), 0);
-}
-
-
-
-        // Charger les données au chargement de la page
-
-        
-const firebaseConfig = { apiKey: "AIzaSyC3zpS_NT8sHN4j0upcAd8jmpfhsgXtdRw",
-
-  authDomain: "paris-entre-amis-598e9.firebaseapp.com",
-
-  projectId: "paris-entre-amis-598e9",
-
-  storageBucket: "paris-entre-amis-598e9.firebasestorage.app",
-
-  messagingSenderId: "638642602040",
-
-  appId: "1:638642602040:web:0f7557f7d4923b6aec26cd"
- };
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.firestore();
-
-	document.addEventListener('DOMContentLoaded', loadData);
-</script>
+    </script>
 </body>
 </html>
