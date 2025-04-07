@@ -639,6 +639,7 @@
                         <tr>
                             <th>Nom</th>
                             <th>Nation</th>
+                            <th>Equipe</th>
                             <th>Position</th>
                             <th>M1</th>
                             <th>M2</th>
@@ -740,7 +741,8 @@
                     const data = doc.data();
                     return {
                         name: data.name,
-                        team: data.team || data.nation || 'Unknown',
+                        nation: data.nation, 
+                        equipe: data.team,
                         position: data.position || 'FW',
                         matches: data.matches || {}
                     };
