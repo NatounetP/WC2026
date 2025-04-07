@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Initialisation Firebase - Paris entre amis</title>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        button {
+            background-color: #3d195b;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            margin: 10px 0;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        button:hover {
+            background-color: #5a2a8a;
+        }
+        .log {
+            background-color: #f4f4f4;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .success {
+            color: green;
+        }
+        .error {
+            color: red;
+        }
+        .info {
+            color: blue;
+        }
+    </style>
+</head>
+<body>
+    <h1>Initialisation de la base de données Firebase</h1>
+    <p>Ce script va créer la structure de données et remplir avec des exemples.</p>
+    
+    <button id="initBtn">Initialiser la base de données</button>
+    <button id="clearBtn" style="background-color: #e74c3c;">Effacer toutes les données</button>
+    
+    <div id="status"></div>
+    <div id="log" class="log"></div>
+
+    <script>
+        // Configuration Firebase (identique à votre app principale)
+        const firebaseConfig = {
+            apiKey: "AIzaSyC3zpS_NT8sHN4j0upcAd8jmpfhsgXtdRw",
+            authDomain: "paris-entre-amis-598e9.firebaseapp.com",
+            projectId: "paris-entre-amis-598e9",
+            storageBucket: "paris-entre-amis-598e9.firebasestorage.app",
+            messagingSenderId: "638642602040",
+            appId: "1:638642602040:web:0f7557f7d4923b6aec26cd"
+        };
+
+        // Initialiser Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // Éléments DOM
+        const initBtn = document.getElementById('initBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const statusDiv = document.getElementById('status');
+        const logDiv = document.getElementById('log');
+
+        // Données d'exemple
+        const sampleData = {
+            teams: [
+                {
+                    id: "team1",
+                    name: "Équipe Rouge",
+                    shortName: "ROU",
+                    formation: "1-2-3",
+                    players: [
+                        { name: "Pierre Dubois", position: "GK", nation: "FR" },
+                        { name: "Jean Martin", position: "DF", nation: "FR" },
+                        { name: "Lucas Bernard", position: "DF", nation: "BE" },
+                        { name: "Mathieu Robert", position: "FW", nation: "CH" },
+                        { name: "Thomas Petit", position: "FW", nation: "LU" },
+                        { name: "Alexandre Durand", position: "FW", nation: "FR" }
+                    ],
+                    results: {
+                        M1: 3,
+                        M2: 1,
+                        M3: 0,
+                        F32: 3,
+                        F16: 2,
+                        F8: 0,
+                        F4: 0,
+                        Final: 0
+                    }
+                },
+                {
+                    id: "team2",
+                    name: "Équipe Bleue",
+                    shortName: "BLE",
+                    formation: "1-3-2",
+                    players: [
+                        { name: "Marc Lefevre", position: "GK", nation: "BE" },
+                        { name: "Paul Dupont", position: "DF", nation: "FR" },
+                        { name: "Jacques Lambert", position: "DF", nation: "FR" },
+                        { name: "Henri Rousseau", position: "DF", nation: "CH" },
+                        { name: "Louis Moreau", position: "FW", nation: "FR" },
+                        { name: "Georges Leroy", position: "FW", nation: "LU" }
+                    ],
+                    results: {
+                        M1: 1,
+                        M2: 3,
+                        M3: 1,
+                        F32: 2,
+                        F16: 0,
+                        F8: 0,
+                        F4: 0,
+                        Final: 0
+                    }
+                },
+                {
+                    id: "team3",
+                    name: "Équipe Verte",
+                    shortName: "VER",
+                    formation: "1-2-3",
+                    players: [
+                        { name: "Olivier Giroud", position: "GK", nation: "FR" },
+                        { name: "Antoine Griezmann", position: "DF", nation: "FR" },
+                        { name: "Kylian Mbappé", position: "DF", nation: "FR" },
+                        { name: "Paul Pogba", position: "FW", nation: "FR" },
+                        { name: "N'Golo Kanté", position: "FW", nation: "FR" },
+                        { name: "Hugo Lloris", position: "FW", nation: "FR" }
+                    ],
+                    results: {
+                        M1: 0,
+                        M2: 1,
+                        M3: 3,
+                        F32: 1,
+                        F16: 3,
+                        F8: 2,
+                        F4: 1,
+                        Final: 0
+                    }
+                }
+            ],
+            players: [
+                {
+                    id: "player1",
+                    name: "Alexandre Durand",
+                    team: "ROU",
+                    position: "FW",
+                    matches: {
+                        M1: 2,
+                        M2: 0,
+                        M3: 1,
+                        F32: 1,
+                        F16: 0,
+                        F8: 0,
+                        F4: 0,
+                        Final: 0
+                    }
+                },
+                {
+                    id: "player2",
+                    name: "Thomas Petit",
+                    team: "ROU",
+                    position: "FW",
+                    matches: {
+                        M1: 1,
+                        M2: 1,
+                        M3: 0,
+                        F32: 2,
+                        F16: 0,
+                        F8: 0,
+                        F4: 0,
+                        Final: 0
+                    }
+                },
+                {
+                    id: "player3",
+                    name: "Louis Moreau",
+                    team: "BLE",
+                    position: "FW",
+                    matches: {
+                        M1: 0,
+                        M2: 2,
+                        M3: 1,
+                        F32: 1,
+                        F16: 0,
+                        F8: 0,
+                        F4: 0,
+                        Final: 0
+                    }
+                },
+                {
+                    id: "player4",
+                    name: "Kylian Mbappé",
+                    team: "VER",
+                    position: "DF",
+                    matches: {
+                        M1: 0,
+                        M2: 0,
+                        M3: 2,
+                        F32: 0,
+                        F16: 2,
+                        F8: 1,
+                        F4: 1,
+                        Final: 0
+                    }
+                }
+            ],
+            bracket: {
+                roundOf16: [
+                    {
+                        team1Id: "team1",
+                        team2Id: "team2",
+                        winnerId: "team1",
+                        score1: 2,
+                        score2: 1,
+                        date: "2023-06-10"
+                    },
+                    {
+                        team1Id: "team3",
+                        team2Id: "team4",
+                        winnerId: "team3",
+                        score1: 3,
+                        score2: 0,
+                        date: "2023-06-11"
+                    }
+                ],
+                quarterFinals: [
+                    {
+                        team1Id: "team1",
+                        team2Id: "team3",
+                        winnerId: "team3",
+                        score1: 1,
+                        score2: 2,
+                        date: "2023-06-15"
+                    }
+                ],
+                semiFinals: [
+                    {
+                        team1Id: "team3",
+                        team2Id: "team5",
+                        winnerId: "team3",
+                        score1: 2,
+                        score2: 1,
+                        penaltyScore1: 4,
+                        penaltyScore2: 3,
+                        date: "2023-06-20"
+                    }
+                ],
+                final: {
+                    team1Id: "team3",
+                    team2Id: "team6",
+                    winnerId: "team3",
+                    score1: 3,
+                    score2: 2,
+                    date: "2023-06-25"
+                }
+            }
+        };
+
+        // Logger pour afficher les messages
+        function log(message, type = "info") {
+            const p = document.createElement('p');
+            p.className = type;
+            p.textContent = message;
+            logDiv.appendChild(p);
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        // Initialiser la base de données
+        async function initializeDatabase() {
+            statusDiv.textContent = "Initialisation en cours...";
+            log("Début de l'initialisation de la base de données", "info");
+            
+            try {
+                // Créer les équipes
+                log("Création des équipes...", "info");
+                for (const team of sampleData.teams) {
+                    await db.collection("teams").doc(team.id).set({
+                        name: team.name,
+                        shortName: team.shortName,
+                        formation: team.formation,
+                        players: team.players,
+                        results: team.results
+                    });
+                    log(`Équipe créée: ${team.name} (${team.id})`, "success");
+                }
+                
+                // Créer les joueurs
+                log("Création des joueurs...", "info");
+                for (const player of sampleData.players) {
+                    await db.collection("players").doc(player.id).set({
+                        name: player.name,
+                        team: player.team,
+                        position: player.position,
+                        matches: player.matches
+                    });
+                    log(`Joueur créé: ${player.name} (${player.id})`, "success");
+                }
+                
+                // Créer le bracket
+                log("Création du bracket...", "info");
+                await db.collection("tournament").doc("bracket").set(sampleData.bracket);
+                log("Bracket créé avec succès", "success");
+                
+                statusDiv.textContent = "Initialisation terminée avec succès!";
+                log("Initialisation terminée avec succès!", "success");
+                
+            } catch (error) {
+                statusDiv.textContent = "Erreur lors de l'initialisation";
+                log(`Erreur: ${error.message}`, "error");
+                console.error(error);
+            }
+        }
+
+        // Effacer toutes les données
+        async function clearDatabase() {
+            if (!confirm("Êtes-vous sûr de vouloir effacer TOUTES les données? Cette action est irréversible.")) {
+                return;
+            }
+            
+            statusDiv.textContent = "Nettoyage en cours...";
+            log("Début du nettoyage de la base de données", "info");
+            
+            try {
+                // Supprimer toutes les équipes
+                const teamsSnapshot = await db.collection("teams").get();
+                for (const doc of teamsSnapshot.docs) {
+                    await doc.ref.delete();
+                }
+                log("Toutes les équipes ont été supprimées", "success");
+                
+                // Supprimer tous les joueurs
+                const playersSnapshot = await db.collection("players").get();
+                for (const doc of playersSnapshot.docs) {
+                    await doc.ref.delete();
+                }
+                log("Tous les joueurs ont été supprimés", "success");
+                
+                // Supprimer le bracket
+                await db.collection("tournament").doc("bracket").delete();
+                log("Bracket supprimé", "success");
+                
+                statusDiv.textContent = "Nettoyage terminé avec succès!";
+                log("Toutes les données ont été effacées", "success");
+                
+            } catch (error) {
+                statusDiv.textContent = "Erreur lors du nettoyage";
+                log(`Erreur: ${error.message}`, "error");
+                console.error(error);
+            }
+        }
+
+        // Événements
+        initBtn.addEventListener('click', initializeDatabase);
+        clearBtn.addEventListener('click', clearDatabase);
+
+        log("Prêt à initialiser la base de données. Cliquez sur le bouton 'Initialiser la base de données'.", "info");
+    </script>
+</body>
+</html>
