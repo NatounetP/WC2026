@@ -363,7 +363,7 @@
         async function loadPlayersForTeam(teamId) {
             try {
                 const playersSnapshot = await db.collection("players")
-                    .where("team", "==", teamId)
+                    .where("nation", "==", teamId)
                     .get();
                 
                 const players = [];
