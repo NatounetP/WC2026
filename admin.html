@@ -176,10 +176,10 @@
         
         <div class="match-info">
             <div class="team-select">
-                <div class="team-name" id="team1-name">Équipe 1</div>
+                <div class="team-name" id="team1-name">Équipe Nationale 1</div>
                 <select class="team-selector" id="team1-select">
-                    <option value="">Sélectionner une équipe</option>
-                    <!-- Teams will be loaded from Firebase -->
+                    <option value="">Sélectionner une équipe nationale</option>
+                    <!-- National teams will be loaded from Firebase -->
                 </select>
                 <input type="number" class="score-input" id="team1-score" min="0" value="0">
             </div>
@@ -187,10 +187,10 @@
             <div class="vs">vs</div>
             
             <div class="team-select">
-                <div class="team-name" id="team2-name">Équipe 2</div>
+                <div class="team-name" id="team2-name">Équipe Nationale 2</div>
                 <select class="team-selector" id="team2-select">
-                    <option value="">Sélectionner une équipe</option>
-                    <!-- Teams will be loaded from Firebase -->
+                    <option value="">Sélectionner une équipe nationale</option>
+                    <!-- National teams will be loaded from Firebase -->
                 </select>
                 <input type="number" class="score-input" id="team2-score" min="0" value="0">
             </div>
@@ -334,36 +334,41 @@
             saveLoading: document.getElementById('save-loading')
         };
 
-        // Load teams and players data from Firebase
-        async function loadTeamsData() {
+        // Load national teams data from Firebase
+        async function loadNationalTeamsData() {
             try {
-                // Load teams from Firestore
-                const teamsSnapshot = await db.collection("teams").get();
-                const teams = [];
+                // Get unique nations from players collection
+                const playersSnapshot = await db.collection("players").get();
+                const nationalTeams = new Set();
                 
-                teamsSnapshot.forEach(doc => {
-                    teams.push({
-                        id: doc.id,
-                        name: doc.data().name,
-                        code: doc.data().code
-                    });
+                playersSnapshot.forEach(doc => {
+                    const playerData = doc.data();
+                    if (playerData.nation) {
+                        nationalTeams.add(playerData.nation);
+                    }
                 });
+                
+                // Convert to array of objects
+                const teams = Array.from(nationalTeams).map(nation => ({
+                    id: nation,
+                    name: nation
+                }));
                 
                 // Sort teams alphabetically
                 teams.sort((a, b) => a.name.localeCompare(b.name));
                 
                 return teams;
             } catch (error) {
-                console.error("Error loading teams:", error);
+                console.error("Error loading national teams:", error);
                 return [];
             }
         }
 
-        // Load players for a specific team from Firebase
-        async function loadPlayersForTeam(teamId) {
+        // Load players for a specific national team from Firebase
+        async function loadPlayersForNationalTeam(nationName) {
             try {
                 const playersSnapshot = await db.collection("players")
-                    .where("nation", "==", teamId)
+                    .where("nation", "==", nationName)
                     .get();
                 
                 const players = [];
@@ -376,19 +381,19 @@
                 
                 return players;
             } catch (error) {
-                console.error("Error loading players:", error);
+                console.error(`Error loading players for ${nationName}:`, error);
                 return [];
             }
         }
 
-        // Update team selectors with available teams
+        // Update team selectors with available national teams
         async function updateTeamSelectors() {
-            const teams = await loadTeamsData();
+            const teams = await loadNationalTeamsData();
             
             // Update both dropdowns
             [elements.team1Select, elements.team2Select].forEach(select => {
                 const currentValue = select.value;
-                select.innerHTML = '<option value="">Sélectionner une équipe</option>';
+                select.innerHTML = '<option value="">Sélectionner une équipe nationale</option>';
                 
                 teams.forEach(team => {
                     const option = document.createElement('option');
@@ -433,13 +438,13 @@
             
             // Get team name from selected option
             const selectedOption = selectElement.options[selectElement.selectedIndex];
-            nameElement.textContent = selectedOption.text || `Équipe ${teamPrefix === 'team1' ? '1' : '2'}`;
+            nameElement.textContent = selectedOption.text || `Équipe Nationale ${teamPrefix === 'team1' ? '1' : '2'}`;
             
             // Prevent selecting the same team for both sides
             if (elements.team1Select.value && elements.team1Select.value === elements.team2Select.value) {
-                alert("Vous ne pouvez pas sélectionner la même équipe pour les deux côtés");
+                alert("Vous ne pouvez pas sélectionner la même équipe nationale pour les deux côtés");
                 selectElement.value = "";
-                nameElement.textContent = `Équipe ${teamPrefix === 'team1' ? '1' : '2'}`;
+                nameElement.textContent = `Équipe Nationale ${teamPrefix === 'team1' ? '1' : '2'}`;
                 return;
             }
             
@@ -460,12 +465,12 @@
             `;
         }
 
-        // Update player table based on selected teams
+        // Update player table based on selected national teams
         async function updatePlayerTable() {
-            const team1Id = elements.team1Select.value;
-            const team2Id = elements.team2Select.value;
+            const nation1 = elements.team1Select.value;
+            const nation2 = elements.team2Select.value;
 
-            if (!team1Id || !team2Id) {
+            if (!nation1 || !nation2) {
                 showNoPlayersMessage();
                 return;
             }
@@ -473,30 +478,41 @@
             // Clear existing rows
             elements.playersBody.innerHTML = '';
             
-            // Load players for both teams
+            // Load players for both nations
             const [team1Players, team2Players] = await Promise.all([
-                loadPlayersForTeam(team1Id),
-                loadPlayersForTeam(team2Id)
+                loadPlayersForNationalTeam(nation1),
+                loadPlayersForNationalTeam(nation2)
             ]);
+            
+            // Check if we have players
+            if (team1Players.length === 0 && team2Players.length === 0) {
+                elements.playersBody.innerHTML = `
+                    <tr>
+                        <td colspan="14" class="no-players-message">Aucun joueur trouvé pour ces équipes nationales</td>
+                    </tr>
+                `;
+                return;
+            }
             
             // Add players from team 1
             team1Players.forEach(player => {
-                addPlayerRow(player, team1Id);
+                addPlayerRow(player, nation1);
             });
             
             // Add players from team 2
             team2Players.forEach(player => {
-                addPlayerRow(player, team2Id);
+                addPlayerRow(player, nation2);
             });
         }
 
         // Add a player row to the table
-        function addPlayerRow(player, teamId) {
+        function addPlayerRow(player, nation) {
             const row = document.createElement('tr');
             
-            // Store team and position as data attributes
-            row.dataset.teamId = teamId;
+            // Store nation and position as data attributes
+            row.dataset.nation = nation;
             row.dataset.position = player.position;
+            row.dataset.playerId = player.id;
             
             // Get the round we're currently working with
             const round = elements.roundSelect.value;
@@ -584,7 +600,7 @@
             const team2ShotsReceived = parseInt(document.getElementById('team2-shots-received').value) || 0;
 
             if (!elements.team1Select.value || !elements.team2Select.value) {
-                alert("Veuillez sélectionner deux équipes d'abord!");
+                alert("Veuillez sélectionner deux équipes nationales d'abord!");
                 return;
             }
 
@@ -593,16 +609,16 @@
             const team2Name = elements.team2Name.textContent;
 
             // Determine winner and goal difference
-            const winnerId = team1Score > team2Score ? elements.team1Select.value :
-                           team2Score > team1Score ? elements.team2Select.value : null;
+            const winnerNation = team1Score > team2Score ? elements.team1Select.value :
+                              team2Score > team1Score ? elements.team2Select.value : null;
             const goalDiff = Math.abs(team1Score - team2Score);
 
             // Process all player rows
             const rows = elements.playersBody.querySelectorAll('tr');
             rows.forEach(row => {
-                const playerTeamId = row.dataset.teamId;
+                const playerNation = row.dataset.nation;
                 const position = row.dataset.position;
-                const isTeam1Player = playerTeamId === elements.team1Select.value;
+                const isTeam1Player = playerNation === elements.team1Select.value;
 
                 // Get all input elements
                 const victoryCheckbox = row.querySelector('.victory');
@@ -613,9 +629,9 @@
                 // --- Auto-fill logic ---
                 
                 // 1. Victory & Big Win (+4 goal difference)
-                if (winnerId) {
-                    victoryCheckbox.checked = (playerTeamId === winnerId);
-                    bigWinCheckbox.checked = (playerTeamId === winnerId && goalDiff >= 4);
+                if (winnerNation) {
+                    victoryCheckbox.checked = (playerNation === winnerNation);
+                    bigWinCheckbox.checked = (playerNation === winnerNation && goalDiff >= 4);
                 } else {
                     victoryCheckbox.checked = false;
                     bigWinCheckbox.checked = false;
@@ -668,7 +684,7 @@
         async function saveResults() {
             // Validate inputs
             if (!elements.team1Select.value || !elements.team2Select.value) {
-                alert("Sélectionnez deux équipes d'abord!");
+                alert("Sélectionnez deux équipes nationales d'abord!");
                 return;
             }
 
@@ -684,23 +700,21 @@
                 const rows = elements.playersBody.querySelectorAll('tr');
                 for (const row of rows) {
                     if (row.cells.length > 1) { // Skip the "no players" message row
-                        const playerName = row.cells[0].textContent;
-                        const teamId = row.dataset.teamId;
+                        const playerId = row.dataset.playerId;
                         const points = parseInt(row.querySelector('.total-points').textContent || 0);
                         
-                        // Create a reference to the player document
-                        const playerRef = db.collection("players").doc(`${playerName}_${teamId}`);
-                        
-                        // Prepare the update data
-                        const updateData = {
-                            name: playerName,
-                            team: teamId,
-                            position: row.dataset.position,
-                            [`matches.${round}`]: points
-                        };
-                        
-                        // Add to batch
-                        batch.set(playerRef, updateData, { merge: true });
+                        if (playerId) {
+                            // Create a reference to the player document using the actual document ID
+                            const playerRef = db.collection("players").doc(playerId);
+                            
+                            // Prepare the update data
+                            const updateData = {
+                                [`matches.${round}`]: points
+                            };
+                            
+                            // Add to batch
+                            batch.update(playerRef, updateData);
+                        }
                     }
                 }
 
