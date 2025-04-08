@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Gestion du Tournoi</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f7f6;
+            color: #333;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1, h2, h3 {
+            color: #3d195b;
+        }
+        .bracket-controls {
+            margin: 20px 0;
+        }
+        .bracket-btn {
+            background-color: #3d195b;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            font-size: 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            transition: background-color 0.3s;
+        }
+        .bracket-btn:hover {
+            background-color: #2a1041;
+        }
+        .bracket-container {
+            display: flex;
+            overflow-x: auto;
+            padding: 20px 0;
+        }
+        .round {
+            min-width: 250px;
+            margin-right: 30px;
+        }
+        .round h3 {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        .match {
+            background-color: #f8f5ff;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+        }
+        .match-team {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+        .match-team input {
+            width: 40px;
+            text-align: center;
+            margin-left: 10px;
+        }
+        .match-winner {
+            font-weight: bold;
+            color: #3d195b;
+        }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-left: 10px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        @media (max-width: 600px) {
+            .bracket-container {
+                flex-direction: column;
+            }
+            .round {
+                margin-right: 0;
+                margin-bottom: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Gestion du Tournoi</h1>
+        
+        <div class="bracket-controls">
+            <button id="start-bracket-btn" class="bracket-btn">Start Bracket</button>
+            <button id="update-scores-btn" class="bracket-btn">Update Scores</button>
+            <span class="loading" id="loading" style="display: none;"></span>
+        </div>
+        
+        <div class="bracket-container">
+            <div class="round" id="round-f32">
+                <h3>1/16 de Finale</h3>
+                <div class="matches" id="matches-f32"></div>
+            </div>
+            <div class="round" id="round-f16">
+                <h3>1/8 de Finale</h3>
+                <div class="matches" id="matches-f16"></div>
+            </div>
+            <div class="round" id="round-f8">
+                <h3>1/4 de Finale</h3>
+                <div class="matches" id="matches-f8"></div>
+            </div>
+            <div class="round" id="round-f4">
+                <h3>1/2 Finale</h3>
+                <div class="matches" id="matches-f4"></div>
+            </div>
+            <div class="round" id="round-final">
+                <h3>Finale</h3>
+                <div class="matches" id="matches-final"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyC3zpS_NT8sHN4j0upcAd8jmpfhsgXtdRw",
+            authDomain: "paris-entre-amis-598e9.firebaseapp.com",
+            projectId: "paris-entre-amis-598e9",
+            storageBucket: "paris-entre-amis-598e9.firebasestorage.app",
+            messagingSenderId: "638642602040",
+            appId: "1:638642602040:web:0f7557f7d4923b6aec26cd"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        
+        // DOM elements
+        const elements = {
+            startBracketBtn: document.getElementById('start-bracket-btn'),
+            updateScoresBtn: document.getElementById('update-scores-btn'),
+            loading: document.getElementById('loading'),
+            rounds: {
+                f32: document.getElementById('matches-f32'),
+                f16: document.getElementById('matches-f16'),
+                f8: document.getElementById('matches-f8'),
+                f4: document.getElementById('matches-f4'),
+                final: document.getElementById('matches-final')
+            }
+        };
+
+        // Load bracket data from Firebase
+        async function loadBracketData() {
+            try {
+                const doc = await db.collection("tournament").doc("bracket").get();
+                return doc.exists ? doc.data() : null;
+            } catch (error) {
+                console.error("Error loading bracket data:", error);
+                return null;
+            }
+        }
+
+        // Save bracket data to Firebase
+        async function saveBracketData(bracketData) {
+            try {
+                elements.loading.style.display = 'inline-block';
+                await db.collection("tournament").doc("bracket").set(bracketData);
+                console.log("Bracket data saved successfully");
+            } catch (error) {
+                console.error("Error saving bracket data:", error);
+            } finally {
+                elements.loading.style.display = 'none';
+            }
+        }
+
+        // Initialize the bracket with teams from general ranking
+        async function startBracket() {
+            if (!confirm("Êtes-vous sûr de vouloir démarrer le tournoi? Cette action réinitialisera le bracket actuel.")) {
+                return;
+            }
+
+            try {
+                elements.loading.style.display = 'inline-block';
+                elements.startBracketBtn.disabled = true;
+                
+                // Get teams ordered by their ranking
+                const teamsSnapshot = await db.collection("teams")
+                    .orderBy("points", "desc")
+                    .get();
+                
+                const teams = teamsSnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    name: doc.data().name,
+                    code: doc.data().code
+                }));
+
+                // Create initial bracket structure (32 teams)
+                const bracketData = {
+                    f32: createMatches(teams.slice(0, 32)), // Top 32 teams
+                    f16: [],
+                    f8: [],
+                    f4: [],
+                    final: []
+                };
+
+                // Save to Firebase
+                await saveBracketData(bracketData);
+                
+                // Update UI
+                renderBracket(bracketData);
+                alert("Bracket initialisé avec succès!");
+            } catch (error) {
+                console.error("Error starting bracket:", error);
+                alert("Erreur lors de l'initialisation du bracket: " + error.message);
+            } finally {
+                elements.loading.style.display = 'none';
+                elements.startBracketBtn.disabled = false;
+            }
+        }
+
+        // Create matches from a list of teams
+        function createMatches(teams) {
+            const matches = [];
+            for (let i = 0; i < teams.length; i += 2) {
+                matches.push({
+                    team1: teams[i],
+                    team2: teams[i + 1],
+                    score1: 0,
+                    score2: 0,
+                    winner: null
+                });
+            }
+            return matches;
+        }
+
+        // Render the bracket on the page
+        function renderBracket(bracketData) {
+            // Clear all rounds first
+            Object.keys(elements.rounds).forEach(round => {
+                elements.rounds[round].innerHTML = '';
+            });
+
+            // Render each round
+            Object.entries(bracketData).forEach(([round, matches]) => {
+                const roundElement = elements.rounds[round];
+                
+                matches.forEach((match, index) => {
+                    const matchElement = document.createElement('div');
+                    matchElement.className = 'match';
+                    matchElement.dataset.round = round;
+                    matchElement.dataset.index = index;
+                    
+                    const team1Element = document.createElement('div');
+                    team1Element.className = `match-team ${match.winner === match.team1.id ? 'match-winner' : ''}`;
+                    team1Element.innerHTML = `
+                        <span>${match.team1.name}</span>
+                        <input type="number" class="score-input" min="0" value="${match.score1}">
+                    `;
+                    
+                    const team2Element = document.createElement('div');
+                    team2Element.className = `match-team ${match.winner === match.team2.id ? 'match-winner' : ''}`;
+                    team2Element.innerHTML = `
+                        <span>${match.team2.name}</span>
+                        <input type="number" class="score-input" min="0" value="${match.score2}">
+                    `;
+                    
+                    matchElement.appendChild(team1Element);
+                    matchElement.appendChild(team2Element);
+                    roundElement.appendChild(matchElement);
+                    
+                    // Add event listeners to score inputs
+                    team1Element.querySelector('input').addEventListener('change', updateMatchWinner);
+                    team2Element.querySelector('input').addEventListener('change', updateMatchWinner);
+                });
+            });
+        }
+
+        // Update match winner based on scores
+        async function updateMatchWinner(event) {
+            const input = event.target;
+            const matchElement = input.closest('.match');
+            const round = matchElement.dataset.round;
+            const index = parseInt(matchElement.dataset.index);
+            
+            // Get current bracket data
+            const bracketData = await loadBracketData();
+            if (!bracketData) return;
+            
+            // Get the match
+            const match = bracketData[round][index];
+            
+            // Update scores from inputs
+            const inputs = matchElement.querySelectorAll('.score-input');
+            match.score1 = parseInt(inputs[0].value) || 0;
+            match.score2 = parseInt(inputs[1].value) || 0;
+            
+            // Determine winner
+            if (match.score1 > match.score2) {
+                match.winner = match.team1.id;
+            } else if (match.score2 > match.score1) {
+                match.winner = match.team2.id;
+            } else {
+                match.winner = null; // Draw (handle this case as needed)
+            }
+            
+            // Update UI
+            const teamElements = matchElement.querySelectorAll('.match-team');
+            teamElements.forEach(el => el.classList.remove('match-winner'));
+            if (match.winner) {
+                const winnerElement = match.winner === match.team1.id ? teamElements[0] : teamElements[1];
+                winnerElement.classList.add('match-winner');
+            }
+            
+            // Save updated bracket
+            await saveBracketData(bracketData);
+        }
+
+        // Update bracket progression (move winners to next round)
+        async function updateBracketProgression() {
+            try {
+                elements.loading.style.display = 'inline-block';
+                elements.updateScoresBtn.disabled = true;
+                
+                const bracketData = await loadBracketData();
+                if (!bracketData) {
+                    alert("Aucun bracket trouvé. Initialisez d'abord le bracket.");
+                    return;
+                }
+                
+                // Check if all matches in current round have winners
+                const currentRound = getCurrentRound(bracketData);
+                if (!currentRound) {
+                    alert("Le tournoi est déjà terminé!");
+                    return;
+                }
+                
+                const incompleteMatches = bracketData[currentRound].filter(m => !m.winner);
+                if (incompleteMatches.length > 0) {
+                    alert("Certains matchs n'ont pas de gagnant défini!");
+                    return;
+                }
+                
+                // Proceed to next round
+                const nextRound = getNextRound(currentRound);
+                if (!nextRound) {
+                    alert("Le tournoi est terminé!");
+                    return;
+                }
+                
+                // Create matches for next round with winners
+                const winners = bracketData[currentRound].map(m => {
+                    return m.winner === m.team1.id ? m.team1 : m.team2;
+                });
+                
+                bracketData[nextRound] = createMatches(winners);
+                await saveBracketData(bracketData);
+                
+                // Update UI
+                renderBracket(bracketData);
+                alert(`Progression mise à jour pour le ${getRoundName(nextRound)}!`);
+            } catch (error) {
+                console.error("Error updating bracket:", error);
+                alert("Erreur lors de la mise à jour du bracket: " + error.message);
+            } finally {
+                elements.loading.style.display = 'none';
+                elements.updateScoresBtn.disabled = false;
+            }
+        }
+
+        // Helper function to get current round
+        function getCurrentRound(bracketData) {
+            const rounds = ['f32', 'f16', 'f8', 'f4', 'final'];
+            for (let i = 0; i < rounds.length; i++) {
+                const round = rounds[i];
+                if (bracketData[round].length > 0) {
+                    // Check if this round is complete
+                    const incompleteMatches = bracketData[round].filter(m => !m.winner);
+                    if (incompleteMatches.length === 0) {
+                        continue; // Round is complete, check next
+                    }
+                    return round;
+                }
+            }
+            return null; // Tournament is complete
+        }
+
+        // Helper function to get next round
+        function getNextRound(currentRound) {
+            const roundOrder = ['f32', 'f16', 'f8', 'f4', 'final'];
+            const currentIndex = roundOrder.indexOf(currentRound);
+            return currentIndex < roundOrder.length - 1 ? roundOrder[currentIndex + 1] : null;
+        }
+
+        // Helper function to get round display name
+        function getRoundName(round) {
+            const names = {
+                'f32': '1/16 de Finale',
+                'f16': '1/8 de Finale',
+                'f8': '1/4 de Finale',
+                'f4': '1/2 Finale',
+                'final': 'Finale'
+            };
+            return names[round] || round;
+        }
+
+        // Initialize the page
+        async function init() {
+            try {
+                // Load and render bracket if it exists
+                const bracketData = await loadBracketData();
+                if (bracketData) {
+                    renderBracket(bracketData);
+                }
+                
+                // Setup event listeners
+                elements.startBracketBtn.addEventListener('click', startBracket);
+                elements.updateScoresBtn.addEventListener('click', updateBracketProgression);
+            } catch (error) {
+                console.error('Error initializing bracket page:', error);
+                alert("Erreur d'initialisation: " + error.message);
+            }
+        }
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
