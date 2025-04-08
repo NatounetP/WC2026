@@ -266,14 +266,16 @@
        const defaultData = {
   teams: [],  // Now empty - all teams come from players.json
   playerStats: [],
-  bracket: {}
+           players:[],
+  tournament: {}
 };
 
         // Data structure to hold tournament data
         let tournamentData = {
             teams: [],
             playerStats: [],
-            bracket: {}
+            players:[],
+            tournament: {}
         };
 
         // Point values by position (Garden/Défenseur/Offensif)
@@ -359,7 +361,7 @@
 
     // Load player stats from Firestore
     const snapshot = await db.collection("players").get();
-    tournamentData.playerStats = snapshot.docs.map(doc => doc.data());
+    tournamentData.players = snapshot.docs.map(doc => doc.data());
 
     updateTeamSelectors();
   } catch (error) {
@@ -481,7 +483,7 @@
   row.dataset.position = player.position;
             
   // Find existing stats for this player
-  const existingStats = tournamentData.playerStats.find(p => 
+  const existingStats = tournamentData.player.find(p => 
     p.name === player.name && p.nation === teamNation);
   
   const round = elements.roundSelect.value;
