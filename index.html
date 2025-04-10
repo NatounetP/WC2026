@@ -784,6 +784,21 @@
     const teamContainer = document.getElementById('team-container');
     teamContainer.innerHTML = '';
 
+    // Organiser les joueurs par équipe
+    const playersByTeam = {};
+    
+    // Initialiser le tableau pour chaque équipe
+    teams.forEach(team => {
+        playersByTeam[team.id] = [];
+    });
+    
+    // Ajouter chaque joueur dans son équipe
+    playerStatsData.forEach(player => {
+        if (player.equipe && playersByTeam[player.equipe]) {
+            playersByTeam[player.equipe].push(player);
+        }
+    });
+
     teams.forEach((team, teamIndex) => {
         const teamCard = document.createElement('div');
         teamCard.className = 'team-card';
@@ -794,64 +809,85 @@
             formation = "1-2-3"; // Formation par défaut si invalide
         }
 
-        // Créer la vue liste des joueurs
+        // Récupérer tous les joueurs de cette équipe depuis playerStatsData
+        const teamPlayers = playersByTeam[team.id] || [];
+        
+        // Trier les joueurs par leur round de draft (croissant, les meilleurs picks en premier)
+        const sortedPlayers = [...teamPlayers].sort((a, b) => {
+            // D'abord par round (croissant)
+            const roundA = a.round || 999;
+            const roundB = b.round || 999;
+            
+            if (roundA !== roundB) {
+                return roundA - roundB;
+            }
+            
+            // Ensuite par position (GK, DF, FW)
+            const posOrder = { 'GK': 1, 'DF': 2, 'FW': 3 };
+            return (posOrder[a.position] || 99) - (posOrder[b.position] || 99);
+        });
+        
+        // Créer la vue liste des joueurs ordonnée par round de draft
         let playersListHtml = '';
-        team.players.forEach(player => {
+        
+        sortedPlayers.forEach(player => {
             const isGoalkeeper = player.position === 'GK';
             const positionName = isGoalkeeper ? 'Gardien' : 
                                 player.position === 'DF' ? 'Défenseur' : 'Attaquant';
             
-            // Trouver les stats du joueur
-            const playerStats = playerStatsData.find(p => p.name === player.name);
-            const totalPoints = playerStats ? calculatePlayerTotalPoints(playerStats.matches) : 0;
+            const totalPoints = calculatePlayerTotalPoints(player.matches);
+            const draftRound = player.round ? `Round ${player.round}` : 'Non drafté';
             
             playersListHtml += `
                 <div class="player ${isGoalkeeper ? 'goalkeeper' : ''}">
-                    ${player.name} (${positionName}, ${player.nation || team.shortName})
-                    <span class="player-points">${totalPoints} pts</span>
+                    ${player.name} (${positionName}, ${player.nation || ''})
+                    <span class="player-details">
+                        ${draftRound}
+                        <span class="player-points">${totalPoints} pts</span>
+                    </span>
                 </div>
             `;
         });
 
-                // Create team card HTML with both views
-                teamCard.innerHTML = `
-                    <h3>${team.name}</h3>
-                    <div class="view-toggle">
-                        <button id="field-btn-${teamIndex}" class="view-btn active" onclick="toggleView(${teamIndex}, 'field')">Vue Terrain</button>
-                        <button id="list-btn-${teamIndex}" class="view-btn" onclick="toggleView(${teamIndex}, 'list')">Vue Liste</button>
+        // Créer le HTML de la carte équipe avec les deux vues
+        teamCard.innerHTML = `
+            <h3>${team.name}</h3>
+            <div class="view-toggle">
+                <button id="field-btn-${teamIndex}" class="view-btn active" onclick="toggleView(${teamIndex}, 'field')">Vue Terrain</button>
+                <button id="list-btn-${teamIndex}" class="view-btn" onclick="toggleView(${teamIndex}, 'list')">Vue Liste</button>
+            </div>
+            
+            <div class="team-content">
+                <div id="field-view-${teamIndex}" class="field-view">
+                    <div class="soccer-field">
+                        <!-- Field lines -->
+                        <div class="halfway-line"></div>
+                        <div class="center-circle"></div>
+                        <div class="center-spot"></div>
+                        <div class="penalty-box-left"></div>
+                        <div class="penalty-box-right"></div>
+                        <div class="goal-box-left"></div>
+                        <div class="goal-box-right"></div>
+                        <div class="goal-left"></div>
+                        <div class="goal-right"></div>
                     </div>
-                    
-                    <div class="team-content">
-                        <div id="field-view-${teamIndex}" class="field-view">
-                            <div class="soccer-field">
-                                <!-- Field lines -->
-                                <div class="halfway-line"></div>
-                                <div class="center-circle"></div>
-                                <div class="center-spot"></div>
-                                <div class="penalty-box-left"></div>
-                                <div class="penalty-box-right"></div>
-                                <div class="goal-box-left"></div>
-                                <div class="goal-box-right"></div>
-                                <div class="goal-left"></div>
-                                <div class="goal-right"></div>
-                            </div>
-                        </div>
-                        
-                        <div id="list-view-${teamIndex}" class="list-view" style="display: none;">
-                            <div class="player-list">
-                                ${playersListHtml}
-                            </div>
-                        </div>
+                </div>
+                
+                <div id="list-view-${teamIndex}" class="list-view" style="display: none;">
+                    <div class="player-list">
+                        ${playersListHtml || '<p>Aucun joueur trouvé pour cette équipe</p>'}
                     </div>
-                `;
+                </div>
+            </div>
+        `;
 
-                teamContainer.appendChild(teamCard);
+        teamContainer.appendChild(teamCard);
 
-                // Add players to the field
-                const soccerField = teamCard.querySelector('.soccer-field');
-                placePlayersOnField(team.players, soccerField, formation);
-            });
-        }
+        // Ajouter les joueurs sur le terrain
+        const soccerField = teamCard.querySelector('.soccer-field');
+        placePlayersOnField(sortedPlayers, soccerField, formation);
+    });
+}
 
         // Function to place players on the field based on formation
         function placePlayersOnField(players, fieldElement, formation) {
