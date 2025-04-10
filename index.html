@@ -833,7 +833,7 @@
                                 player.position === 'DF' ? 'Défenseur' : 'Attaquant';
             
             const totalPoints = calculatePlayerTotalPoints(player.matches);
-            const draftRound = player.round ? `Round ${player.round}` : 'Non drafté';
+            const draftRound = player.round ? `Round ${player.round}` : '     ';
             
             playersListHtml += `
                 <div class="player ${isGoalkeeper ? 'goalkeeper' : ''}">
