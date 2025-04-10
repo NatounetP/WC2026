@@ -178,6 +178,11 @@
         .draft-controls button {
             flex: 1;
         }
+        .admin-controls {
+            margin-top: 20px;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
         @media (max-width: 768px) {
             .container {
                 padding: 10px;
@@ -206,6 +211,10 @@
                 <input type="text" id="draft-order" placeholder="Exemple: Bubu, Bryan, Chris, ...">
             </div>
             <button id="start-draft">Démarrer la Draft</button>
+            <div id="reset-section" class="admin-controls hidden">
+                <button id="reset-draft">Réinitialiser la Draft</button>
+                <p class="small-text">Attention: Cela effacera tous les joueurs et l'historique!</p>
+            </div>
         </div>
         
         <div id="draft-section" class="section hidden">
@@ -279,11 +288,14 @@
         let currentRound = 1;
         let draftHistory = [];
         let snakeOrder = true; // Draft en serpent (alterne l'ordre à chaque round)
+        const DRAFT_STATE_ID = "current_draft_state"; // ID unique pour l'état de la draft
         
         // Éléments DOM
         const startDraftBtn = document.getElementById('start-draft');
+        const resetDraftBtn = document.getElementById('reset-draft');
         const draftSection = document.getElementById('draft-section');
         const draftHistorySection = document.getElementById('draft-history');
+        const resetSection = document.getElementById('reset-section');
         const currentTeamElement = document.getElementById('current-team').querySelector('span');
         const roundIndicator = document.getElementById('round-indicator');
         const draftOrderDisplay = document.getElementById('draft-order-display');
@@ -295,7 +307,7 @@
         const statusMessage = document.getElementById('status-message');
         const draftHistoryBody = document.getElementById('draft-history-body');
         
-        // Liste des participants
+        // Liste des participants par défaut
         const participants = ["Bubu", "Bryan", "Chris", "Cyril", "Colin", "Gui", "Joss", "Léo", "Marc", "Matthieu", "Patrick", "Pedzou", "Séb", "Nathan", "Julien"];
         
         // Pré-remplir l'input avec la liste des participants
@@ -305,9 +317,24 @@
         startDraftBtn.addEventListener('click', startDraft);
         submitPickBtn.addEventListener('click', submitPick);
         undoPickBtn.addEventListener('click', undoLastPick);
+        resetDraftBtn.addEventListener('click', resetDraft);
+        
+        // Au chargement de la page, vérifier s'il y a une draft en cours
+        checkExistingDraft();
         
         // Fonctions
-        function startDraft() {
+        async function checkExistingDraft() {
+            try {
+                const stateSnapshot = await db.collection('draft_state').doc(DRAFT_STATE_ID).get();
+                if (stateSnapshot.exists) {
+                    resetSection.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error("Erreur lors de la vérification de l'état:", error);
+            }
+        }
+        
+        async function startDraft() {
             const orderInput = document.getElementById('draft-order').value.trim();
             if (!orderInput) {
                 showStatusMessage('Veuillez entrer l\'ordre de la draft', 'error');
@@ -320,21 +347,63 @@
                 return;
             }
             
-            // Réinitialiser l'état
-            currentPick = 0;
-            currentRound = 1;
-            draftHistory = [];
-            
             // Afficher la section de draft
             draftSection.classList.remove('hidden');
             draftHistorySection.classList.remove('hidden');
+            resetSection.classList.remove('hidden');
             draftHistoryBody.innerHTML = '';
             
-            // Mettre à jour l'affichage
-            updateDraftDisplay();
-            
-            // Charger l'historique existant si disponible
-            loadDraftHistory();
+            try {
+                const stateSnapshot = await db.collection('draft_state').doc(DRAFT_STATE_ID).get();
+                
+                if (stateSnapshot.exists) {
+                    const stateData = stateSnapshot.data();
+                    // Vérifier si l'ordre de draft correspond
+                    if (JSON.stringify(stateData.draftOrder) === JSON.stringify(draftOrder)) {
+                        currentPick = stateData.currentPick;
+                        currentRound = stateData.currentRound;
+                        snakeOrder = stateData.snakeOrder !== undefined ? stateData.snakeOrder : true;
+                        showStatusMessage('Draft existante chargée', 'success');
+                    } else {
+                        // Réinitialiser si l'ordre a changé
+                        currentPick = 0;
+                        currentRound = 1;
+                        showStatusMessage('Nouvel ordre de draft détecté, réinitialisation', 'success');
+                    }
+                } else {
+                    // Pas d'état existant, initialiser
+                    currentPick = 0;
+                    currentRound = 1;
+                }
+                
+                // Sauvegarder le nouvel état
+                await saveDraftState();
+                
+                // Charger l'historique
+                await loadDraftHistory();
+                
+                // Mettre à jour l'affichage
+                updateDraftDisplay();
+                
+            } catch (error) {
+                console.error("Erreur lors du démarrage:", error);
+                showStatusMessage(`Erreur: ${error.message}`, 'error');
+            }
+        }
+        
+        async function saveDraftState() {
+            try {
+                await db.collection('draft_state').doc(DRAFT_STATE_ID).set({
+                    draftOrder: draftOrder,
+                    currentPick: currentPick,
+                    currentRound: currentRound,
+                    snakeOrder: snakeOrder,
+                    lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            } catch (error) {
+                console.error("Erreur lors de la sauvegarde de l'état:", error);
+                throw error;
+            }
         }
         
         function updateDraftDisplay() {
@@ -382,127 +451,175 @@
         }
         
         async function submitPick() {
-    // Récupérer les valeurs
-    const playerName = playerNameInput.value.trim();
-    const playerNation = playerNationInput.value.trim();
-    const playerPosition = playerPositionSelect.value;
-    
-    // Validation
-    if (!playerName || !playerNation) {
-        showStatusMessage('Veuillez remplir tous les champs', 'error');
-        return;
-    }
-    
-    // Obtenir l'équipe actuelle
-    const pickInRound = currentPick % draftOrder.length;
-    const roundIsEven = currentRound % 2 === 0;
-    let currentTeamIndex;
-    
-    if (snakeOrder && roundIsEven) {
-        currentTeamIndex = draftOrder.length - 1 - pickInRound;
-    } else {
-        currentTeamIndex = pickInRound;
-    }
-    
-    const currentTeam = draftOrder[currentTeamIndex];
-    
-    // Afficher l'état de chargement
-    submitPickBtn.disabled = true;
-    const loadingSpinner = document.createElement('span');
-    loadingSpinner.className = 'loading';
-    submitPickBtn.appendChild(loadingSpinner);
-    
-    try {
-        // Créer un ID basé sur le nom du joueur (nettoyé pour Firebase)
-        const playerId = playerName.toLowerCase().replace(/[^a-z0-9]/g, '_');
-        
-        // Enregistrer dans Firebase avec le nom comme ID
-        const pickData = {
-            name: playerName,
-            nation: playerNation,
-            position: playerPosition,
-            team: currentTeam,
-            pickNumber: currentPick + 1,
-            round: currentRound
-        };
-        
-        await db.collection('players').doc(playerId).set(pickData);
-        
-        // Ajouter à l'historique
-        pickData.id = playerId;
-        draftHistory.push(pickData);
-        
-        // Ajouter à la table d'historique
-        addToHistoryTable(pickData);
-        
-        // Passer au pick suivant
-        currentPick++;
-        if (currentPick % draftOrder.length === 0) {
-            currentRound++;
+            // Récupérer les valeurs
+            const playerName = playerNameInput.value.trim();
+            const playerNation = playerNationInput.value.trim();
+            const playerPosition = playerPositionSelect.value;
+            
+            // Validation
+            if (!playerName || !playerNation) {
+                showStatusMessage('Veuillez remplir tous les champs', 'error');
+                return;
+            }
+            
+            // Obtenir l'équipe actuelle
+            const pickInRound = currentPick % draftOrder.length;
+            const roundIsEven = currentRound % 2 === 0;
+            let currentTeamIndex;
+            
+            if (snakeOrder && roundIsEven) {
+                currentTeamIndex = draftOrder.length - 1 - pickInRound;
+            } else {
+                currentTeamIndex = pickInRound;
+            }
+            
+            const currentTeam = draftOrder[currentTeamIndex];
+            
+            // Afficher l'état de chargement
+            submitPickBtn.disabled = true;
+            const loadingSpinner = document.createElement('span');
+            loadingSpinner.className = 'loading';
+            submitPickBtn.appendChild(loadingSpinner);
+            
+            try {
+                // Créer un ID basé sur le nom du joueur (nettoyé pour Firebase)
+                const playerId = playerName.toLowerCase().replace(/[^a-z0-9]/g, '_');
+                
+                // Enregistrer dans Firebase avec le nom comme ID
+                const pickData = {
+                    name: playerName,
+                    nation: playerNation,
+                    position: playerPosition,
+                    team: currentTeam,
+                    pickNumber: currentPick + 1,
+                    round: currentRound
+                };
+                
+                await db.collection('players').doc(playerId).set(pickData);
+                
+                // Ajouter à l'historique
+                pickData.id = playerId;
+                draftHistory.push(pickData);
+                
+                // Ajouter à la table d'historique
+                addToHistoryTable(pickData);
+                
+                // Passer au pick suivant
+                currentPick++;
+                if (currentPick % draftOrder.length === 0) {
+                    currentRound++;
+                }
+                
+                // Sauvegarder le nouvel état
+                await saveDraftState();
+                
+                // Afficher le bouton d'annulation
+                undoPickBtn.classList.remove('hidden');
+                
+                // Mettre à jour l'affichage
+                updateDraftDisplay();
+                
+                showStatusMessage(`${playerName} a été sélectionné par ${currentTeam}`, 'success');
+            } catch (error) {
+                console.error("Erreur lors de l'enregistrement:", error);
+                showStatusMessage(`Erreur: ${error.message}`, 'error');
+            } finally {
+                // Enlever l'état de chargement
+                submitPickBtn.disabled = false;
+                submitPickBtn.removeChild(loadingSpinner);
+            }
         }
         
-        // Afficher le bouton d'annulation
-        undoPickBtn.classList.remove('hidden');
-        
-        // Mettre à jour l'affichage
-        updateDraftDisplay();
-        
-        showStatusMessage(`${playerName} a été sélectionné par ${currentTeam}`, 'success');
-    } catch (error) {
-        console.error("Erreur lors de l'enregistrement:", error);
-        showStatusMessage(`Erreur: ${error.message}`, 'error');
-    } finally {
-        // Enlever l'état de chargement
-        submitPickBtn.disabled = false;
-        submitPickBtn.removeChild(loadingSpinner);
-    }
-}
-        
-       async function undoLastPick() {
-    if (draftHistory.length === 0) {
-        showStatusMessage('Pas de sélection à annuler', 'error');
-        return;
-    }
-    
-    // Désactiver le bouton pendant l'opération
-    undoPickBtn.disabled = true;
-    const loadingSpinner = document.createElement('span');
-    loadingSpinner.className = 'loading';
-    undoPickBtn.appendChild(loadingSpinner);
-    
-    try {
-        // Récupérer la dernière sélection
-        const lastPick = draftHistory.pop();
-        
-        // Supprimer de Firebase en utilisant l'ID basé sur le nom
-        await db.collection('players').doc(lastPick.id).delete();
-        
-        // Mettre à jour l'affichage
-        if (currentPick % draftOrder.length === 0) {
-            currentRound--;
-        }
-        currentPick--;
-        
-        // Mettre à jour la table d'historique
-        draftHistoryBody.removeChild(draftHistoryBody.lastChild);
-        
-        updateDraftDisplay();
-        
-        // Masquer le bouton d'annulation si plus d'historique
-        if (draftHistory.length === 0) {
-            undoPickBtn.classList.add('hidden');
+        async function undoLastPick() {
+            if (draftHistory.length === 0) {
+                showStatusMessage('Pas de sélection à annuler', 'error');
+                return;
+            }
+            
+            // Désactiver le bouton pendant l'opération
+            undoPickBtn.disabled = true;
+            const loadingSpinner = document.createElement('span');
+            loadingSpinner.className = 'loading';
+            undoPickBtn.appendChild(loadingSpinner);
+            
+            try {
+                // Récupérer la dernière sélection
+                const lastPick = draftHistory.pop();
+                
+                // Supprimer de Firebase
+                await db.collection('players').doc(lastPick.id).delete();
+                
+                // Mettre à jour l'état
+                if (currentPick % draftOrder.length === 0) {
+                    currentRound--;
+                }
+                currentPick--;
+                
+                // Sauvegarder le nouvel état
+                await saveDraftState();
+                
+                // Mettre à jour la table d'historique
+                draftHistoryBody.removeChild(draftHistoryBody.lastChild);
+                
+                updateDraftDisplay();
+                
+                // Masquer le bouton d'annulation si plus d'historique
+                if (draftHistory.length === 0) {
+                    undoPickBtn.classList.add('hidden');
+                }
+                
+                showStatusMessage(`Sélection de ${lastPick.name} annulée`, 'success');
+            } catch (error) {
+                console.error("Erreur lors de l'annulation:", error);
+                showStatusMessage(`Erreur: ${error.message}`, 'error');
+            } finally {
+                // Réactiver le bouton
+                undoPickBtn.disabled = false;
+                undoPickBtn.removeChild(loadingSpinner);
+            }
         }
         
-        showStatusMessage(`Sélection de ${lastPick.name} annulée`, 'success');
-    } catch (error) {
-        console.error("Erreur lors de l'annulation:", error);
-        showStatusMessage(`Erreur: ${error.message}`, 'error');
-    } finally {
-        // Réactiver le bouton
-        undoPickBtn.disabled = false;
-        undoPickBtn.removeChild(loadingSpinner);
-    }
-}
+        async function resetDraft() {
+            if (!confirm("Êtes-vous sûr de vouloir réinitialiser complètement la draft? Cette action est irréversible!")) {
+                return;
+            }
+            
+            resetDraftBtn.disabled = true;
+            const loadingSpinner = document.createElement('span');
+            loadingSpinner.className = 'loading';
+            resetDraftBtn.appendChild(loadingSpinner);
+            
+            try {
+                // Supprimer tous les joueurs
+                const playersSnapshot = await db.collection('players').get();
+                const batch = db.batch();
+                playersSnapshot.forEach(doc => {
+                    batch.delete(doc.ref);
+                });
+                await batch.commit();
+                
+                // Supprimer l'état de la draft
+                await db.collection('draft_state').doc(DRAFT_STATE_ID).delete();
+                
+                // Réinitialiser les variables
+                draftHistory = [];
+                currentPick = 0;
+                currentRound = 1;
+                
+                // Mettre à jour l'interface
+                draftHistoryBody.innerHTML = '';
+                undoPickBtn.classList.add('hidden');
+                updateDraftDisplay();
+                
+                showStatusMessage('Draft réinitialisée avec succès', 'success');
+            } catch (error) {
+                console.error("Erreur lors de la réinitialisation:", error);
+                showStatusMessage(`Erreur: ${error.message}`, 'error');
+            } finally {
+                resetDraftBtn.disabled = false;
+                resetDraftBtn.removeChild(loadingSpinner);
+            }
+        }
         
         function addToHistoryTable(pickData) {
             const row = document.createElement('tr');
@@ -521,6 +638,71 @@
             draftHistoryBody.appendChild(row);
         }
         
+        async function loadDraftHistory() {
+            try {
+                // Afficher un message de chargement
+                draftHistoryBody.innerHTML = '<tr><td colspan="6" class="loading-text">Chargement de l\'historique...</td></tr>';
+                
+                // Récupérer les données de Firebase, triées par round et pickNumber
+                const snapshot = await db.collection('players')
+                    .orderBy('round')
+                    .orderBy('pickNumber')
+                    .get();
+                
+                if (snapshot.empty) {
+                    draftHistoryBody.innerHTML = '<tr><td colspan="6">Aucune sélection trouvée</td></tr>';
+                    return;
+                }
+                
+                // Réinitialiser l'historique et les compteurs
+                draftHistory = [];
+                draftHistoryBody.innerHTML = '';
+                
+                // Parcourir les résultats
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    const pickData = {
+                        id: doc.id,
+                        name: data.name,
+                        nation: data.nation,
+                        position: data.position,
+                        team: data.team,
+                        pickNumber: data.pickNumber,
+                        round: data.round
+                    };
+                    
+                    // Ajouter à l'historique
+                    draftHistory.push(pickData);
+                    
+                    // Ajouter à la table
+                    addToHistoryTable(pickData);
+                });
+                
+                // Mettre à jour le pick et round actuels
+                if (draftHistory.length > 0) {
+                    const lastPick = draftHistory[draftHistory.length - 1];
+                    currentPick = lastPick.pickNumber;
+                    currentRound = lastPick.round;
+                    
+                    // Si on est à la fin d'un round, passer au suivant
+                    if (currentPick % draftOrder.length === 0) {
+                        currentRound++;
+                        currentPick = currentRound * draftOrder.length - draftOrder.length;
+                    }
+                    
+                    // Afficher le bouton d'annulation
+                    undoPickBtn.classList.remove('hidden');
+                }
+                
+                // Mettre à jour l'affichage
+                updateDraftDisplay();
+                
+            } catch (error) {
+                console.error("Erreur lors du chargement de l'historique:", error);
+                draftHistoryBody.innerHTML = `<tr><td colspan="6">Erreur: ${error.message}</td></tr>`;
+            }
+        }
+        
         function showStatusMessage(message, type) {
             statusMessage.textContent = message;
             statusMessage.className = `status-message ${type}`;
@@ -531,71 +713,6 @@
                 statusMessage.classList.add('hidden');
             }, 5000);
         }
-        
-        async function loadDraftHistory() {
-    try {
-        // Afficher un message de chargement
-        draftHistoryBody.innerHTML = '<tr><td colspan="6" class="loading-text">Chargement de l\'historique...</td></tr>';
-        
-        // Récupérer les données de Firebase, triées par round et pickNumber
-        const snapshot = await db.collection('players')
-            .orderBy('round')
-            .orderBy('pickNumber')
-            .get();
-        
-        if (snapshot.empty) {
-            draftHistoryBody.innerHTML = '<tr><td colspan="6">Aucune sélection trouvée</td></tr>';
-            return;
-        }
-        
-        // Réinitialiser l'historique et les compteurs
-        draftHistory = [];
-        draftHistoryBody.innerHTML = '';
-        
-        // Parcourir les résultats
-        snapshot.forEach(doc => {
-            const data = doc.data();
-            const pickData = {
-                id: doc.id,
-                name: data.name,
-                nation: data.nation,
-                position: data.position,
-                team: data.team,
-                pickNumber: data.pickNumber,
-                round: data.round
-            };
-            
-            // Ajouter à l'historique
-            draftHistory.push(pickData);
-            
-            // Ajouter à la table
-            addToHistoryTable(pickData);
-        });
-        
-        // Mettre à jour le pick et round actuels
-        if (draftHistory.length > 0) {
-            const lastPick = draftHistory[draftHistory.length - 1];
-            currentPick = lastPick.pickNumber;
-            currentRound = lastPick.round;
-            
-            // Si on est à la fin d'un round, passer au suivant
-            if (currentPick % draftOrder.length === 0) {
-                currentRound++;
-                currentPick = currentRound * draftOrder.length - draftOrder.length;
-            }
-            
-            // Afficher le bouton d'annulation
-            undoPickBtn.classList.remove('hidden');
-        }
-        
-        // Mettre à jour l'affichage
-        updateDraftDisplay();
-        
-    } catch (error) {
-        console.error("Erreur lors du chargement de l'historique:", error);
-        draftHistoryBody.innerHTML = `<tr><td colspan="6">Erreur: ${error.message}</td></tr>`;
-    }
-}
     </script>
 </body>
 </html>
