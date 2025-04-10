@@ -930,42 +930,81 @@
 
         // Function to render standings
         function renderStandings(teams) {
-            const standingsBody = document.getElementById('standings-body');
-            standingsBody.innerHTML = '';
+    const standingsBody = document.getElementById('standings-body');
+    standingsBody.innerHTML = '';
 
-            // Sort by total points (descending)
-            const sortedStandings = [...teams].sort((a, b) => {
-                const totalA = calculateTeamTotalPoints(a.results);
-                const totalB = calculateTeamTotalPoints(b.results);
-                return totalB - totalA;
-            });
+    // Créer un objet pour stocker les totaux des équipes par match
+    const teamPointsByMatch = {};
+    teams.forEach(team => {
+        teamPointsByMatch[team.id] = {
+            M1: 0, M2: 0, M3: 0, F32: 0, F16: 0, F8: 0, F4: 0, Final: 0
+        };
+    });
 
-            sortedStandings.forEach((team, index) => {
-                const row = document.createElement('tr');
-                const totalPoints = calculateTeamTotalPoints(team.results);
+    // Parcourir tous les joueurs pour calculer les points des équipes
+    db.collection("players").get().then(playersSnapshot => {
+        const players = playersSnapshot.docs.map(doc => doc.data());
+        
+        // Pour chaque joueur, ajouter ses points à son équipe
+        players.forEach(player => {
+            if (player.team && player.matches) {
+                const teamId = player.team;
+                
+                // Si l'équipe existe dans notre liste
+                if (teamPointsByMatch[teamId]) {
+                    // Pour chaque match, ajouter les points du joueur à ceux de l'équipe
+                    for (const [matchKey, points] of Object.entries(player.matches)) {
+                        if (teamPointsByMatch[teamId][matchKey] !== undefined) {
+                            teamPointsByMatch[teamId][matchKey] += (points || 0);
+                        }
+                    }
+                }
+            }
+        });
 
-                row.innerHTML = `
-                    <td>${index + 1}</td>
-                    <td>${team.name}</td>
-                    <td>${team.results.M1 || 0}</td>
-                    <td>${team.results.M2 || 0}</td>
-                    <td>${team.results.M3 || 0}</td>
-                    <td>${team.results.F32 || 0}</td>
-                    <td>${team.results.F16 || 0}</td>
-                    <td>${team.results.F8 || 0}</td>
-                    <td>${team.results.F4 || 0}</td>
-                    <td>${team.results.Final || 0}</td>
-                    <td><strong>${totalPoints}</strong></td>
-                `;
-                standingsBody.appendChild(row);
-            });
-        }
+        // Maintenant, nous pouvons trier et afficher les équipes
+        const sortedStandings = [...teams].sort((a, b) => {
+            const totalA = calculateTeamTotalPointsDynamic(teamPointsByMatch[a.id] || {});
+            const totalB = calculateTeamTotalPointsDynamic(teamPointsByMatch[b.id] || {});
+            return totalB - totalA;
+        });
+
+        sortedStandings.forEach((team, index) => {
+            const row = document.createElement('tr');
+            const teamPoints = teamPointsByMatch[team.id] || {};
+            const totalPoints = calculateTeamTotalPointsDynamic(teamPoints);
+
+            row.innerHTML = `
+                <td>${index + 1}</td>
+                <td>${team.name}</td>
+                <td>${teamPoints.M1 || 0}</td>
+                <td>${teamPoints.M2 || 0}</td>
+                <td>${teamPoints.M3 || 0}</td>
+                <td>${teamPoints.F32 || 0}</td>
+                <td>${teamPoints.F16 || 0}</td>
+                <td>${teamPoints.F8 || 0}</td>
+                <td>${teamPoints.F4 || 0}</td>
+                <td>${teamPoints.Final || 0}</td>
+                <td><strong>${totalPoints}</strong></td>
+            `;
+            standingsBody.appendChild(row);
+        });
+    }).catch(error => {
+        console.error("Error loading player data for standings:", error);
+        standingsBody.innerHTML = `<tr><td colspan="11" class="error">Error loading data: ${error.message}</td></tr>`;
+    });
+}
 
         // Helper function to calculate team total points
         function calculateTeamTotalPoints(results) {
             if (!results) return 0;
             return Object.values(results).reduce((sum, val) => sum + (val || 0), 0);
         }
+
+         function calculateTeamTotalPointsDynamic(matchPoints) {
+    if (!matchPoints) return 0;
+    return Object.values(matchPoints).reduce((sum, val) => sum + (val || 0), 0);
+}
 
         // Function to render the tournament bracket
         function renderBracket(tournamentData) {
