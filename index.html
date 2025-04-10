@@ -780,7 +780,7 @@
         }
 
         // Function to render teams with soccer field
-        function renderTeams(teams, playerStatsData) {
+       function renderTeams(teams, playerStatsData) {
     const teamContainer = document.getElementById('team-container');
     teamContainer.innerHTML = '';
 
@@ -803,16 +803,13 @@
         const teamCard = document.createElement('div');
         teamCard.className = 'team-card';
 
-        // Vérifier si la formation est valide (1-2-3 ou 1-3-2)
-        let formation = team.formation;
-        if (formation !== "1-2-3" && formation !== "1-3-2") {
-            formation = "1-2-3"; // Formation par défaut si invalide
-        }
-
-        // Récupérer tous les joueurs de cette équipe depuis playerStatsData
+        // Récupérer tous les joueurs de cette équipe
         const teamPlayers = playersByTeam[team.id] || [];
         
-        // Trier les joueurs par leur round de draft (croissant, les meilleurs picks en premier)
+        // Déterminer dynamiquement la formation basée sur les positions des joueurs
+        const formation = determineFormation(teamPlayers);
+        
+        // Trier les joueurs par leur round de draft (croissant)
         const sortedPlayers = [...teamPlayers].sort((a, b) => {
             // D'abord par round (croissant)
             const roundA = a.round || 999;
@@ -857,6 +854,8 @@
                 <button id="list-btn-${teamIndex}" class="view-btn" onclick="toggleView(${teamIndex}, 'list')">Vue Liste</button>
             </div>
             
+            <div class="formation-title">Formation: ${formation}</div>
+            
             <div class="team-content">
                 <div id="field-view-${teamIndex}" class="field-view">
                     <div class="soccer-field">
@@ -887,6 +886,33 @@
         const soccerField = teamCard.querySelector('.soccer-field');
         placePlayersOnField(sortedPlayers, soccerField, formation);
     });
+}
+
+         // Fonction pour déterminer la formation en fonction des positions des joueurs
+function determineFormation(players) {
+    if (!players || players.length === 0) return "1-2-3"; // Formation par défaut
+
+    // Compter le nombre de joueurs par position
+    let goalkeepers = 0;
+    let defenders = 0;
+    let forwards = 0;
+
+    players.forEach(player => {
+        if (player.position === 'GK') goalkeepers++;
+        else if (player.position === 'DF') defenders++;
+        else if (player.position === 'FW') forwards++;
+    });
+
+    // S'assurer qu'il y a au moins un gardien
+    if (goalkeepers === 0) goalkeepers = 1;
+
+    // Déterminer la formation en fonction de la prédominance des positions
+    // Si plus de défenseurs, formation 1-3-2, sinon 1-2-3
+    if (defenders >= 3) {
+        return "1-3-2";
+    } else {
+        return "1-2-3";
+    }
 }
 
         // Function to place players on the field based on formation
