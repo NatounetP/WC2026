@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Draft Fantasy Football</title>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f7f6;
+            color: #333;
+            min-height: 100vh;
+        }
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        header {
+            background-color: #3d195b;
+            color: white;
+            padding: 15px 10px;
+            text-align: center;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        h1, h2, h3 {
+            margin: 0;
+            padding: 0;
+        }
+        .section {
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #3d195b;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2a1040;
+        }
+        .draft-order {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .draft-order-item {
+            background-color: #e8e8e8;
+            padding: 8px 15px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .draft-order-item.active {
+            background-color: #3d195b;
+            color: white;
+        }
+        .draft-history {
+            margin-top: 30px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+        .round-indicator {
+            font-weight: bold;
+            text-align: center;
+            margin: 15px 0;
+            font-size: 18px;
+            color: #3d195b;
+        }
+        .team-indicator {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            margin: 10px 0;
+            color: #3d195b;
+        }
+        .status-message {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(0,0,0,0.2);
+            border-radius: 50%;
+            border-top-color: #3d195b;
+            animation: spin 1s ease-in-out infinite;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .hidden {
+            display: none;
+        }
+        .position-tag {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+        .position-GK {
+            background-color: #4caf50;
+            color: white;
+        }
+        .position-DF {
+            background-color: #2196f3;
+            color: white;
+        }
+        .position-FW {
+            background-color: #f44336;
+            color: white;
+        }
+        .draft-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .draft-controls button {
+            flex: 1;
+        }
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            input, select, button {
+                font-size: 14px;
+            }
+            th, td {
+                padding: 8px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Draft Fantasy Football</h1>
+            <p>Paris entre amis - WC 2026</p>
+        </header>
+        
+        <div class="section">
+            <h2>Configuration de la Draft</h2>
+            <div class="form-group">
+                <label for="draft-order">Ordre de la Draft (séparé par des virgules)</label>
+                <input type="text" id="draft-order" placeholder="Exemple: Bubu, Bryan, Chris, ...">
+            </div>
+            <button id="start-draft">Démarrer la Draft</button>
+        </div>
+        
+        <div id="draft-section" class="section hidden">
+            <div class="team-indicator" id="current-team">Au tour de: <span></span></div>
+            <div class="round-indicator" id="round-indicator">Round 1 - Pick 1</div>
+            
+            <div class="draft-order" id="draft-order-display"></div>
+            
+            <h3>Sélectionner un joueur</h3>
+            <div class="form-group">
+                <label for="player-name">Nom du joueur</label>
+                <input type="text" id="player-name" placeholder="Nom du joueur">
+            </div>
+            <div class="form-group">
+                <label for="player-nation">Nation</label>
+                <input type="text" id="player-nation" placeholder="Nation du joueur">
+            </div>
+            <div class="form-group">
+                <label for="player-position">Position</label>
+                <select id="player-position">
+                    <option value="GK">Gardien (GK)</option>
+                    <option value="DF">Défenseur (DF)</option>
+                    <option value="FW">Attaquant (FW)</option>
+                </select>
+            </div>
+            <div class="draft-controls">
+                <button id="submit-pick">Valider la sélection</button>
+                <button id="undo-pick" class="hidden">Annuler dernière sélection</button>
+            </div>
+            <div id="status-message" class="status-message hidden"></div>
+        </div>
+        
+        <div id="draft-history" class="section draft-history hidden">
+            <h2>Historique de la Draft</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Pick #</th>
+                        <th>Round</th>
+                        <th>Team</th>
+                        <th>Joueur</th>
+                        <th>Position</th>
+                        <th>Nation</th>
+                    </tr>
+                </thead>
+                <tbody id="draft-history-body">
+                    <!-- Les sélections seront ajoutées ici -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <script>
+        // Configuration Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyC3zpS_NT8sHN4j0upcAd8jmpfhsgXtdRw",
+            authDomain: "paris-entre-amis-598e9.firebaseapp.com",
+            projectId: "paris-entre-amis-598e9",
+            storageBucket: "paris-entre-amis-598e9.firebasestorage.app",
+            messagingSenderId: "638642602040",
+            appId: "1:638642602040:web:0f7557f7d4923b6aec26cd"
+        };
+        
+        // Initialiser Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        
+        // Variables globales
+        let draftOrder = [];
+        let currentPick = 0;
+        let currentRound = 1;
+        let draftHistory = [];
+        let snakeOrder = true; // Draft en serpent (alterne l'ordre à chaque round)
+        
+        // Éléments DOM
+        const startDraftBtn = document.getElementById('start-draft');
+        const draftSection = document.getElementById('draft-section');
+        const draftHistorySection = document.getElementById('draft-history');
+        const currentTeamElement = document.getElementById('current-team').querySelector('span');
+        const roundIndicator = document.getElementById('round-indicator');
+        const draftOrderDisplay = document.getElementById('draft-order-display');
+        const playerNameInput = document.getElementById('player-name');
+        const playerNationInput = document.getElementById('player-nation');
+        const playerPositionSelect = document.getElementById('player-position');
+        const submitPickBtn = document.getElementById('submit-pick');
+        const undoPickBtn = document.getElementById('undo-pick');
+        const statusMessage = document.getElementById('status-message');
+        const draftHistoryBody = document.getElementById('draft-history-body');
+        
+        // Liste des participants
+        const participants = ["Bubu", "Bryan", "Chris", "Cyril", "Colin", "Gui", "Joss", "Léo", "Marc", "Matthieu", "Patrick", "Pedzou", "Séb", "Nathan", "Julien"];
+        
+        // Pré-remplir l'input avec la liste des participants
+        document.getElementById('draft-order').value = participants.join(', ');
+        
+        // Événements
+        startDraftBtn.addEventListener('click', startDraft);
+        submitPickBtn.addEventListener('click', submitPick);
+        undoPickBtn.addEventListener('click', undoLastPick);
+        
+        // Fonctions
+        function startDraft() {
+            const orderInput = document.getElementById('draft-order').value.trim();
+            if (!orderInput) {
+                showStatusMessage('Veuillez entrer l\'ordre de la draft', 'error');
+                return;
+            }
+            
+            draftOrder = orderInput.split(',').map(name => name.trim());
+            if (draftOrder.length < 2) {
+                showStatusMessage('Il faut au moins 2 participants pour la draft', 'error');
+                return;
+            }
+            
+            // Réinitialiser l'état
+            currentPick = 0;
+            currentRound = 1;
+            draftHistory = [];
+            
+            // Afficher la section de draft
+            draftSection.classList.remove('hidden');
+            draftHistorySection.classList.remove('hidden');
+            draftHistoryBody.innerHTML = '';
+            
+            // Mettre à jour l'affichage
+            updateDraftDisplay();
+            
+            // Charger l'historique existant si disponible
+            loadDraftHistory();
+        }
+        
+        function updateDraftDisplay() {
+            // Déterminer l'équipe actuelle
+            const pickInRound = currentPick % draftOrder.length;
+            const roundIsEven = currentRound % 2 === 0;
+            
+            let currentTeamIndex;
+            if (snakeOrder && roundIsEven) {
+                // Pour les rounds pairs dans une draft serpent, on inverse l'ordre
+                currentTeamIndex = draftOrder.length - 1 - pickInRound;
+            } else {
+                currentTeamIndex = pickInRound;
+            }
+            
+            const currentTeam = draftOrder[currentTeamIndex];
+            currentTeamElement.textContent = currentTeam;
+            
+            // Mise à jour du round et pick
+            const roundPickNumber = pickInRound + 1;
+            const overallPick = currentPick + 1;
+            roundIndicator.textContent = `Round ${currentRound} - Pick ${roundPickNumber} (Overall: ${overallPick})`;
+            
+            // Mise à jour de l'affichage de l'ordre
+            draftOrderDisplay.innerHTML = '';
+            draftOrder.forEach((team, index) => {
+                const orderItem = document.createElement('div');
+                orderItem.className = 'draft-order-item';
+                orderItem.textContent = team;
+                
+                if (index === currentTeamIndex) {
+                    orderItem.classList.add('active');
+                }
+                
+                draftOrderDisplay.appendChild(orderItem);
+            });
+            
+            // Réinitialiser les champs
+            playerNameInput.value = '';
+            playerNationInput.value = '';
+            playerPositionSelect.value = 'FW';
+            
+            // Focus sur le champ du nom
+            playerNameInput.focus();
+        }
+        
+        async function submitPick() {
+            // Récupérer les valeurs
+            const playerName = playerNameInput.value.trim();
+            const playerNation = playerNationInput.value.trim();
+            const playerPosition = playerPositionSelect.value;
+            
+            // Validation
+            if (!playerName || !playerNation) {
+                showStatusMessage('Veuillez remplir tous les champs', 'error');
+                return;
+            }
+            
+            // Obtenir l'équipe actuelle
+            const pickInRound = currentPick % draftOrder.length;
+            const roundIsEven = currentRound % 2 === 0;
+            let currentTeamIndex;
+            
+            if (snakeOrder && roundIsEven) {
+                currentTeamIndex = draftOrder.length - 1 - pickInRound;
+            } else {
+                currentTeamIndex = pickInRound;
+            }
+            
+            const currentTeam = draftOrder[currentTeamIndex];
+            
+            // Afficher l'état de chargement
+            submitPickBtn.disabled = true;
+            const loadingSpinner = document.createElement('span');
+            loadingSpinner.className = 'loading';
+            submitPickBtn.appendChild(loadingSpinner);
+            
+            try {
+                // Enregistrer dans Firebase
+                const pickData = {
+                    name: playerName,
+                    nation: playerNation,
+                    position: playerPosition,
+                    team: currentTeam,
+                    pickNumber: currentPick + 1,
+                    round: currentRound,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                };
+                
+                const docRef = await db.collection('players').add(pickData);
+                
+                // Ajouter à l'historique
+                pickData.id = docRef.id;
+                draftHistory.push(pickData);
+                
+                // Ajouter à la table d'historique
+                addToHistoryTable(pickData);
+                
+                // Passer au pick suivant
+                currentPick++;
+                if (currentPick % draftOrder.length === 0) {
+                    currentRound++;
+                }
+                
+                // Afficher le bouton d'annulation
+                undoPickBtn.classList.remove('hidden');
+                
+                // Mettre à jour l'affichage
+                updateDraftDisplay();
+                
+                showStatusMessage(`${playerName} a été sélectionné par ${currentTeam}`, 'success');
+            } catch (error) {
+                console.error("Erreur lors de l'enregistrement:", error);
+                showStatusMessage(`Erreur: ${error.message}`, 'error');
+            } finally {
+                // Enlever l'état de chargement
+                submitPickBtn.disabled = false;
+                submitPickBtn.removeChild(loadingSpinner);
+            }
+        }
+        
+        async function undoLastPick() {
+            if (draftHistory.length === 0) {
+                showStatusMessage('Pas de sélection à annuler', 'error');
+                return;
+            }
+            
+            // Désactiver le bouton pendant l'opération
+            undoPickBtn.disabled = true;
+            const loadingSpinner = document.createElement('span');
+            loadingSpinner.className = 'loading';
+            undoPickBtn.appendChild(loadingSpinner);
+            
+            try {
+                // Récupérer la dernière sélection
+                const lastPick = draftHistory.pop();
+                
+                // Supprimer de Firebase
+                await db.collection('players').doc(lastPick.id).delete();
+                
+                // Mettre à jour l'affichage
+                if (currentPick % draftOrder.length === 0) {
+                    currentRound--;
+                }
+                currentPick--;
+                
+                // Mettre à jour la table d'historique
+                draftHistoryBody.removeChild(draftHistoryBody.lastChild);
+                
+                updateDraftDisplay();
+                
+                // Masquer le bouton d'annulation si plus d'historique
+                if (draftHistory.length === 0) {
+                    undoPickBtn.classList.add('hidden');
+                }
+                
+                showStatusMessage(`Sélection de ${lastPick.name} annulée`, 'success');
+            } catch (error) {
+                console.error("Erreur lors de l'annulation:", error);
+                showStatusMessage(`Erreur: ${error.message}`, 'error');
+            } finally {
+                // Réactiver le bouton
+                undoPickBtn.disabled = false;
+                undoPickBtn.removeChild(loadingSpinner);
+            }
+        }
+        
+        function addToHistoryTable(pickData) {
+            const row = document.createElement('tr');
+            
+            const positionClass = `position-${pickData.position}`;
+            
+            row.innerHTML = `
+                <td>${pickData.pickNumber}</td>
+                <td>${pickData.round}</td>
+                <td>${pickData.team}</td>
+                <td>${pickData.name}</td>
+                <td><span class="position-tag ${positionClass}">${pickData.position}</span></td>
+                <td>${pickData.nation}</td>
+            `;
+            
+            draftHistoryBody.appendChild(row);
+        }
+        
+        function showStatusMessage(message, type) {
+            statusMessage.textContent = message;
+            statusMessage.className = `status-message ${type}`;
+            statusMessage.classList.remove('hidden');
+            
+            // Masquer après 5 secondes
+            setTimeout(() => {
+                statusMessage.classList.add('hidden');
+            }, 5000);
+        }
+        
+        async function loadDraftHistory() {
+            try {
+                // Afficher un message de chargement
+                draftHistoryBody.innerHTML = '<tr><td colspan="6" class="loading-text">Chargement de l\'historique...</td></tr>';
+                
+                // Récupérer les données de Firebase, triées par timestamp
+                const snapshot = await db.collection('players')
+                    .orderBy('timestamp', 'asc')
+                    .get();
+                
+                if (snapshot.empty) {
+                    draftHistoryBody.innerHTML = '<tr><td colspan="6">Aucune sélection trouvée</td></tr>';
+                    return;
+                }
+                
+                // Réinitialiser l'historique et les compteurs
+                draftHistory = [];
+                draftHistoryBody.innerHTML = '';
+                
+                // Parcourir les résultats
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    const pickData = {
+                        id: doc.id,
+                        name: data.name,
+                        nation: data.nation,
+                        position: data.position,
+                        team: data.team,
+                        pickNumber: data.pickNumber,
+                        round: data.round
+                    };
+                    
+                    // Ajouter à l'historique
+                    draftHistory.push(pickData);
+                    
+                    // Ajouter à la table
+                    addToHistoryTable(pickData);
+                });
+                
+                // Mettre à jour le pick et round actuels
+                if (draftHistory.length > 0) {
+                    const lastPick = draftHistory[draftHistory.length - 1];
+                    currentPick = lastPick.pickNumber;
+                    currentRound = lastPick.round;
+                    
+                    // Si on est à la fin d'un round, passer au suivant
+                    if (currentPick % draftOrder.length === 0) {
+                        currentRound++;
+                        currentPick = currentRound * draftOrder.length - draftOrder.length;
+                    }
+                    
+                    // Afficher le bouton d'annulation
+                    undoPickBtn.classList.remove('hidden');
+                }
+                
+                // Mettre à jour l'affichage
+                updateDraftDisplay();
+                
+            } catch (error) {
+                console.error("Erreur lors du chargement de l'historique:", error);
+                draftHistoryBody.innerHTML = `<tr><td colspan="6">Erreur: ${error.message}</td></tr>`;
+            }
+        }
+    </script>
+</body>
+</html>
