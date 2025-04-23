@@ -534,6 +534,9 @@
             padding: 6px 10px;
             font-size: 0.8rem;
         }
+.tab[onclick="openTab('bracket')"] {
+    display: none;
+}
         .section {
             padding: 10px;
         }
@@ -897,61 +900,75 @@ Avant le début de la bracket un double tour de draft permettra de changé 2 jou
         }
 
         // Main function to load all data from Firestore
-        async function loadAllData() {
-            try {
-                // Load teams data
-                const teamsSnapshot = await db.collection("teams").get();
-                const teams = teamsSnapshot.docs.map(doc => {
-                    const data = doc.data();
-                    return {
-                        id: doc.id,
-                        name: data.name,
-                        shortName: data.shortName || data.name.substring(0, 3).toUpperCase(),
-                        formation: data.formation || "1-2-3",
-                        players: data.players || [],
-                        results: data.results || {}
-                    };
-                });
+       async function loadAllData() {
+    try {
+        // Load teams data
+        const teamsSnapshot = await db.collection("teams").get();
+        const teams = teamsSnapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
+                id: doc.id,
+                name: data.name,
+                shortName: data.shortName || data.name.substring(0, 3).toUpperCase(),
+                formation: data.formation || "1-2-3",
+                players: data.players || [],
+                results: data.results || {}
+            };
+        });
 
-                // Load bracket data
-                const bracketDoc = await db.collection("tournament").doc("bracket").get();
-                const bracketData = bracketDoc.exists ? bracketDoc.data() : {};
+        // Load tournament settings to check if bracket should be shown
+        const tournamentSettings = await db.collection("tournament").doc("general").get();
+        const showBracket = tournamentSettings.exists && tournamentSettings.data().start === true;
 
-                // Load player stats
-                const playersSnapshot = await db.collection("players").get();
-                const playerStats = playersSnapshot.docs.map(doc => {
-                    const data = doc.data();
-                    return {
-                        name: data.name,
-                        nation: data.nation, 
-                        equipe: data.team,
-                        position: data.position || 'FW',
-                        matches: data.matches || {}
-                    };
-                });
-
-                // Render all data
-                renderTeams(teams, playerStats);
-                renderStandings(teams);
-                renderPlayerStats(playerStats);
-                renderBracket({
-                    teams: teams,
-                    bracket: bracketData
-                });
-
-            } catch (error) {
-                console.error("Error loading data:", error);
-                // Show error messages in each section
-                document.getElementById('team-container').innerHTML = 
-                    `<p class="error">Error loading team data: ${error.message}</p>`;
-                document.getElementById('standings-body').innerHTML = 
-                    `<tr><td colspan="11" class="error">Error loading standings: ${error.message}</td></tr>`;
-                document.getElementById('player-stats-body').innerHTML = 
-                    `<tr><td colspan="12" class="error">Error loading player stats: ${error.message}</td></tr>`;
-                document.getElementById('bracket-container').innerHTML = 
-                    `<p class="error">Error loading bracket: ${error.message}</p>`;
-            }
+        // Load bracket data only if needed
+        let bracketData = {};
+        if (showBracket) {
+            const bracketDoc = await db.collection("tournament").doc("bracket").get();
+            bracketData = bracketDoc.exists ? bracketDoc.data() : {};
         }
+
+        // Load player stats
+        const playersSnapshot = await db.collection("players").get();
+        const playerStats = playersSnapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
+                name: data.name,
+                nation: data.nation, 
+                equipe: data.team,
+                position: data.position || 'FW',
+                matches: data.matches || {}
+            };
+        });
+
+        // Render all data
+        renderTeams(teams, playerStats);
+        renderStandings(teams);
+        renderPlayerStats(playerStats);
+        
+        // Only render bracket if enabled
+        if (showBracket) {
+            renderBracket({
+                teams: teams,
+                bracket: bracketData
+            });
+            document.querySelector('.tab[onclick="openTab(\'bracket\')"]').style.display = 'block';
+        } else {
+            document.querySelector('.tab[onclick="openTab(\'bracket\')"]').style.display = 'none';
+        }
+
+    } catch (error) {
+        console.error("Error loading data:", error);
+        // Show error messages in each section
+        document.getElementById('team-container').innerHTML = 
+            `<p class="error">Error loading team data: ${error.message}</p>`;
+        document.getElementById('standings-body').innerHTML = 
+            `<tr><td colspan="11" class="error">Error loading standings: ${error.message}</td></tr>`;
+        document.getElementById('player-stats-body').innerHTML = 
+            `<tr><td colspan="12" class="error">Error loading player stats: ${error.message}</td></tr>`;
+        document.getElementById('bracket-container').innerHTML = 
+            `<p class="error">Error loading bracket: ${error.message}</p>`;
+    }
+}
 
         // Function to render teams with soccer field
        function renderTeams(teams, playerStatsData) {
