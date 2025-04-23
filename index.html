@@ -552,6 +552,53 @@
             width: 50px;
             height: 100px;
         }
+.rules-content {
+    line-height: 1.6;
+}
+
+.rules-content h3 {
+    color: #3d195b;
+    margin-top: 20px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid #eee;
+}
+
+.rules-content ul, .rules-content ol {
+    padding-left: 20px;
+    margin: 10px 0;
+}
+
+.rules-content li {
+    margin-bottom: 5px;
+}
+
+.points-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 15px 0;
+}
+
+.points-table th, .points-table td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+.points-table th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+}
+
+.points-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+@media (max-width: 768px) {
+    .points-table th, .points-table td {
+        padding: 8px;
+        font-size: 0.85rem;
+    }
+}
         .player-name {
             font-size: 9px;
             width: 50px;
@@ -586,6 +633,7 @@
             <button class="tab" onclick="openTab('standings')">Classement</button>
             <button class="tab" onclick="openTab('stats')">Statistiques</button>
             <button class="tab" onclick="openTab('bracket')">Bracket</button>
+	    <button class="tab" onclick="openTab('rules')">Règles</button>
         </div>
 
         <!-- Section Équipes -->    
@@ -597,6 +645,132 @@
                 </div>
             </div>
         </div>
+
+	<!-- Section Règles -->
+<div id="rules" class="tab-content">
+    <div class="section">
+        <h2>Règles du Jeu</h2>
+        <div class="rules-content">
+            <h3>Objectif du jeu</h3>
+            <p>Chaque participant compose une équipe de 6 joueurs (1 gardien, 2 défensifs et 3 offensifs ou 1 gardien, 3 défensifs et 2 offensifs) qui marquent des points selon leurs performances pendant la Coupe du Monde 2026. Les milieux de terrain sont considéré comme offensifs</p>
+            
+            <h3>Composition des équipes</h3>
+	    Les équipes sont construites à la base d'une draft. Le tirage au sort de l'ordre de draft donne une chance égale à chacun d'être #1. La draft aura lieu sur le groupe Whatsapp. Il faudra annoncé le nom complet du joueur choisi, sa position et sa nationalité.
+            <ul>
+                <li>1-2-3</li>
+                <li>1-3-2 </li>
+            </ul>
+            A choix et peut changer si des transfers de joueurs sont introduits.
+<ul> </ul>
+           <h3>Système de points</h3>
+            <table class="points-table">
+                <thead>
+                    <tr>
+                        <th>Fait de jeu</th>
+                        <th>Gardien</th>
+                        <th>Défenseur</th>
+                        <th>Attaquant</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Match de groupe gagné</td>
+                        <td>+2</td>
+                        <td>+2</td>
+                        <td>+2</td>
+                    </tr>
+                    <tr>
+                        <td>Match élimination directe gagné</td>
+                        <td>+3</td>
+                        <td>+3</td>
+                        <td>+3</td>
+                    </tr>
+                    <tr>
+                        <td>But marqué</td>
+                        <td>+15</td>
+                        <td>+10</td>
+                        <td>+9</td>
+                    </tr>
+                    <tr>
+                        <td>Passe décisive</td>
+                        <td>+7</td>
+                        <td>+5</td>
+                        <td>+5</td>
+                    </tr>
+                    <tr>
+                        <td>Hat-trick</td>
+                        <td>+5</td>
+                        <td>+5</td>
+                        <td>+5</td>
+                    </tr>
+                    <tr>
+                        <td>Clean sheet</td>
+                        <td>+5</td>
+                        <td>+2</td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td>Carton jaune</td>
+                        <td>-3</td>
+                        <td>-3</td>
+                        <td>-3</td>
+                    </tr>
+                    <tr>
+                        <td>Carton rouge</td>
+                        <td>-10</td>
+                        <td>-10</td>
+                        <td>-10</td>
+                    </tr>
+                    <tr>
+                        <td>Match gagné avec +4 buts d'écart</td>
+                        <td>+2</td>
+                        <td>+2</td>
+                        <td>+2</td>
+                    </tr>
+                    <tr>
+                        <td>Arrêt de penalty</td>
+                        <td>+3</td>
+                        <td>-</td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td>But en prolongation</td>
+                        <td>+2</td>
+                        <td>+2</td>
+                        <td>+2</td>
+                    </tr>
+                    <tr>
+                        <td>+10 tirs cadrés concédés mais victoire</td>
+                        <td>+2</td>
+                        <td>+2</td>
+                        <td>-</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+           
+            <ul> </ul>
+            <h3>Phase à élimination directe</h3>
+            La phase de groupe de la Coupe de Monde est de 3 matchs. Les équipes qualifiés passent en 16ème de finale.
+	    Pour notre jeu les 3 matchs de poules (M1, M2, M3) et les 16ème de finale donneront un total d'accession à chacun. En prenant le classement après les 16èmes de finale nous commenceront un tableau de match à élimination direct ("Bracket"). 
+	    On ne se battra plus pour faire le plus de points, mais juste plus de points que notre adversaire direct. On avancera jusqu'à la finale qui définiera le vainqueur final. Cependant les points et le classement général continueront de faire valeur pour au final définir les 2 perdants responsables d'organiser un apéro lors de la soirée d'ouverture de la prochaine compétiion (Euro 28). Si un des deux derniers venait à gagner le tournoi "bracket", il sera dispensé de sa charge et l'antépénultième prendra sa place.
+            <ul> </ul>
+            <h3>Transfers</h3>
+Avant le début de la bracket un double tour de draft permettra de changé 2 joueurs. On commence par le dernier du classement jusqu'au premier et retour. Il n'y a aucune obligation de procédé à un transfers une fois son tour venu.
+<ul> </ul>15:29 23/04/2025
+	    <h3>Règles supplémentaires</h3>
+            <ul>
+                <li>En cas d'égalité au classement, le départage se fait par : 
+                    <ol>
+                        <li>Total de buts marqués par les joueurs de l'équipe</li>
+                        <li>Tirage au sort</li>
+                    </ol>
+                </li>
+                <li>Les séances tirs au but ne rapportent pas de points. Les points détaillés s'arrêtent à la fin de la prolongation les pénaltys ne servent qu'à définir dle vainqueur du match.</li>
+            </ul>
+        </div>
+    </div>
+</div>
 
         <!-- Section Classement -->
         <div id="standings" class="tab-content">
