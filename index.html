@@ -1331,7 +1331,7 @@ function determineFormation(players) {
                     const matchDiv = document.createElement('div');
                     matchDiv.className = 'bracket-match';
                     
-                    const team1 = findTeamById(tournamentData.teams, match.team1Id);
+                    const team1 = tournamentData.teams, match.team1Id;
                     const team2 = findTeamById(tournamentData.teams, match.team2Id);
                     
                     const topTeam = document.createElement('div');
