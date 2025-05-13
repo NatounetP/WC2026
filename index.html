@@ -1280,100 +1280,128 @@ function determineFormation(players) {
     return Object.values(matchPoints).reduce((sum, val) => sum + (val || 0), 0);
 }
 
-        // Function to render the tournament bracket
         function renderBracket(tournamentData) {
-            const container = document.getElementById('bracket-container');
-            container.innerHTML = '';
-            
-            if (!tournamentData.bracket) {
-                container.innerHTML = '<p>No bracket data available</p>';
-                return;
-            }
+    const container = document.getElementById('bracket-container');
+    container.innerHTML = '';
+    
+    if (!tournamentData || !tournamentData.bracket) {
+        container.innerHTML = '<p>No bracket data available</p>';
+        return;
+    }
 
-            // Create rounds in order
-            const rounds = [
-                { 
-                    name: "1/8", 
-                    class: "bracket-round-16",
-                    matches: tournamentData.bracket.roundOf16 || [] 
-                },
-                { 
-                    name: "1/4", 
-                    class: "bracket-round-8",
-                    matches: tournamentData.bracket.quarterFinals || [] 
-                },
-                { 
-                    name: "1/2", 
-                    class: "bracket-round-4",
-                    matches: tournamentData.bracket.semiFinals || [] 
-                },
-                { 
-                    name: "FINAL", 
-                    class: "bracket-round-2 bracket-final",
-                    matches: tournamentData.bracket.final ? [tournamentData.bracket.final] : [] 
-                }
-            ];
-            
-            rounds.forEach(round => {
-                if (!round.matches || round.matches.length === 0) return;
-                
-                const roundDiv = document.createElement('div');
-                roundDiv.className = `bracket-round ${round.class}`;
-                
-                const titleDiv = document.createElement('div');
-                titleDiv.className = 'bracket-round-title';
-                titleDiv.textContent = round.name;
-                roundDiv.appendChild(titleDiv);
-                
-                round.matches.forEach(match => {
-                    if (!match) return;
-                    
-                    const matchDiv = document.createElement('div');
-                    matchDiv.className = 'bracket-match';
-                    
-                    const team1 = match.team1Id;
-                    const team2 = match.team2Id;
-                    
-                    const topTeam = document.createElement('div');
-                    topTeam.className = `bracket-team top ${match.team1Id === match.winnerId ? 'winner' : ''}`;
-                    topTeam.innerHTML = `
-                        <span>${team1.shortName}</span>
-                        ${match.score1 !== undefined ? 
-                            `<span class="bracket-score">${match.score1}</span>` : ''
-                        }
-                        ${match.penaltyScore1 !== undefined ? 
-                            `<span class="penalty-score">(${match.penaltyScore1})</span>` : ''
-                        }
-                    `;
-                    
-                    const bottomTeam = document.createElement('div');
-                    bottomTeam.className = `bracket-team bottom ${match.team2Id === match.winnerId ? 'winner' : ''}`;
-                    bottomTeam.innerHTML = `
-                        <span>${team2.shortName}</span>
-                        ${match.score2 !== undefined ? 
-                            `<span class="bracket-score">${match.score2}</span>` : ''
-                        }
-                        ${match.penaltyScore2 !== undefined ? 
-                            `<span class="penalty-score">(${match.penaltyScore2})</span>` : ''
-                        }
-                    `;
-                    
-                    /* Add match date if available
-                    if (match.date) {
-                        const dateDiv = document.createElement('div');
-                        dateDiv.className = 'match-date';
-                        dateDiv.textContent = match.date;
-                        matchDiv.appendChild(dateDiv);
-                    }*/
-                                        
-                    matchDiv.appendChild(topTeam);
-                    matchDiv.appendChild(bottomTeam);            
-                    roundDiv.appendChild(matchDiv);
-                });
-                
-                container.appendChild(roundDiv);
-            });
+    // Create rounds in order with proper fallbacks
+    const rounds = [
+        { 
+            name: "Round of 16", 
+            class: "bracket-round-16",
+            matches: tournamentData.bracket.roundOf16 || [] 
+        },
+        { 
+            name: "Quarter Finals", 
+            class: "bracket-round-8",
+            matches: tournamentData.bracket.quarterFinals || [] 
+        },
+        { 
+            name: "Semi Finals", 
+            class: "bracket-round-4",
+            matches: tournamentData.bracket.semiFinals || [] 
+        },
+        { 
+            name: "FINAL", 
+            class: "bracket-round-2 bracket-final",
+            matches: tournamentData.bracket.final ? [tournamentData.bracket.final] : [] 
         }
+    ];
+    
+    rounds.forEach(round => {
+        if (!round.matches || round.matches.length === 0) return;
+        
+        const roundDiv = document.createElement('div');
+        roundDiv.className = `bracket-round ${round.class}`;
+        
+        const titleDiv = document.createElement('div');
+        titleDiv.className = 'bracket-round-title';
+        titleDiv.textContent = round.name;
+        roundDiv.appendChild(titleDiv);
+        
+        round.matches.forEach((match, index) => {
+            if (!match) return;
+            
+            const matchDiv = document.createElement('div');
+            matchDiv.className = 'bracket-match';
+            
+            // Handle team data - fallback to IDs if team objects don't exist
+            const team1 = match.team1Id || (match.teamId && typeof match.teamId === 'object' ? match.teamId : { shortName: match.teamId || 'TBD' });
+            const team2 = match.team2Id || (match.teamZId && typeof match.teamZId === 'object' ? match.teamZId : { shortName: match.teamZId || 'TBD' });
+            
+            // Handle scores - some matches might use score1/score2, others might use score
+            const score1 = match.score1 !== undefined ? match.score1 : (match.score && match.score[0]);
+            const score2 = match.score2 !== undefined ? match.score2 : (match.score && match.score[1]);
+            
+            // Handle winner - some matches might use winnerId, others might determine from scores
+            let winnerId = match.winnerId;
+            if (!winnerId && score1 !== undefined && score2 !== undefined) {
+                winnerId = score1 > score2 ? match.team1Id || match.teamId : 
+                          score2 > score1 ? match.team2Id || match.teamZId : 
+                          null; // draw
+            }
+            
+            const topTeam = document.createElement('div');
+            topTeam.className = `bracket-team top ${(match.team1Id || match.teamId) === winnerId ? 'winner' : ''}`;
+            topTeam.innerHTML = `
+                <span>${typeof team1 === 'object' ? team1.shortName : team1}</span>
+                ${score1 !== undefined ? 
+                    `<span class="bracket-score">${score1}</span>` : ''
+                }
+                ${match.penaltyScore1 !== undefined ? 
+                    `<span class="penalty-score">(${match.penaltyScore1})</span>` : ''
+                }
+            `;
+            
+            const bottomTeam = document.createElement('div');
+            bottomTeam.className = `bracket-team bottom ${(match.team2Id || match.teamZId) === winnerId ? 'winner' : ''}`;
+            bottomTeam.innerHTML = `
+                <span>${typeof team2 === 'object' ? team2.shortName : team2}</span>
+                ${score2 !== undefined ? 
+                    `<span class="bracket-score">${score2}</span>` : ''
+                }
+                ${match.penaltyScore2 !== undefined ? 
+                    `<span class="penalty-score">(${match.penaltyScore2})</span>` : ''
+                }
+            `;
+            
+            // Add match date if available
+            if (match.date) {
+                const dateDiv = document.createElement('div');
+                dateDiv.className = 'match-date';
+                dateDiv.textContent = new Date(match.date).toLocaleDateString();
+                matchDiv.appendChild(dateDiv);
+            }
+            
+            // Add match time if available
+            if (match.time) {
+                const timeDiv = document.createElement('div');
+                timeDiv.className = 'match-time';
+                timeDiv.textContent = match.time;
+                matchDiv.appendChild(timeDiv);
+            }
+            
+            // Add match location if available
+            if (match.location) {
+                const locationDiv = document.createElement('div');
+                locationDiv.className = 'match-location';
+                locationDiv.textContent = match.location;
+                matchDiv.appendChild(locationDiv);
+            }
+            
+            matchDiv.appendChild(topTeam);
+            matchDiv.appendChild(bottomTeam);            
+            roundDiv.appendChild(matchDiv);
+        });
+        
+        container.appendChild(roundDiv);
+    });
+}
 
         // Helper function to find team by ID
         function findTeamById(teams, id) {
