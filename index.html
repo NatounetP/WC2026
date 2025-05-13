@@ -1210,7 +1210,7 @@ function determineFormation(players) {
     // Créer un objet pour stocker les totaux des équipes par match
     const teamPointsByMatch = {};
     teams.forEach(team => {
-        teamPointsByMatch[team.id] = {
+        teamPointsByMatch[team.name] = {
             M1: 0, M2: 0, M3: 0, F32: 0, F16: 0, F8: 0, F4: 0, Final: 0
         };
     });
