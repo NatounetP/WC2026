@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+    <title>Gestion des Transferts - Paris entre amis WC 2026</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background-color: #3d195b;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        header h1 {
+            font-size: 2em;
+            margin-bottom: 5px;
+        }
+
+        header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .transfer-window-info {
+            background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+            border-left: 6px solid #ff9800;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .transfer-window-info h2 {
+            color: #e65100;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .transfer-window-info ul {
+            margin-left: 20px;
+            color: #5d4037;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            color: #3d195b;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .stat-card .number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #ff9800;
+        }
+
+        .stat-card .subtitle {
+            color: #666;
+            font-size: 0.8em;
+            margin-top: 5px;
+        }
+
+        .transfer-form-container {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .transfer-form-container h2 {
+            color: #3d195b;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+            font-size: 0.9em;
+        }
+
+        .form-group select, .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            background-color: #f9f9f9;
+        }
+
+        .form-group select:hover, .form-group input:hover {
+            border-color: #b39ddb;
+        }
+
+        .form-group select:focus, .form-group input:focus {
+            outline: none;
+            border-color: #3d195b;
+            background-color: white;
+            box-shadow: 0 0 0 3px rgba(61, 25, 91, 0.1);
+        }
+
+        .form-group select:disabled {
+            background-color: #f5f5f5;
+            border-color: #ddd;
+            color: #999;
+            cursor: not-allowed;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 20px;
+            margin-top: 10px;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .radio-option input[type="radio"] {
+            width: auto;
+            margin-right: 5px;
+        }
+
+        .btn {
+            background-color: #3d195b;
+            color: white;
+            padding: 14px 28px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .btn:hover:not(:disabled) {
+            background-color: #2a1240;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .btn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .btn-secondary {
+            background-color: #ff9800;
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background-color: #f57c00;
+        }
+
+        .btn-success {
+            background-color: #4caf50;
+        }
+
+        .btn-success:hover:not(:disabled) {
+            background-color: #388e3c;
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+        }
+
+        .btn-danger:hover:not(:disabled) {
+            background-color: #c82333;
+        }
+
+        .transfers-history {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .transfers-history h2 {
+            color: #3d195b;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .filter-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-bar select, .filter-bar input {
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background-color: #f8f5ff;
+            color: #3d195b;
+            font-weight: 600;
+            padding: 15px 10px;
+            text-align: left;
+            border-bottom: 3px solid #3d195b;
+        }
+
+        td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        .transfer-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+
+        .badge-round1 {
+            background-color: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .badge-round2 {
+            background-color: #fff3e0;
+            color: #f57c00;
+        }
+
+        .team-badge {
+            background-color: #3d195b;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+        }
+
+        .transferred-badge {
+            background-color: #ff9800;
+            color: white;
+            padding: 2px 5px;
+            border-radius: 10px;
+            font-size: 0.7em;
+            margin-left: 5px;
+        }
+
+        .delete-btn {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8em;
+            transition: background-color 0.3s;
+        }
+
+        .delete-btn:hover {
+            background-color: #c82333;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2em;
+            color: #777;
+        }
+
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            margin-left: 10px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3d195b;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            border: 1px solid #f5c6cb;
+        }
+
+        .success-message {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            border: 1px solid #c3e6cb;
+        }
+
+        .info-message {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            border: 1px solid #bee5eb;
+        }
+
+        .transfer-summary {
+            display: flex;
+            gap: 20px;
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #f8f5ff;
+            border-radius: 8px;
+            align-items: center;
+        }
+
+        .transfer-arrow {
+            font-size: 1.5em;
+            color: #ff9800;
+        }
+
+        .new-player-fields {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+            border-left: 4px solid #4caf50;
+        }
+
+        .player-info {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .points-badge {
+            background-color: #e0e0e0;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 0.8em;
+            margin-left: 5px;
+        }
+
+        .transferred-row {
+            background-color: #fff3e0;
+            color: #666;
+        }
+
+        .transferred-row td {
+            font-style: italic;
+        }
+
+        .transferred-row .points-badge {
+            background-color: #ff9800;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .filter-bar {
+                flex-direction: column;
+            }
+            
+            table {
+                font-size: 0.9em;
+            }
+            
+            th, td {
+                padding: 8px 5px;
+            }
+            
+            .radio-group {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⚽ Gestion des Transferts</h1>
+            <p>Paris entre amis - Coupe du Monde 2026</p>
+        </header>
+
+        <!-- Informations sur la fenêtre de transferts -->
+        <div class="transfer-window-info">
+            <h2>
+                <span>🔄 Fenêtre de Transferts</span>
+                <span class="badge-round1" id="window-status" style="font-size: 0.8em; padding: 5px 10px;">Statut inconnu</span>
+            </h2>
+            <ul>
+                <li><strong>Période :</strong> Après les 1/32èmes de finale</li>
+                <li><strong>Maximum :</strong> 2 transferts par équipe</li>
+                <li><strong>Ordre :</strong> Draft inversé (du dernier au premier), puis second tour</li>
+                <li><strong>Points :</strong> Les joueurs sortants conservent leurs points de groupe (M1, M2, M3, F32) et ne marquent plus après le transfert</li>
+                <li><strong>Trace :</strong> Les joueurs transférés restent visibles dans l'équipe avec leurs points figés</li>
+            </ul>
+        </div>
+
+        <!-- Statistiques rapides -->
+        <div class="stats-grid" id="stats-container">
+            <div class="stat-card">
+                <h3>Transferts effectués</h3>
+                <div class="number" id="total-transfers">0</div>
+                <div class="subtitle">sur 30 maximum</div>
+            </div>
+            <div class="stat-card">
+                <h3>Équipes ayant transféré</h3>
+                <div class="number" id="teams-transferred">0</div>
+                <div class="subtitle">sur 15 équipes</div>
+            </div>
+            <div class="stat-card">
+                <h3>Joueurs transférés</h3>
+                <div class="number" id="total-transferred">0</div>
+                <div class="subtitle">ont changé d'équipe</div>
+            </div>
+        </div>
+
+        <!-- Formulaire de transfert -->
+        <div class="transfer-form-container">
+            <h2>
+                <span>➕ Enregistrer un nouveau transfert</span>
+            </h2>
+
+            <div id="message-container"></div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="team-select">Équipe qui transfère *</label>
+                    <select id="team-select" required onchange="onTeamChange()">
+                        <option value="">Sélectionner une équipe</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="round-select">Tour de draft *</label>
+                    <select id="round-select" required onchange="updateTransferSummary()">
+                        <option value="">Sélectionner le tour</option>
+                        <option value="1">Tour 1 (ordre inverse)</option>
+                        <option value="2">Tour 2 (ordre inverse)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="player-out-select">Joueur sortant *</label>
+                    <select id="player-out-select" required onchange="updateTransferSummary()">
+                        <option value="">D'abord sélectionner une équipe</option>
+                    </select>
+                    <div class="player-info" id="player-out-info"></div>
+                </div>
+
+                <div class="transfer-arrow">→</div>
+
+                <div class="form-group">
+                    <label for="player-in-type">Type de joueur entrant *</label>
+                    <div class="radio-group">
+                        <label class="radio-option">
+                            <input type="radio" name="playerInType" value="existing" checked onchange="onPlayerInTypeChange()">
+                            Joueur existant
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="playerInType" value="new" onchange="onPlayerInTypeChange()">
+                            Nouveau joueur
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section joueur existant -->
+            <div id="existing-player-section">
+                <div class="form-group">
+                    <label for="player-in-select">Sélectionner un joueur disponible *</label>
+                    <select id="player-in-select" onchange="updateTransferSummary()">
+                        <option value="">Sélectionner un joueur</option>
+                    </select>
+                    <div class="player-info" id="player-in-info"></div>
+                </div>
+            </div>
+
+            <!-- Section nouveau joueur -->
+            <div id="new-player-section" style="display: none;">
+                <div class="new-player-fields">
+                    <h4 style="color: #4caf50; margin-bottom: 15px;">🆕 Créer un nouveau joueur</h4>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="new-player-name">Nom du joueur *</label>
+                            <input type="text" id="new-player-name" placeholder="Ex: Kylian Mbappé">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="new-player-nation">Nationalité</label>
+                            <input type="text" id="new-player-nation" placeholder="Ex: France">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="new-player-position">Position *</label>
+                            <select id="new-player-position">
+                                <option value="GK">Gardien</option>
+                                <option value="DF">Défenseur</option>
+                                <option value="FW" selected>Attaquant</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="new-player-round">Round de draft</label>
+                            <input type="number" id="new-player-round" placeholder="Optionnel" min="1" max="20">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Points initiaux (optionnel)</label>
+                        <div class="form-row">
+                            <input type="number" id="new-player-m1" placeholder="M1" min="0" style="flex:1;">
+                            <input type="number" id="new-player-m2" placeholder="M2" min="0" style="flex:1;">
+                            <input type="number" id="new-player-m3" placeholder="M3" min="0" style="flex:1;">
+                            <input type="number" id="new-player-f32" placeholder="F32" min="0" style="flex:1;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="transfer-summary" id="transfer-summary" style="display: none;">
+                <div>
+                    <strong>Résumé du transfert :</strong>
+                </div>
+                <div id="summary-text"></div>
+            </div>
+
+            <button class="btn" id="save-transfer-btn" onclick="saveTransfer()">
+                <span>💾</span> Enregistrer le transfert
+            </button>
+        </div>
+
+        <!-- Historique des transferts -->
+        <div class="transfers-history">
+            <h2>
+                <span>📋 Historique des transferts</span>
+                <button class="btn-secondary" onclick="refreshData()" style="width: auto; padding: 8px 15px; font-size: 0.9em;">↻ Actualiser</button>
+                <button class="btn-success" onclick="openBulkAddModal()" style="width: auto; padding: 8px 15px; font-size: 0.9em;">➕ Ajout multiple</button>
+            </h2>
+
+            <div class="filter-bar">
+                <select id="filter-team" onchange="filterTransfers()">
+                    <option value="">Toutes les équipes</option>
+                </select>
+                <select id="filter-round" onchange="filterTransfers()">
+                    <option value="">Tous les tours</option>
+                    <option value="1">Tour 1</option>
+                    <option value="2">Tour 2</option>
+                </select>
+                <input type="text" id="filter-search" placeholder="Rechercher un joueur..." onkeyup="filterTransfers()">
+            </div>
+
+            <div style="overflow-x: auto;">
+                <table id="transfers-table">
+                    <thead>
+                        <tr>
+                            <th>Équipe</th>
+                            <th>Joueur sortant</th>
+                            <th>Points au transfert</th>
+                            <th>→</th>
+                            <th>Joueur entrant</th>
+                            <th>Position</th>
+                            <th>Tour</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transfers-body">
+                        <tr>
+                            <td colspan="9" class="loading">Chargement des transferts...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal pour ajout multiple -->
+    <div id="bulkAddModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1000;">
+        <div style="background-color: white; margin: 50px auto; padding: 20px; max-width: 500px; border-radius: 10px;">
+            <h3>Ajouter plusieurs joueurs</h3>
+            <p>Entrez les noms des joueurs (un par ligne) au format: Nom, Nationalité, Position</p>
+            <textarea id="bulk-players" rows="10" style="width: 100%; padding: 10px; margin: 10px 0;"></textarea>
+            <button class="btn-success" onclick="saveBulkPlayers()">Ajouter</button>
+            <button class="btn-secondary" onclick="closeBulkAddModal()">Annuler</button>
+        </div>
+    </div>
+
+    <script>
+        // Configuration Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyC3zpS_NT8sHN4j0upcAd8jmpfhsgXtdRw",
+            authDomain: "paris-entre-amis-598e9.firebaseapp.com",
+            projectId: "paris-entre-amis-598e9",
+            storageBucket: "paris-entre-amis-598e9.firebasestorage.app",
+            messagingSenderId: "638642602040",
+            appId: "1:638642602040:web:0f7557f7d4923b6aec26cd"
+        };
+
+        // Initialiser Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // Variables globales
+        let allTeams = [];
+        let allPlayers = [];
+        let allTransfers = [];
+        let currentFilterTeam = '';
+        let currentFilterRound = '';
+        let currentFilterSearch = '';
+
+        // Charger toutes les données au démarrage
+        document.addEventListener('DOMContentLoaded', () => {
+            loadAllData();
+        });
+
+        // Fonction pour charger toutes les données
+        async function loadAllData() {
+            showMessage('Chargement des données...', 'info');
+            
+            try {
+                // Charger les équipes
+                const teamsSnapshot = await db.collection("teams").get();
+                allTeams = teamsSnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    name: doc.data().name,
+                    transfersUsed: doc.data().transfersUsed || 0,
+                    players: doc.data().players || []
+                }));
+
+                // Charger tous les joueurs
+                const playersSnapshot = await db.collection("players").get();
+                allPlayers = playersSnapshot.docs.map(doc => {
+                    const data = doc.data();
+                    return {
+                        id: doc.id,
+                        ...data,
+                        docId: doc.id,
+                        // Normaliser le champ équipe/team
+                        teamName: data.team || data.equipe || null
+                    };
+                });
+
+                // Charger les transferts
+                await loadTransfers();
+
+                // Mettre à jour l'interface
+                updateTeamSelects();
+                updatePlayerOutSelect();
+                updatePlayerInSelect();
+                updateStats();
+                updateFilterTeams();
+                checkTransferWindowStatus();
+
+                hideMessage();
+
+            } catch (error) {
+                console.error("Erreur lors du chargement:", error);
+                showMessage('Erreur lors du chargement des données: ' + error.message, 'error');
+            }
+        }
+
+        // Charger les transferts
+        async function loadTransfers() {
+            const transfersSnapshot = await db.collection("transfers")
+                .orderBy("timestamp", "desc")
+                .get();
+            
+            allTransfers = transfersSnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+
+            displayTransfers();
+        }
+
+        // Afficher les transferts
+        function displayTransfers() {
+            const tbody = document.getElementById('transfers-body');
+            
+            if (allTransfers.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" class="loading">Aucun transfert effectué pour le moment</td></tr>';
+                return;
+            }
+
+            let filteredTransfers = allTransfers;
+
+            // Appliquer les filtres
+            if (currentFilterTeam) {
+                filteredTransfers = filteredTransfers.filter(t => t.team === currentFilterTeam);
+            }
+            if (currentFilterRound) {
+                filteredTransfers = filteredTransfers.filter(t => t.round == currentFilterRound);
+            }
+            if (currentFilterSearch) {
+                const search = currentFilterSearch.toLowerCase();
+                filteredTransfers = filteredTransfers.filter(t => 
+                    (t.playerOut && t.playerOut.toLowerCase().includes(search)) || 
+                    (t.playerIn && t.playerIn.toLowerCase().includes(search))
+                );
+            }
+
+            tbody.innerHTML = filteredTransfers.map(transfer => {
+                return `
+                <tr>
+                    <td><span class="team-badge">${transfer.team}</span></td>
+                    <td>${transfer.playerOut}</td>
+                    <td><span class="points-badge">${transfer.pointsAtTransfer || '?'} pts</span></td>
+                    <td>→</td>
+                    <td><strong>${transfer.playerIn}</strong></td>
+                    <td>${transfer.position || 'N/A'}</td>
+                    <td><span class="transfer-badge ${transfer.round === 1 ? 'badge-round1' : 'badge-round2'}">Tour ${transfer.round}</span></td>
+                    <td>${transfer.timestamp ? new Date(transfer.timestamp.toDate()).toLocaleDateString() : 'N/A'}</td>
+                    <td>
+                        <button class="delete-btn" onclick="deleteTransfer('${transfer.id}')">Supprimer</button>
+                    </td>
+                </tr>
+            `}).join('');
+        }
+
+        // Filtrer les transferts
+        function filterTransfers() {
+            currentFilterTeam = document.getElementById('filter-team').value;
+            currentFilterRound = document.getElementById('filter-round').value;
+            currentFilterSearch = document.getElementById('filter-search').value;
+            displayTransfers();
+        }
+
+        // Mettre à jour le sélecteur d'équipes
+        function updateTeamSelects() {
+            const teamSelect = document.getElementById('team-select');
+            const filterTeam = document.getElementById('filter-team');
+            
+            // Trier les équipes par nombre de transferts utilisés
+            const sortedTeams = [...allTeams].sort((a, b) => {
+                if (a.transfersUsed >= 2) return 1;
+                if (b.transfersUsed >= 2) return -1;
+                return a.transfersUsed - b.transfersUsed;
+            });
+            
+            const options = sortedTeams.map(team => {
+                const disabled = team.transfersUsed >= 2 ? 'disabled' : '';
+                return `<option value="${team.name}" ${disabled}>${team.name} (${team.transfersUsed}/2 transferts) ${disabled ? '- MAX ATTEINT' : ''}</option>`;
+            }).join('');
+
+            teamSelect.innerHTML = '<option value="">Sélectionner une équipe</option>' + options;
+            filterTeam.innerHTML = '<option value="">Toutes les équipes</option>' + allTeams.map(team => 
+                `<option value="${team.name}">${team.name}</option>`
+            ).join('');
+        }
+
+        // Quand l'équipe change
+        function onTeamChange() {
+            updatePlayerOutSelect();
+            updatePlayerInSelect();
+            updateTransferSummary();
+        }
+
+        // Mettre à jour le sélecteur des joueurs sortants
+        function updatePlayerOutSelect() {
+            const teamName = document.getElementById('team-select').value;
+            const select = document.getElementById('player-out-select');
+            const infoDiv = document.getElementById('player-out-info');
+            
+            if (!teamName) {
+                select.innerHTML = '<option value="">D\'abord sélectionner une équipe</option>';
+                infoDiv.innerHTML = '';
+                return;
+            }
+
+            // Chercher tous les joueurs de l'équipe, y compris ceux déjà transférés
+            const teamPlayers = allPlayers.filter(p => {
+                const belongsToTeam = 
+                    (p.team === teamName) || 
+                    (p.equipe === teamName) ||
+                    (p.teamName === teamName);
+                
+                return belongsToTeam;
+            });
+
+            if (teamPlayers.length === 0) {
+                select.innerHTML = '<option value="">Aucun joueur trouvé dans cette équipe</option>';
+                infoDiv.innerHTML = 'Aucun joueur assigné à cette équipe';
+                return;
+            }
+
+            // Séparer les joueurs actifs et transférés
+            const activePlayers = teamPlayers.filter(p => !p.transferStatus || p.transferStatus !== 'transferred_out');
+            const transferredPlayers = teamPlayers.filter(p => p.transferStatus === 'transferred_out');
+
+            // Trier les actifs par points
+            activePlayers.sort((a, b) => {
+                const pointsA = calculatePlayerTotalPoints(a.matches);
+                const pointsB = calculatePlayerTotalPoints(b.matches);
+                return pointsB - pointsA;
+            });
+
+            // Créer les options
+            let options = '<option value="">Sélectionner un joueur</option>';
+            
+            // Groupe des joueurs actifs
+            if (activePlayers.length > 0) {
+                options += '<optgroup label="Joueurs actifs">';
+                activePlayers.forEach(player => {
+                    const points = calculatePlayerTotalPoints(player.matches);
+                    const groupPoints = calculatePlayerGroupPoints(player.matches);
+                    options += `<option value="${player.name}" data-points="${points}" data-position="${player.position}" data-group-points="${groupPoints}">
+                        ${player.name} (${player.position}) - ${points} pts (dont ${groupPoints} pts de groupe)
+                    </option>`;
+                });
+                options += '</optgroup>';
+            }
+
+            // Groupe des joueurs déjà transférés (pour information, mais pas sélectionnables)
+            if (transferredPlayers.length > 0) {
+                options += '<optgroup label="Joueurs déjà transférés (non sélectionnables)">';
+                transferredPlayers.forEach(player => {
+                    options += `<option value="${player.name}" disabled style="color: #999; font-style: italic;">
+                        ${player.name} - Transféré (${player.pointsAtTransfer || '?'} pts figés)
+                    </option>`;
+                });
+                options += '</optgroup>';
+            }
+
+            select.innerHTML = options;
+            infoDiv.innerHTML = `${activePlayers.length} joueur(s) actif(s), ${transferredPlayers.length} transféré(s)`;
+        }
+
+        // Mettre à jour le sélecteur des joueurs entrants
+        function updatePlayerInSelect() {
+            const select = document.getElementById('player-in-select');
+            const infoDiv = document.getElementById('player-in-info');
+            
+            // Trouver tous les joueurs sans équipe OU avec statut disponible
+            const availablePlayers = allPlayers.filter(p => {
+                const hasNoTeam = !p.team && !p.equipe && !p.teamName;
+                const isAvailable = !p.transferStatus || p.transferStatus === 'available' || p.transferStatus === 'original';
+                return hasNoTeam && isAvailable;
+            });
+
+            if (availablePlayers.length === 0) {
+                select.innerHTML = '<option value="">Aucun joueur disponible</option>';
+                infoDiv.innerHTML = '';
+                return;
+            }
+
+            // Trier par points (décroissant)
+            availablePlayers.sort((a, b) => {
+                const pointsA = calculatePlayerTotalPoints(a.matches);
+                const pointsB = calculatePlayerTotalPoints(b.matches);
+                return pointsB - pointsA;
+            });
+
+            select.innerHTML = availablePlayers.map(player => {
+                const points = calculatePlayerTotalPoints(player.matches);
+                return `<option value="${player.name}" data-points="${points}" data-position="${player.position}">
+                    ${player.name} (${player.position}) - ${points} pts
+                </option>`;
+            }).join('');
+
+            infoDiv.innerHTML = `${availablePlayers.length} joueur(s) disponible(s)`;
+        }
+
+        // Quand le type de joueur entrant change
+        function onPlayerInTypeChange() {
+            const type = document.querySelector('input[name="playerInType"]:checked').value;
+            
+            if (type === 'existing') {
+                document.getElementById('existing-player-section').style.display = 'block';
+                document.getElementById('new-player-section').style.display = 'none';
+            } else {
+                document.getElementById('existing-player-section').style.display = 'none';
+                document.getElementById('new-player-section').style.display = 'block';
+            }
+            
+            updateTransferSummary();
+        }
+
+        // Calculer les points totaux d'un joueur
+        function calculatePlayerTotalPoints(matches) {
+            if (!matches) return 0;
+            return Object.values(matches).reduce((sum, val) => sum + (val || 0), 0);
+        }
+
+        // Calculer les points de groupe d'un joueur (M1, M2, M3, F32)
+        function calculatePlayerGroupPoints(matches) {
+            if (!matches) return 0;
+            const groupMatches = ['M1', 'M2', 'M3', 'F32'];
+            let total = 0;
+            groupMatches.forEach(match => {
+                if (matches[match]) {
+                    total += matches[match];
+                }
+            });
+            return total;
+        }
+
+        // Mettre à jour les statistiques
+        function updateStats() {
+            document.getElementById('total-transfers').textContent = allTransfers.length;
+            
+            const teamsWithTransfers = new Set(allTransfers.map(t => t.team)).size;
+            document.getElementById('teams-transferred').textContent = teamsWithTransfers;
+            
+            const transferredPlayers = allPlayers.filter(p => p.transferStatus === 'transferred_out').length;
+            document.getElementById('total-transferred').textContent = transferredPlayers;
+        }
+
+        // Mettre à jour les filtres d'équipes
+        function updateFilterTeams() {
+            const filterTeam = document.getElementById('filter-team');
+            const currentValue = filterTeam.value;
+            
+            const options = allTeams.map(team => 
+                `<option value="${team.name}">${team.name}</option>`
+            ).join('');
+
+            filterTeam.innerHTML = '<option value="">Toutes les équipes</option>' + options;
+            filterTeam.value = currentValue;
+        }
+
+        // Vérifier le statut de la fenêtre de transferts
+        async function checkTransferWindowStatus() {
+            try {
+                const settingsDoc = await db.collection("tournament").doc("general").get();
+                const isOpen = settingsDoc.exists && settingsDoc.data().transferWindowOpen === true;
+                
+                const statusEl = document.getElementById('window-status');
+                if (isOpen) {
+                    statusEl.textContent = 'Fenêtre ouverte';
+                    statusEl.style.backgroundColor = '#4caf50';
+                } else {
+                    statusEl.textContent = 'Fenêtre fermée';
+                    statusEl.style.backgroundColor = '#dc3545';
+                }
+            } catch (error) {
+                console.error("Erreur lors de la vérification du statut:", error);
+            }
+        }
+
+        // Afficher un message
+        function showMessage(text, type) {
+            const container = document.getElementById('message-container');
+            const className = type === 'error' ? 'error-message' : 
+                            type === 'success' ? 'success-message' : 'info-message';
+            
+            container.innerHTML = `<div class="${className}">${text}</div>`;
+            
+            // Auto-hide après 5 secondes pour les succès
+            if (type === 'success') {
+                setTimeout(() => {
+                    container.innerHTML = '';
+                }, 5000);
+            }
+        }
+
+        // Cacher le message
+        function hideMessage() {
+            document.getElementById('message-container').innerHTML = '';
+        }
+
+        // Mettre à jour le résumé du transfert
+        function updateTransferSummary() {
+            const team = document.getElementById('team-select').value;
+            const playerOut = document.getElementById('player-out-select').value;
+            const round = document.getElementById('round-select').value;
+            
+            const playerInType = document.querySelector('input[name="playerInType"]:checked').value;
+            let playerIn = '';
+            
+            if (playerInType === 'existing') {
+                playerIn = document.getElementById('player-in-select').value;
+            } else {
+                playerIn = document.getElementById('new-player-name').value;
+            }
+            
+            const summaryDiv = document.getElementById('transfer-summary');
+            const summaryText = document.getElementById('summary-text');
+            
+            if (team && playerOut && playerIn && round) {
+                summaryDiv.style.display = 'flex';
+                summaryText.innerHTML = `
+                    <strong>${team}</strong> transfère <strong>${playerOut}</strong> → <strong>${playerIn}</strong> (Tour ${round})
+                `;
+            } else {
+                summaryDiv.style.display = 'none';
+            }
+        }
+
+        // Sauvegarder un transfert
+        async function saveTransfer() {
+            const team = document.getElementById('team-select').value;
+            const playerOut = document.getElementById('player-out-select').value;
+            const round = document.getElementById('round-select').value;
+            const playerInType = document.querySelector('input[name="playerInType"]:checked').value;
+
+            // Validation de base
+            if (!team || !playerOut || !round) {
+                showMessage('Veuillez remplir tous les champs obligatoires', 'error');
+                return;
+            }
+
+            // Validation du joueur entrant
+            let playerIn = '';
+            let playerInPosition = '';
+            let playerInNation = '';
+            let playerInRound = null;
+            let playerInMatches = {};
+
+            if (playerInType === 'existing') {
+                playerIn = document.getElementById('player-in-select').value;
+                if (!playerIn) {
+                    showMessage('Veuillez sélectionner un joueur entrant', 'error');
+                    return;
+                }
+                
+                // Récupérer les infos du joueur existant
+                const selectedOption = document.querySelector('#player-in-select option:checked');
+                playerInPosition = selectedOption?.dataset.position || 'FW';
+                
+            } else {
+                playerIn = document.getElementById('new-player-name').value.trim();
+                playerInPosition = document.getElementById('new-player-position').value;
+                playerInNation = document.getElementById('new-player-nation').value.trim();
+                playerInRound = document.getElementById('new-player-round').value;
+                
+                // Points initiaux
+                const m1 = parseInt(document.getElementById('new-player-m1').value) || 0;
+                const m2 = parseInt(document.getElementById('new-player-m2').value) || 0;
+                const m3 = parseInt(document.getElementById('new-player-m3').value) || 0;
+                const f32 = parseInt(document.getElementById('new-player-f32').value) || 0;
+                
+                if (m1 > 0 || m2 > 0 || m3 > 0 || f32 > 0) {
+                    playerInMatches = { M1: m1, M2: m2, M3: m3, F32: f32 };
+                }
+                
+                if (!playerIn) {
+                    showMessage('Veuillez entrer le nom du nouveau joueur', 'error');
+                    return;
+                }
+            }
+
+            // Vérifier le nombre de transferts de l'équipe
+            const teamTransfersCount = allTransfers.filter(t => t.team === team).length;
+            if (teamTransfersCount >= 2) {
+                showMessage('Cette équipe a déjà effectué 2 transferts (maximum)', 'error');
+                return;
+            }
+
+            try {
+                showMessage('Enregistrement du transfert...', 'info');
+
+                // Trouver le joueur sortant
+                const playerOutDoc = allPlayers.find(p => p.name === playerOut);
+                if (!playerOutDoc) {
+                    showMessage('Joueur sortant non trouvé', 'error');
+                    return;
+                }
+
+                // Calculer ses points de groupe (ceux qu'il conserve)
+                const groupPoints = calculatePlayerGroupPoints(playerOutDoc.matches);
+
+                // 1. Créer le document de transfert avec les points figés
+                const transferData = {
+                    team: team,
+                    playerOut: playerOut,
+                    playerIn: playerIn,
+                    position: playerInPosition,
+                    round: parseInt(round),
+                    pointsAtTransfer: groupPoints, // Points figés au moment du transfert
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                };
+
+                const transferRef = await db.collection("transfers").add(transferData);
+
+                // 2. Mettre à jour le joueur sortant - il reste dans l'équipe mais avec un statut "transféré"
+                await db.collection("players").doc(playerOutDoc.docId).update({
+                    transferStatus: 'transferred_out',
+                    transferredTo: team, // L'équipe depuis laquelle il est transféré
+                    transferredToTeam: team,
+                    pointsAtTransfer: groupPoints, // Ses points figés
+                    transferRound: parseInt(round),
+                    transferDate: firebase.firestore.FieldValue.serverTimestamp(),
+                    // On garde team/equipe identiques - il reste dans l'équipe
+                    team: team,
+                    equipe: team
+                });
+
+                // 3. Gérer le joueur entrant
+                if (playerInType === 'existing') {
+                    // Mettre à jour le joueur existant
+                    const playerInDoc = allPlayers.find(p => p.name === playerIn);
+                    if (playerInDoc) {
+                        await db.collection("players").doc(playerInDoc.docId).update({
+                            transferStatus: 'transferred_in',
+                            transferredFrom: team,
+                            transferredFromTeam: team,
+                            transferRound: parseInt(round),
+                            transferDate: firebase.firestore.FieldValue.serverTimestamp(),
+                            equipe: team,
+                            team: team
+                        });
+                    }
+                } else {
+                    // Créer un nouveau joueur
+                    const newPlayerData = {
+                        name: playerIn,
+                        nation: playerInNation || 'Inconnue',
+                        position: playerInPosition,
+                        round: playerInRound ? parseInt(playerInRound) : null,
+                        team: team,
+                        equipe: team,
+                        transferStatus: 'transferred_in',
+                        transferRound: parseInt(round),
+                        transferredFrom: null,
+                        matches: playerInMatches,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    };
+                    
+                    await db.collection("players").add(newPlayerData);
+                }
+
+                // 4. Mettre à jour le compteur de transferts de l'équipe
+                const teamDoc = allTeams.find(t => t.name === team);
+                if (teamDoc) {
+                    await db.collection("teams").doc(teamDoc.id).update({
+                        transfersUsed: teamTransfersCount + 1,
+                        transferHistory: firebase.firestore.FieldValue.arrayUnion({
+                            transferId: transferRef.id,
+                            playerOut: playerOut,
+                            playerIn: playerIn,
+                            round: round,
+                            pointsAtTransfer: groupPoints,
+                            date: new Date().toISOString()
+                        })
+                    });
+                }
+
+                showMessage('Transfert enregistré avec succès !', 'success');
+
+                // Recharger toutes les données
+                await loadAllData();
+
+                // Réinitialiser le formulaire
+                document.getElementById('team-select').value = '';
+                document.getElementById('round-select').value = '';
+                document.getElementById('player-out-select').innerHTML = '<option value="">D\'abord sélectionner une équipe</option>';
+                document.getElementById('player-in-select').innerHTML = '<option value="">Sélectionner un joueur disponible</option>';
+                document.getElementById('new-player-name').value = '';
+                document.getElementById('new-player-nation').value = '';
+                document.getElementById('new-player-position').value = 'FW';
+                document.getElementById('new-player-round').value = '';
+                document.getElementById('new-player-m1').value = '';
+                document.getElementById('new-player-m2').value = '';
+                document.getElementById('new-player-m3').value = '';
+                document.getElementById('new-player-f32').value = '';
+                
+                // Remettre le type sur "existant"
+                document.querySelector('input[name="playerInType"][value="existing"]').checked = true;
+                onPlayerInTypeChange();
+                
+                document.getElementById('transfer-summary').style.display = 'none';
+
+            } catch (error) {
+                console.error("Erreur lors de l'enregistrement:", error);
+                showMessage('Erreur lors de l\'enregistrement: ' + error.message, 'error');
+            }
+        }
+
+        // Supprimer un transfert
+        async function deleteTransfer(transferId) {
+            if (!confirm('Êtes-vous sûr de vouloir supprimer ce transfert ? Cette action est irréversible.')) {
+                return;
+            }
+
+            try {
+                showMessage('Suppression du transfert...', 'info');
+
+                const transfer = allTransfers.find(t => t.id === transferId);
+                if (!transfer) return;
+
+                // Supprimer le document de transfert
+                await db.collection("transfers").doc(transferId).delete();
+
+                // Remettre le statut du joueur sortant à "original"
+                const playerOutDoc = allPlayers.find(p => p.name === transfer.playerOut);
+                if (playerOutDoc) {
+                    await db.collection("players").doc(playerOutDoc.docId).update({
+                        transferStatus: 'original',
+                        transferredTo: null,
+                        transferredToTeam: null,
+                        pointsAtTransfer: null,
+                        transferRound: null,
+                        transferDate: null
+                    });
+                }
+
+                // Remettre le statut du joueur entrant
+                const playerInDoc = allPlayers.find(p => p.name === transfer.playerIn);
+                if (playerInDoc) {
+                    // Si c'était un nouveau joueur, on le remet sans équipe
+                    if (playerInDoc.transferStatus === 'transferred_in' && !playerInDoc.round) {
+                        await db.collection("players").doc(playerInDoc.docId).update({
+                            transferStatus: 'original',
+                            transferredFrom: null,
+                            transferredFromTeam: null,
+                            transferRound: null,
+                            transferDate: null,
+                            equipe: null,
+                            team: null
+                        });
+                    } else {
+                        // Sinon on remet juste son statut
+                        await db.collection("players").doc(playerInDoc.docId).update({
+                            transferStatus: 'original',
+                            transferredFrom: null,
+                            transferredFromTeam: null,
+                            transferRound: null,
+                            transferDate: null
+                        });
+                    }
+                }
+
+                // Décrémenter le compteur de transferts de l'équipe
+                const teamDoc = allTeams.find(t => t.name === transfer.team);
+                if (teamDoc) {
+                    await db.collection("teams").doc(teamDoc.id).update({
+                        transfersUsed: firebase.firestore.FieldValue.increment(-1)
+                    });
+                }
+
+                showMessage('Transfert supprimé avec succès !', 'success');
+                
+                // Recharger les données
+                await loadAllData();
+
+            } catch (error) {
+                console.error("Erreur lors de la suppression:", error);
+                showMessage('Erreur lors de la suppression: ' + error.message, 'error');
+            }
+        }
+
+        // Rafraîchir les données
+        function refreshData() {
+            loadAllData();
+        }
+
+        // Ouvrir le modal d'ajout multiple
+        function openBulkAddModal() {
+            document.getElementById('bulkAddModal').style.display = 'block';
+        }
+
+        // Fermer le modal d'ajout multiple
+        function closeBulkAddModal() {
+            document.getElementById('bulkAddModal').style.display = 'none';
+        }
+
+        // Sauvegarder plusieurs joueurs
+        async function saveBulkPlayers() {
+            const textarea = document.getElementById('bulk-players');
+            const lines = textarea.value.split('\n').filter(line => line.trim());
+            
+            if (lines.length === 0) {
+                alert('Veuillez entrer au moins un joueur');
+                return;
+            }
+
+            showMessage('Ajout des joueurs...', 'info');
+
+            try {
+                for (const line of lines) {
+                    const parts = line.split(',').map(p => p.trim());
+                    const name = parts[0];
+                    const nation = parts[1] || 'Inconnue';
+                    const position = parts[2] || 'FW';
+                    
+                    if (name) {
+                        await db.collection("players").add({
+                            name: name,
+                            nation: nation,
+                            position: position,
+                            team: null,
+                            equipe: null,
+                            transferStatus: 'original',
+                            matches: {},
+                            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                    }
+                }
+                
+                showMessage('Joueurs ajoutés avec succès !', 'success');
+                closeBulkAddModal();
+                await loadAllData();
+                
+            } catch (error) {
+                console.error("Erreur lors de l'ajout multiple:", error);
+                showMessage('Erreur: ' + error.message, 'error');
+            }
+        }
+
+        // Écouter les changements dans les champs du nouveau joueur
+        document.getElementById('new-player-name').addEventListener('input', updateTransferSummary);
+    </script>
+</body>
+</html>
