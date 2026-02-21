@@ -6,6 +6,7 @@
     <title>Draft Fantasy Football</title>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+	<script src="countries.js"></script>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -229,9 +230,11 @@
                 <input type="text" id="player-name" placeholder="Nom du joueur">
             </div>
             <div class="form-group">
-                <label for="player-nation">Nation</label>
-                <input type="text" id="player-nation" placeholder="Nation du joueur">
-            </div>
+    <label for="player-nation">Nation</label>
+    <select id="player-nation">
+        <option value="">-- Sélectionnez une nation --</option>
+    </select>
+</div>
             <div class="form-group">
                 <label for="player-position">Position</label>
                 <select id="player-position">
@@ -323,6 +326,15 @@
         checkExistingDraft();
         
         // Fonctions
+		
+		// Fonction pour peupler le select des nations
+function populateNationSelect() {
+    const nationSelect = document.getElementById('player-nation');
+    if (nationSelect) {
+        populateCountrySelect(nationSelect, "Sélectionnez une nation");
+    }
+}
+
         async function checkExistingDraft() {
             try {
                 const stateSnapshot = await db.collection('draft_state').doc(DRAFT_STATE_ID).get();
@@ -352,6 +364,7 @@
             draftHistorySection.classList.remove('hidden');
             resetSection.classList.remove('hidden');
             draftHistoryBody.innerHTML = '';
+			    populateNationSelect();
             
             try {
                 const stateSnapshot = await db.collection('draft_state').doc(DRAFT_STATE_ID).get();
@@ -442,9 +455,9 @@
             });
             
             // Réinitialiser les champs
-            playerNameInput.value = '';
-            playerNationInput.value = '';
-            playerPositionSelect.value = 'FW';
+playerNameInput.value = '';
+playerNationInput.value = ''; // Remet le select à l'option par défaut
+playerPositionSelect.value = 'FW';
             
             // Focus sur le champ du nom
             playerNameInput.focus();
@@ -453,7 +466,7 @@
         async function submitPick() {
             // Récupérer les valeurs
             const playerName = playerNameInput.value.trim();
-            const playerNation = playerNationInput.value.trim();
+            const playerNation = playerNationInput.value; // Pas besoin de trim() car c'est un select
             const playerPosition = playerPositionSelect.value;
             
             // Validation
