@@ -34,6 +34,10 @@
         margin: 0;
         padding: 0;
     }
+    h4 {
+        margin: 10px 0 5px 0;
+        color: #3d195b;
+    }
     .section {
         background-color: white;
         border-radius: 5px;
@@ -84,6 +88,9 @@
         padding-bottom: 5px;
         margin-bottom: 10px;
         font-size: 1.2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
     }
     .player {
         padding: 5px 0;
@@ -95,6 +102,39 @@
     }
     .goalkeeper {
         font-weight: bold;
+    }
+    .transferred-out {
+        font-style: italic;
+        background-color: #f9f9f9;
+    }
+    .transferred-out .player-points {
+        font-weight: bold;
+    }
+    .transferred-in {
+        color: #4caf50;
+        font-weight: bold;
+        position: relative;
+    }
+    .transferred-in::before {
+        margin-right: 5px;
+        font-size: 0.8rem;
+    }
+    
+    .transfer-period {
+        background-color: #fff3e0;
+        border-left: 4px solid #ff9800;
+        padding: 10px;
+        margin: 10px 0;
+        border-radius: 3px;
+    }
+    .transfer-period h4 {
+        color: #e65100;
+        margin-top: 0;
+    }
+    .transfers-section {
+        margin-top: 15px;
+        padding-top: 10px;
+        border-top: 2px dashed #ff9800;
     }
     .tabs {
         display: flex;
@@ -321,6 +361,14 @@
         flex-direction: column;
         width: 100%;
     }
+    
+    /* Nouveau layout pour le terrain et les joueurs sortis */
+    .field-wrapper {
+        position: relative;
+        width: 100%;
+        margin-bottom: 20px;
+    }
+    
     .soccer-field {
         position: relative;
         width: 100%;
@@ -328,9 +376,10 @@
         background-color: #75c043;
         border: 2px solid white;
         border-radius: 5px;
-        overflow: hidden;
-        margin-bottom: 15px;
+        overflow: visible;
+        margin-bottom: 5px;
     }
+    
     .field-line {
         position: absolute;
         background-color: white;
@@ -423,6 +472,25 @@
         transform: translate(-50%, -50%);
         z-index: 5;
     }
+    .player-dot.transferred-in {
+        position: absolute;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: black;
+        font-weight: bold;
+        font-size: 12px;
+        transform: translate(-50%, -50%);
+        z-index: 5;
+    }
+    @keyframes pulse {
+        0% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7); }
+        70% { box-shadow: 0 0 0 5px rgba(76, 175, 80, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
+    }
     .player-name {
         position: absolute;
         font-size: 14px;
@@ -440,9 +508,133 @@
     .position-DF, .position-FW {
         background-color: #ffeb3b;
     }
+    
+    /* Zone des joueurs transférés (sous le terrain) */
+    .transferred-out-players {
+        margin-top: 10px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        align-items: center;
+    }
+
+    
+    .transferred-out-player-card {
+        border-radius: 3px;
+        padding: 5px 10px;
+        font-size: 0.8rem;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .transferred-out-player-name {
+        font-weight: bold;
+        color: #666;
+    }
+    
+    .transferred-out-player-points {
+        color: #e65100;
+        font-size: 0.9rem;
+        font-weight: bold;
+    }
+    
+    .transferred-out-player-position {
+        font-size: 0.7rem;
+        color: #999;
+        font-style: italic;
+    }
+    
+    .transfer-tag {
+        font-size: 0.6rem;
+        background-color: #ff9800;
+        color: white;
+        padding: 1px 3px;
+        border-radius: 2px;
+        margin-left: 3px;
+    }
+    
+    /* Styles pour la liste view */
     .player-list {
         margin-top: 10px;
     }
+    
+    .active-players-section, .transferred-out-section {
+        margin-bottom: 15px;
+    }
+    
+    .section-title {
+        font-size: 0.9rem;
+        font-weight: bold;
+        color: #3d195b;
+        margin-bottom: 8px;
+        padding-bottom: 3px;
+        border-bottom: 1px solid #3d195b;
+    }
+    
+    .transferred-out-section .section-title {
+        color: #e65100;
+        border-bottom-color: #ff9800;
+    }
+    
+    .player {
+        padding: 8px 10px;
+        border-bottom: 1px solid #eee;
+        font-size: 0.9rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: white;
+    }
+    
+    .player:last-child {
+        border-bottom: none;
+    }
+    
+    .player-info {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+    
+    .player-name {
+        font-size: 14px;
+		width:60px;
+    }
+    
+    .player-position {
+        font-size: 0.8rem;
+        color: #666;
+        background-color: #f0f0f0;
+        padding: 2px 5px;
+        border-radius: 3px;
+    }
+    
+    .player-nation {
+        font-size: 0.8rem;
+        color: #888;
+    }
+    
+    .player-points {
+        font-weight: bold;
+        color: #3d195b;
+        padding: 2px 8px;
+        font-size: 0.85rem;
+    }
+    
+    .transferred-out .player-points {
+        background-color: #fff3e0;
+        color: #e65100;
+    }
+   
+    
+    .goalkeeper .player-name::after {
+        content: " (G)";
+        font-size: 0.8rem;
+        color: #4caf50;
+        font-weight: normal;
+    }
+    
     .formation-title {
         margin-top: 10px;
         font-weight: bold;
@@ -474,8 +666,15 @@
         background-color: #3d195b;
         color: white;
     }
-
-    /* Responsive adjustments */
+    .phase-badge {
+        display: inline-block;
+        background-color: #3d195b;
+        color: white;
+        padding: 3px 8px;
+        border-radius: 3px;
+        font-size: 0.7rem;
+        margin-left: 5px;
+    }
     @media (max-width: 1024px) {
         .team-card {
             flex: 1 1 100%;
@@ -534,9 +733,6 @@
             padding: 6px 10px;
             font-size: 0.8rem;
         }
-.tab[onclick="openTab('bracket')"] {
-    display: none;
-}
         .section {
             padding: 10px;
         }
@@ -555,71 +751,63 @@
             width: 50px;
             height: 100px;
         }
-.rules-content {
-    line-height: 1.6;
-}
-
-.rules-content h3 {
-    color: #3d195b;
-    margin-top: 20px;
-    padding-bottom: 5px;
-    border-bottom: 1px solid #eee;
-}
-
-.rules-content ul, .rules-content ol {
-    padding-left: 20px;
-    margin: 10px 0;
-}
-
-.rules-content li {
-    margin-bottom: 5px;
-}
-
-.points-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 15px 0;
-}
-
-.points-table th, .points-table td {
-    padding: 10px;
-    border: 1px solid #ddd;
-    text-align: left;
-}
-
-.points-table th {
-    background-color: #f2f2f2;
-    font-weight: bold;
-}
-
-.points-table tr:nth-child(even) {
-    background-color: #f9f9f9;
-}
-
-@media (max-width: 768px) {
-    .points-table th, .points-table td {
-        padding: 8px;
-        font-size: 0.85rem;
-    }
-}
         .player-name {
             font-size: 9px;
             width: 50px;
         }
-        .player-points {
-        float: right;
-        font-weight: bold;
+        .transferred-out-player-card {
+            padding: 3px 6px;
+            font-size: 0.7rem;
+        }
+    }
+    .rules-content {
+        line-height: 1.6;
+    }
+
+    .rules-content h3 {
         color: #3d195b;
-    }
-    
-    .player {
-        padding: 8px 0;
-        font-size: 0.8rem;
+        margin-top: 20px;
+        padding-bottom: 5px;
         border-bottom: 1px solid #eee;
-        overflow: hidden; /* Pour contenir le float */
     }
+
+    .rules-content ul, .rules-content ol {
+        padding-left: 20px;
+        margin: 10px 0;
     }
-</style>
+
+    .rules-content li {
+        margin-bottom: 5px;
+    }
+
+    .points-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 15px 0;
+    }
+
+    .points-table th, .points-table td {
+        padding: 10px;
+        border: 1px solid #ddd;
+        text-align: left;
+    }
+
+    .points-table th {
+        background-color: #f2f2f2;
+        font-weight: bold;
+    }
+
+    .points-table tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+
+    @media (max-width: 768px) {
+        .points-table th, .points-table td {
+            padding: 8px;
+            font-size: 0.85rem;
+        }
+    }
+    </style>
 
 </head>
 
@@ -636,8 +824,9 @@
             <button class="tab" onclick="openTab('standings')">Classement</button>
             <button class="tab" onclick="openTab('stats')">Statistiques</button>
             <button class="tab" onclick="openTab('bracket')">Bracket</button>
-	        <button class="tab" onclick="openTab('rules')">Règles</button>
-			<button class="tab" onclick="openTab('palma')">Palmarès</button>
+            <button class="tab" onclick="openTab('rules')">Règles</button>
+            <button class="tab" onclick="openTab('palma')">Palmarès</button>
+            <button class="tab" onclick="openTab('transfers')">Transferts</button>
         </div>
 
         <!-- Section Équipes -->    
@@ -650,15 +839,15 @@
             </div>
         </div>
 
-		<!-- Section Palmarès -->    
-        <div id="palma" class="tab-content active">
-             <div class="section">
+        <!-- Section Palmarès -->    
+        <div id="palma" class="tab-content">
+            <div class="section">
                 <h2>Palmarès 2024</h2>
                 <table id="2024-ranking">
                     <thead>
                         <tr>
                             <th>Position</th>
-							<th>Nom</th>
+                            <th>Nom</th>
                             <th>Total</th>
                         </tr>
                     </thead>
@@ -743,7 +932,39 @@
             </div>
         </div>
 
-	<!-- Section Règles -->
+    <!-- Section Transferts -->
+<div id="transfers" class="tab-content">
+    <div class="section">
+        <h2>Période de Transferts</h2>
+        <div class="transfer-period">
+            <h4>Fenêtre de Transferts - Après les 1/32èmes de finale</h4>
+            <p>Chaque manager peut transférer <strong>2 joueurs maximum</strong> avant le début des 1/16èmes de finale.</p>
+            <p><strong>Ordre de draft inversé :</strong> Le dernier du classement choisit en premier, puis remontée jusqu'au premier.</p>
+            <p><strong>Deux tours :</strong> Un premier tour dans l'ordre inverse, puis un second tour dans le même ordre.</p>
+            <p><em>Note: Les joueurs transférés conservent leurs points de la phase de groupes. Les nouveaux joueurs commencent à marquer des points à partir des 1/16èmes.</em></p>
+        </div>
+        
+        <h3>Historique des Transferts</h3>
+        <table id="transfers-table">
+            <thead>
+                <tr>
+                    <th>Équipe</th>
+                    <th>Joueur Sortant</th>
+                    <th>Joueur Entrant</th>
+                    <th>Position</th>
+                    <th>Tour</th>
+                </tr>
+            </thead>
+            <tbody id="transfers-body">
+                <tr>
+                    <td colspan="5" class="loading">Chargement des données...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+    <!-- Section Règles -->
 <div id="rules" class="tab-content">
     <div class="section">
         <h2>Règles du Jeu</h2>
@@ -752,14 +973,27 @@
             <p>Chaque participant compose une équipe de 6 joueurs (1 gardien, 2 défensifs et 3 offensifs ou 1 gardien, 3 défensifs et 2 offensifs) qui marquent des points selon leurs performances pendant la Coupe du Monde 2026. Les milieux de terrain sont considéré comme offensifs</p>
             
             <h3>Composition des équipes</h3>
-	    Les équipes sont construites à la base d'une draft. Le tirage au sort de l'ordre de draft donne une chance égale à chacun d'être #1. La draft aura lieu sur le groupe Whatsapp. Il faudra annoncé le nom complet du joueur choisi, sa position et sa nationalité.
+        Les équipes sont construites à la base d'une draft. Le tirage au sort de l'ordre de draft donne une chance égale à chacun d'être #1. La draft aura lieu sur le groupe Whatsapp. Il faudra annoncé le nom complet du joueur choisi, sa position et sa nationalité.
             <ul>
                 <li>1-2-3</li>
                 <li>1-3-2 </li>
             </ul>
             A choix et peut changer si des transfers de joueurs sont introduits.
-<ul> </ul>
-           <h3>Système de points</h3>
+
+            <h3>🚨 Période de Transferts</h3>
+            <p><strong>Après les 1/32èmes de finale</strong>, une fenêtre de transferts est ouverte :</p>
+            <ul>
+                <li>Chaque équipe peut transférer <strong>maximum 2 joueurs</strong></li>
+                <li><strong>Ordre de draft inversé</strong> : Le dernier du classement après les 1/32èmes choisit en premier</li>
+                <li><strong>Deux tours</strong> de draft : on commence par le dernier jusqu'au premier, puis on refait un second tour dans le même ordre</li>
+                <li>Un manager peut choisir de ne pas faire de transfert à son tour</li>
+                <li>Les joueurs transférés <strong>conservent leurs points</strong> de la phase de groupes</li>
+                <li>Les nouveaux joueurs <strong>commencent à marquer des points à partir des 1/16èmes</strong> de finale</li>
+                <li>La formation peut changer si les positions des nouveaux joueurs sont différentes</li>
+            </ul>
+            <p>Cette mécanique permet aux équipes mal classées de se renforcer et de rester compétitives pour la phase à élimination directe !</p>
+
+            <h3>Système de points</h3>
             <table class="points-table">
                 <thead>
                     <tr>
@@ -849,11 +1083,11 @@
             <ul> </ul>
             <h3>Phase à élimination directe / Tournoi "Bracket"</h3>
             La phase de groupe de la Coupe de Monde est de 3 matchs. Les équipes qualifiés passent en 16ème de finale.
-	    Pour notre jeu les 3 matchs de poules (M1, M2, M3) et les 16ème de finale donneront un total d'accession à chacun. En prenant le classement après les 16èmes de finale nous commenceront un tableau de match à élimination direct ("Bracket"). 
-	    On ne se battra plus pour faire le plus de points, mais juste plus de points que notre adversaire direct. On avancera jusqu'à la finale qui définiera le vainqueur final. Cependant les points et le classement général continueront de faire valeur pour deux raisons:
+        Pour notre jeu les 3 matchs de poules (M1, M2, M3) et les 16ème de finale donneront un total d'accession à chacun. En prenant le classement après les 16èmes de finale nous commenceront un tableau de match à élimination direct ("Bracket"). 
+        On ne se battra plus pour faire le plus de points, mais juste plus de points que notre adversaire direct. On avancera jusqu'à la finale qui définiera le vainqueur final. Cependant les points et le classement général continueront de faire valeur pour deux raisons:
 1. En cas d'égalité dans un match de Bracket, l'équipe avec le plus de points au total passe; 2. pour au final définir les 2 perdants responsables d'organiser un apéro lors de la soirée d'ouverture de la prochaine compétition (Euro 28). Si un des deux derniers venait à gagner le tournoi "bracket", il sera dispensé de sa charge et l'antépénultième prendra sa place.
             
-		<p>Le premier round des matchs est défini comme suit:</p>
+        <p>Le premier round des matchs est défini comme suit:</p>
             <p>1            vs            16
             ------
             8            vs            9
@@ -861,10 +1095,10 @@
             5            vs            12
             ------
             4            vs            13</p>
-	    
+        
 
-		
-	    <p>3            vs            14
+        
+        <p>3            vs            14
             ------
             11            vs            6
             ------
@@ -872,11 +1106,11 @@
             ------
             15            vs            2</p>
         
-		<ul> </ul>
-            <h3>Transfers</h3>
-Avant le début de la bracket un double tour de draft permettra de changé 2 joueurs. On commence par le dernier du classement jusqu'au premier et retour. Il n'y a aucune obligation de procédé à un transfers une fois son tour venu.
+        <ul> </ul>
+            <h3>Transfers (Rappel)</h3>
+Avant le début de la bracket (après les 1/32èmes) un double tour de draft permettra de changé 2 joueurs. On commence par le dernier du classement jusqu'au premier et retour. Il n'y a aucune obligation de procédé à un transfers une fois son tour venu.
 <ul> </ul>
-	    <h3>Règles supplémentaires</h3>
+        <h3>Règles supplémentaires</h3>
             <ul>
                 <li>En cas d'égalité au classement, le départage se fait par : 
                     <ol>
@@ -908,11 +1142,12 @@ Avant le début de la bracket un double tour de draft permettra de changé 2 jou
                             <th>1/2</th>
                             <th>Final</th>
                             <th>Pts</th>
+                            <th>Transferts</th>
                         </tr>
                     </thead>
                     <tbody id="standings-body">
                         <tr>
-                            <td colspan="11" class="loading">Chargement des données...</td>
+                            <td colspan="12" class="loading">Chargement des données...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -941,6 +1176,7 @@ Avant le début de la bracket un double tour de draft permettra de changé 2 jou
                             <th>Nom</th>
                             <th>Nation</th>
                             <th>Position</th>
+                            <th>Équipe</th>
                             <th>M1</th>
                             <th>M2</th>
                             <th>M3</th>
@@ -954,7 +1190,7 @@ Avant le début de la bracket un double tour de draft permettra de changé 2 jou
                     </thead>
                     <tbody id="player-stats-body">
                         <tr>
-                            <td colspan="12" class="loading">Chargement des données...</td>
+                            <td colspan="14" class="loading">Chargement des données...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -1027,13 +1263,16 @@ Avant le début de la bracket un double tour de draft permettra de changé 2 jou
                 shortName: data.shortName || data.name.substring(0, 3).toUpperCase(),
                 formation: data.formation || "1-2-3",
                 players: data.players || [],
-                results: data.results || {}
+                results: data.results || {},
+                transfersUsed: data.transfersUsed || 0,
+                transferHistory: data.transferHistory || []
             };
         });
 
         // Load tournament settings to check if bracket should be shown
         const tournamentSettings = await db.collection("tournament").doc("general").get();
         const showBracket = tournamentSettings.exists && tournamentSettings.data().start === true;
+        const transferWindowOpen = tournamentSettings.exists && tournamentSettings.data().transferWindowOpen === true;
 
         // Load bracket data only if needed
         let bracketData = {};
@@ -1051,7 +1290,27 @@ Avant le début de la bracket un double tour de draft permettra de changé 2 jou
                 nation: data.nation, 
                 equipe: data.team,
                 position: data.position || 'FW',
+                transferStatus: data.transferStatus || 'original', // 'original', 'transferred_in', 'transferred_out'
+                transferredFrom: data.transferredFrom || null, // Previous team if transferred out
+                transferredTo: data.transferredTo || null, // New team if transferred in
+                transferRound: data.transferRound || null, // 1 or 2
+                pointsAtTransfer: data.pointsAtTransfer || calculatePlayerTotalPointsBeforeTransfer(data.matches), // Points when transferred out
                 matches: data.matches || {}
+            };
+        });
+
+        // Load transfers data
+        const transfersSnapshot = await db.collection("transfers").get();
+        const transfers = transfersSnapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
+                id: doc.id,
+                team: data.team,
+                playerOut: data.playerOut,
+                playerIn: data.playerIn,
+                position: data.position,
+                round: data.round,
+                timestamp: data.timestamp
             };
         });
 
@@ -1059,6 +1318,13 @@ Avant le début de la bracket un double tour de draft permettra de changé 2 jou
         renderTeams(teams, playerStats);
         renderStandings(teams);
         renderPlayerStats(playerStats);
+        renderTransfers(transfers);
+        
+        // Show transfer window indicator
+        if (transferWindowOpen) {
+            document.querySelector('.tab[onclick="openTab(\'transfers\')"]').style.backgroundColor = '#ff9800';
+            document.querySelector('.tab[onclick="openTab(\'transfers\')"]').style.color = 'white';
+        }
         
         // Only render bracket if enabled
         if (showBracket) {
@@ -1077,15 +1343,31 @@ Avant le début de la bracket un double tour de draft permettra de changé 2 jou
         document.getElementById('team-container').innerHTML = 
             `<p class="error">Error loading team data: ${error.message}</p>`;
         document.getElementById('standings-body').innerHTML = 
-            `<tr><td colspan="11" class="error">Error loading standings: ${error.message}</td></tr>`;
+            `<tr><td colspan="12" class="error">Error loading standings: ${error.message}</td></tr>`;
         document.getElementById('player-stats-body').innerHTML = 
-            `<tr><td colspan="12" class="error">Error loading player stats: ${error.message}</td></tr>`;
+            `<tr><td colspan="14" class="error">Error loading player stats: ${error.message}</td></tr>`;
+        document.getElementById('transfers-body').innerHTML = 
+            `<tr><td colspan="5" class="error">Error loading transfers: ${error.message}</td></tr>`;
         document.getElementById('bracket-container').innerHTML = 
             `<p class="error">Error loading bracket: ${error.message}</p>`;
     }
 }
 
-        // Function to render teams with soccer field
+        // Helper function to calculate player points before transfer (only group stage matches)
+        function calculatePlayerTotalPointsBeforeTransfer(matches) {
+            if (!matches) return 0;
+            // Only count M1, M2, M3, F32 (group stage matches)
+            const groupMatches = ['M1', 'M2', 'M3', 'F32'];
+            let total = 0;
+            groupMatches.forEach(matchKey => {
+                if (matches[matchKey]) {
+                    total += matches[matchKey];
+                }
+            });
+            return total;
+        }
+
+        // Function to render teams with improved field and list views
        function renderTeams(teams, playerStatsData) {
     const teamContainer = document.getElementById('team-container');
     teamContainer.innerHTML = '';
@@ -1093,12 +1375,12 @@ Avant le début de la bracket un double tour de draft permettra de changé 2 jou
     // Organiser les joueurs par équipe
     const playersByTeam = {};
     
-    // Initialiser le tableau pour chaque équipe
+    // Initialiser les tableaux pour chaque équipe
     teams.forEach(team => {
         playersByTeam[team.id] = [];
     });
     
-    // Ajouter chaque joueur dans son équipe
+    // Ajouter chaque joueur dans son équipe actuelle
     playerStatsData.forEach(player => {
         if (player.equipe && playersByTeam[player.equipe]) {
             playersByTeam[player.equipe].push(player);
@@ -1110,14 +1392,27 @@ Avant le début de la bracket un double tour de draft permettra de changé 2 jou
         teamCard.className = 'team-card';
 
         // Récupérer tous les joueurs de cette équipe
-        const teamPlayers = playersByTeam[team.id] || [];
+        const allTeamPlayers = playersByTeam[team.id] || [];
         
-        // Déterminer dynamiquement la formation basée sur les positions des joueurs
-        const formation = determineFormation(teamPlayers);
+        // Séparer les joueurs actifs et les joueurs transférés (qui ont quitté l'équipe)
+        // Note: Les joueurs transférés ont transferStatus = 'transferred_out' mais sont encore dans l'équipe ?
+        // En réalité, les joueurs transférés ne sont plus dans l'équipe. Nous devons les trouver ailleurs.
         
-        // Trier les joueurs par leur round de draft (croissant)
-        const sortedPlayers = [...teamPlayers].sort((a, b) => {
-            // D'abord par round (croissant)
+        // Pour cet exemple, nous allons considérer que les joueurs avec transferStatus = 'transferred_out' 
+        // ne sont plus dans l'équipe. Les joueurs actifs sont ceux avec transferStatus !== 'transferred_out'
+        const activePlayers = allTeamPlayers.filter(p => p.transferStatus !== 'transferred_out');
+        const transferredOutPlayers = allTeamPlayers.filter(p => p.transferStatus === 'transferred_out');
+        
+        // Déterminer dynamiquement la formation basée sur les positions des joueurs actifs
+        const formation = determineFormation(activePlayers);
+        
+        // Trier les joueurs actifs
+        const sortedActivePlayers = [...activePlayers].sort((a, b) => {
+            // D'abord les transferts entrants (pour les mettre en évidence)
+            if (a.transferStatus === 'transferred_in' && b.transferStatus !== 'transferred_in') return -1;
+            if (a.transferStatus !== 'transferred_in' && b.transferStatus === 'transferred_in') return 1;
+            
+            // Ensuite par round (croissant)
             const roundA = a.round || 999;
             const roundB = b.round || 999;
             
@@ -1130,18 +1425,28 @@ Avant le début de la bracket un double tour de draft permettra de changé 2 jou
             return (posOrder[a.position] || 99) - (posOrder[b.position] || 99);
         });
         
-        // Créer la vue liste des joueurs ordonnée par round de draft
-        let playersListHtml = '';
+        // Créer la vue liste avec deux sections
+        let activePlayersHtml = '';
+        let transferredOutHtml = '';
         
-        sortedPlayers.forEach(player => {
+        // Section des joueurs actifs
+        sortedActivePlayers.forEach(player => {
             const isGoalkeeper = player.position === 'GK';
             const positionName = isGoalkeeper ? 'Gardien' : 
                                 player.position === 'DF' ? 'Défenseur' : 'Attaquant';
             
             const totalPoints = calculatePlayerTotalPoints(player.matches);
-            const draftRound = player.round ? `Round ${player.round}` : '     ';
+            const draftRound = player.round ? `Round ${player.round}` : '';
             
-            playersListHtml += `
+            // Déterminer la classe CSS en fonction du statut de transfert
+            let transferBadge = '';
+            let playerClass = '';
+            
+            if (player.transferStatus === 'transferred_in') {
+                playerClass = 'transferred-in';
+            }
+            
+            activePlayersHtml += `
                 <div class="player ${isGoalkeeper ? 'goalkeeper' : ''}">
                     ${player.name} (${positionName}, ${player.nation || ''})
                     <span class="player-details">
@@ -1151,36 +1456,91 @@ Avant le début de la bracket un double tour de draft permettra de changé 2 jou
                 </div>
             `;
         });
+        
+        // Section des joueurs transférés (sortis)
+        transferredOutPlayers.forEach(player => {
+            const positionName = player.position === 'GK' ? 'Gardien' : 
+                                player.position === 'DF' ? 'Défenseur' : 'Attaquant';
+            
+            // Utiliser les points au moment du transfert ou calculer les points de groupe
+            const pointsAtTransfer = player.pointsAtTransfer || calculatePlayerTotalPointsBeforeTransfer(player.matches);
+            
+            transferredOutHtml += `
+                <div class="player">
+					${player.name} (${positionName}, ${player.nation || ''})
+                    <span class="player-points">${pointsAtTransfer} pts</span>
+                </div>
+            `;
+        });
 
         // Créer le HTML de la carte équipe avec les deux vues
         teamCard.innerHTML = `
-            <h3>${team.name}</h3>
+            <h3>
+                ${team.name} 
+            </h3>
             <div class="view-toggle">
                 <button id="field-btn-${teamIndex}" class="view-btn active" onclick="toggleView(${teamIndex}, 'field')">Vue Terrain</button>
                 <button id="list-btn-${teamIndex}" class="view-btn" onclick="toggleView(${teamIndex}, 'list')">Vue Liste</button>
             </div>
             
-            <div class="formation-title">Formation: ${formation}</div>
+            <div class="formation-title">Formation actuelle: ${formation}</div>
             
             <div class="team-content">
+                <!-- Vue Terrain -->
                 <div id="field-view-${teamIndex}" class="field-view">
-                    <div class="soccer-field">
-                        <!-- Field lines -->
-                        <div class="halfway-line"></div>
-                        <div class="center-circle"></div>
-                        <div class="center-spot"></div>
-                        <div class="penalty-box-left"></div>
-                        <div class="penalty-box-right"></div>
-                        <div class="goal-box-left"></div>
-                        <div class="goal-box-right"></div>
-                        <div class="goal-left"></div>
-                        <div class="goal-right"></div>
+                    <div class="field-wrapper">
+                        <div class="soccer-field" style="position: relative;">
+                            <!-- Field lines -->
+                            <div class="halfway-line"></div>
+                            <div class="center-circle"></div>
+                            <div class="center-spot"></div>
+                            <div class="penalty-box-left"></div>
+                            <div class="penalty-box-right"></div>
+                            <div class="goal-box-left"></div>
+                            <div class="goal-box-right"></div>
+                            <div class="goal-left"></div>
+                            <div class="goal-right"></div>
+                        </div>
+                        
+						<div class="formation-title">Transfert</div>
+                        <!-- Joueurs transférés affichés sous le terrain -->
+                        ${transferredOutPlayers.length > 0 ? `
+                        <div class="transferred-out-players">
+                            ${transferredOutPlayers.map(player => {
+                                const pointsAtTransfer = player.pointsAtTransfer || calculatePlayerTotalPointsBeforeTransfer(player.matches);
+                                const positionName = player.position === 'GK' ? 'G' : player.position === 'DF' ? 'D' : 'A';
+                                return `
+                                    
+									<div class="player">
+                    ${player.name} (${positionName}, ${player.nation || ''})
+                    <span class="player-details">
+                       
+                        <span class="player-points">${pointsAtTransfer} pts</span>
+                    </span>
+                </div>
+                                `;
+                            }).join('')}
+                        </div>
+                        ` : ''}
                     </div>
                 </div>
                 
+                <!-- Vue Liste -->
                 <div id="list-view-${teamIndex}" class="list-view" style="display: none;">
                     <div class="player-list">
-                        ${playersListHtml || '<p>Aucun joueur trouvé pour cette équipe</p>'}
+                        <!-- Section des joueurs actifs -->
+                        <div class="active-players-section">
+                            <div class="section-title">Équipe active (6 joueurs)</div>
+                            ${activePlayersHtml || '<p>Aucun joueur actif</p>'}
+                        </div>
+                        
+                        <!-- Section des joueurs transférés -->
+                        ${transferredOutPlayers.length > 0 ? `
+                        <div class="transferred-out-section">
+                            <div class="section-title">Joueurs transférés</div>
+                            ${transferredOutHtml}
+                        </div>
+                        ` : ''}
                     </div>
                 </div>
             </div>
@@ -1188,9 +1548,9 @@ Avant le début de la bracket un double tour de draft permettra de changé 2 jou
 
         teamContainer.appendChild(teamCard);
 
-        // Ajouter les joueurs sur le terrain
+        // Ajouter les joueurs actifs sur le terrain
         const soccerField = teamCard.querySelector('.soccer-field');
-        placePlayersOnField(sortedPlayers, soccerField, formation);
+        placePlayersOnField(sortedActivePlayers, soccerField, formation);
     });
 }
 
@@ -1260,7 +1620,7 @@ function determineFormation(players) {
             
             sortedPlayers.forEach(player => {
                 const playerDot = document.createElement('div');
-                playerDot.className = `player-dot position-${player.position}`;
+                playerDot.className = `player-dot position-${player.position} ${player.transferStatus === 'transferred_in' ? 'transferred-in' : ''}`;
                 
                 // Determine field position
                 let position;
@@ -1287,7 +1647,7 @@ function determineFormation(players) {
                 // Add player name below
                 const playerName = document.createElement('div');
                 playerName.className = 'player-name';
-                playerName.textContent = player.name;
+                playerName.textContent = player.name + (player.transferStatus === 'transferred_in' ? ' (N)' : '');
                 playerName.style.left = `${position.x}%`;
                 playerName.style.top = `${position.y}%`;
                 
@@ -1296,7 +1656,7 @@ function determineFormation(players) {
             });
         }
 
-        // Function to render standings
+        // Function to render standings with transfers info
         function renderStandings(teams) {
     const standingsBody = document.getElementById('standings-body');
     standingsBody.innerHTML = '';
@@ -1304,7 +1664,7 @@ function determineFormation(players) {
     // Créer un objet pour stocker les totaux des équipes par match
     const teamPointsByMatch = {};
     teams.forEach(team => {
-        teamPointsByMatch[team.name] = {
+        teamPointsByMatch[team.id] = {
             M1: 0, M2: 0, M3: 0, F32: 0, F16: 0, F8: 0, F4: 0, Final: 0
         };
     });
@@ -1320,7 +1680,8 @@ function determineFormation(players) {
                 
                 // Si l'équipe existe dans notre liste
                 if (teamPointsByMatch[teamId]) {
-                    // Pour chaque match, ajouter les points du joueur à ceux de l'équipe
+                    // Pour les joueurs transférés, ils conservent leurs points de groupe
+                    // mais leurs points après transfert vont à leur nouvelle équipe
                     for (const [matchKey, points] of Object.entries(player.matches)) {
                         if (teamPointsByMatch[teamId][matchKey] !== undefined) {
                             teamPointsByMatch[teamId][matchKey] += (points || 0);
@@ -1354,12 +1715,13 @@ function determineFormation(players) {
                 <td>${teamPoints.F4 || 0}</td>
                 <td>${teamPoints.Final || 0}</td>
                 <td><strong>${totalPoints}</strong></td>
+                <td>${team.transfersUsed || 0}/2</td>
             `;
             standingsBody.appendChild(row);
         });
     }).catch(error => {
         console.error("Error loading player data for standings:", error);
-        standingsBody.innerHTML = `<tr><td colspan="11" class="error">Error loading data: ${error.message}</td></tr>`;
+        standingsBody.innerHTML = `<tr><td colspan="12" class="error">Error loading data: ${error.message}</td></tr>`;
     });
 }
 
@@ -1385,6 +1747,11 @@ function determineFormation(players) {
 
     // Create rounds in order with proper fallbacks
     const rounds = [
+        { 
+            name: "Round of 32", 
+            class: "bracket-round-32",
+            matches: tournamentData.bracket.roundOf32 || [] 
+        },
         { 
             name: "Round of 16", 
             class: "bracket-round-16",
@@ -1416,6 +1783,9 @@ function determineFormation(players) {
         const titleDiv = document.createElement('div');
         titleDiv.className = 'bracket-round-title';
         titleDiv.textContent = round.name;
+        if (round.name === "Round of 32") {
+            titleDiv.innerHTML += ' <span style="font-size:0.7rem; background:#ff9800; color:white; padding:2px 5px; border-radius:3px; margin-left:5px;">Fin de la phase de groupes</span>';
+        }
         roundDiv.appendChild(titleDiv);
         
         round.matches.forEach((match, index) => {
@@ -1464,28 +1834,16 @@ function determineFormation(players) {
                 }
             `;
             
-            // Add match date if available
-            if (match.date) {
-                const dateDiv = document.createElement('div');
-                dateDiv.className = 'match-date';
-                dateDiv.textContent = new Date(match.date).toLocaleDateString();
-                matchDiv.appendChild(dateDiv);
-            }
-            
-            // Add match time if available
-            if (match.time) {
-                const timeDiv = document.createElement('div');
-                timeDiv.className = 'match-time';
-                timeDiv.textContent = match.time;
-                matchDiv.appendChild(timeDiv);
-            }
-            
-            // Add match location if available
-            if (match.location) {
-                const locationDiv = document.createElement('div');
-                locationDiv.className = 'match-location';
-                locationDiv.textContent = match.location;
-                matchDiv.appendChild(locationDiv);
+            // Add transfer window indicator after round of 32
+            if (round.name === "Round of 32") {
+                const transferNote = document.createElement('div');
+                transferNote.className = 'match-date';
+                transferNote.style.backgroundColor = '#fff3e0';
+                transferNote.style.color = '#e65100';
+                transferNote.style.padding = '2px';
+                transferNote.style.borderRadius = '3px';
+                transferNote.textContent = '🔓 Fenêtre de transferts ouverte';
+                matchDiv.appendChild(transferNote);
             }
             
             matchDiv.appendChild(topTeam);
@@ -1497,6 +1855,35 @@ function determineFormation(players) {
     });
 }
 
+        // Function to render transfers history
+        function renderTransfers(transfers) {
+            const transfersBody = document.getElementById('transfers-body');
+            transfersBody.innerHTML = '';
+            
+            if (!transfers || transfers.length === 0) {
+                transfersBody.innerHTML = '<tr><td colspan="5" class="loading">Aucun transfert effectué pour le moment</td></tr>';
+                return;
+            }
+            
+            // Sort by round and timestamp
+            const sortedTransfers = [...transfers].sort((a, b) => {
+                if (a.round !== b.round) return a.round - b.round;
+                return (a.timestamp || 0) - (b.timestamp || 0);
+            });
+            
+            sortedTransfers.forEach(transfer => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${transfer.team}</td>
+                    <td>${transfer.playerOut}</td>
+                    <td><strong>${transfer.playerIn}</strong></td>
+                    <td>${transfer.position}</td>
+                    <td>Tour ${transfer.round}</td>
+                `;
+                transfersBody.appendChild(row);
+            });
+        }
+
         // Helper function to find team by ID
         function findTeamById(teams, id) {
             return teams.find(team => team.id === id) || { 
@@ -1505,7 +1892,7 @@ function determineFormation(players) {
             };
         }
 
-        // Function to render player statistics
+        // Function to render player statistics with transfer info
         function renderPlayerStats(playerStats) {
             const playerStatsBody = document.getElementById('player-stats-body');
             playerStatsBody.innerHTML = '';
@@ -1521,10 +1908,23 @@ function determineFormation(players) {
                 const row = document.createElement('tr');
                 const totalPoints = calculatePlayerTotalPoints(player.matches);
                 
+                // Add transfer status styling
+                let statusText = 'Original';
+                let statusStyle = '';
+                
+                if (player.transferStatus === 'transferred_in') {
+                    statusText = `Transféré (R${player.transferRound})`;
+                    statusStyle = 'color: #4caf50; font-weight: bold;';
+                } else if (player.transferStatus === 'transferred_out') {
+                    statusText = 'Transféré (départ)';
+                    statusStyle = 'color: #999; text-decoration: line-through;';
+                }
+                
                 row.innerHTML = `
                     <td>${player.name}</td>
                     <td>${player.nation}</td>
                     <td>${player.position}</td>
+                    <td>${player.equipe || 'Sans équipe'}</td>
                     <td>${player.matches.M1 || 0}</td>
                     <td>${player.matches.M2 || 0}</td>
                     <td>${player.matches.M3 || 0}</td>
@@ -1547,7 +1947,3 @@ function determineFormation(players) {
     </script>
 </body>
 </html>
-
-
-
-
