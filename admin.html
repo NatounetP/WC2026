@@ -33,11 +33,11 @@
             border-radius: 5px;
             gap: 15px;
         }
-        .team-select {
+        .country-select {
             flex: 1;
             min-width: 200px;
         }
-        .team-name {
+        .country-name {
             font-weight: bold;
             margin-bottom: 10px;
         }
@@ -48,6 +48,7 @@
             font-size: 18px;
             border: 2px solid #3d195b;
             border-radius: 4px;
+            margin-top: 10px;
         }
         .vs {
             display: flex;
@@ -64,13 +65,14 @@
             margin-bottom: 15px;
             width: 100%;
         }
-        .team-selector {
+        .country-selector {
             padding: 8px;
             font-size: 16px;
             border: 1px solid #ccc;
             border-radius: 4px;
             width: 100%;
             margin-bottom: 10px;
+            background-color: white;
         }
         .players-table {
             width: 100%;
@@ -113,6 +115,10 @@
         .save-btn:hover {
             background-color: #2a1041;
         }
+        .save-btn:disabled {
+            background-color: #999;
+            cursor: not-allowed;
+        }
         .auto-fill-section {
             margin: 20px 0;
             padding: 15px;
@@ -129,6 +135,9 @@
             cursor: pointer;
             margin-right: 10px;
             margin-bottom: 10px;
+        }
+        .auto-fill-btn:hover {
+            background-color: #1565c0;
         }
         .no-players-message {
             text-align: center;
@@ -175,24 +184,22 @@
         </select>
         
         <div class="match-info">
-            <div class="team-select">
-                <div class="team-name" id="team1-name">Équipe Nationale 1</div>
-                <select class="team-selector" id="team1-select">
-                    <option value="">Sélectionner une équipe nationale</option>
-                    <!-- National teams will be loaded from Firebase -->
+            <div class="country-select">
+                <div class="country-name" id="country1-name">Pays 1</div>
+                <select class="country-selector" id="country1-select">
+                    <option value="">-- Sélectionnez un pays --</option>
                 </select>
-                <input type="number" class="score-input" id="team1-score" min="0" value="0">
+                <input type="number" class="score-input" id="country1-score" min="0" value="0">
             </div>
             
             <div class="vs">vs</div>
             
-            <div class="team-select">
-                <div class="team-name" id="team2-name">Équipe Nationale 2</div>
-                <select class="team-selector" id="team2-select">
-                    <option value="">Sélectionner une équipe nationale</option>
-                    <!-- National teams will be loaded from Firebase -->
+            <div class="country-select">
+                <div class="country-name" id="country2-name">Pays 2</div>
+                <select class="country-selector" id="country2-select">
+                    <option value="">-- Sélectionnez un pays --</option>
                 </select>
-                <input type="number" class="score-input" id="team2-score" min="0" value="0">
+                <input type="number" class="score-input" id="country2-score" min="0" value="0">
             </div>
         </div>
         
@@ -202,11 +209,11 @@
             <button class="auto-fill-btn" id="auto-fill-reset">Réinitialiser</button>
             
             <div style="margin-top: 15px;">
-                <label for="team1-shots-received">Tirs reçus par Équipe 1:</label>
-                <input type="number" id="team1-shots-received" min="0" value="0" style="width: 60px; margin-right: 15px;">
+                <label for="country1-shots-received">Tirs reçus par Pays 1:</label>
+                <input type="number" id="country1-shots-received" min="0" value="0" style="width: 60px; margin-right: 15px;">
                 
-                <label for="team2-shots-received">Tirs reçus par Équipe 2:</label>
-                <input type="number" id="team2-shots-received" min="0" value="0" style="width: 60px;">
+                <label for="country2-shots-received">Tirs reçus par Pays 2:</label>
+                <input type="number" id="country2-shots-received" min="0" value="0" style="width: 60px;">
             </div>
         </div>
         
@@ -216,6 +223,7 @@
                 <tr>
                     <th>Nom</th>
                     <th>Position</th>
+                    <th>Nationalité</th>
                     <th>But</th>
                     <th>Assist</th>
                     <th>Hat Trick</th>
@@ -232,7 +240,7 @@
             </thead>
             <tbody id="players-body">
                 <tr>
-                    <td colspan="14" class="no-players-message">Sélectionnez deux équipes nationales pour afficher les joueurs</td>
+                    <td colspan="15" class="no-players-message">Sélectionnez deux pays pour afficher les joueurs</td>
                 </tr>
             </tbody>
         </table>
@@ -246,6 +254,9 @@
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Countries data -->
+    <script src="countries.js"></script>
 
     <script>
         const firebaseConfig = {
@@ -323,54 +334,58 @@
         // DOM elements
         const elements = {
             roundSelect: document.getElementById('round-select'),
-            team1Select: document.getElementById('team1-select'),
-            team2Select: document.getElementById('team2-select'),
-            team1Name: document.getElementById('team1-name'),
-            team2Name: document.getElementById('team2-name'),
-            team1Score: document.getElementById('team1-score'),
-            team2Score: document.getElementById('team2-score'),
+            country1Select: document.getElementById('country1-select'),
+            country2Select: document.getElementById('country2-select'),
+            country1Name: document.getElementById('country1-name'),
+            country2Name: document.getElementById('country2-name'),
+            country1Score: document.getElementById('country1-score'),
+            country2Score: document.getElementById('country2-score'),
             playersBody: document.getElementById('players-body'),
             saveBtn: document.getElementById('save-btn'),
             saveLoading: document.getElementById('save-loading')
         };
 
-        // Load national teams data from Firebase
-        async function loadNationalTeamsData() {
-            try {
-                // Get unique nations from players collection
-                const playersSnapshot = await db.collection("players").get();
-                const nationalTeams = new Set();
+        // Update country selectors with countries from COUNTRIES array
+        function updateCountrySelectors() {
+            // Check if COUNTRIES is defined (from countries.js)
+            if (typeof COUNTRIES !== 'undefined' && COUNTRIES.length > 0) {
+                console.log("Countries loaded:", COUNTRIES.length);
                 
-                playersSnapshot.forEach(doc => {
-                    const playerData = doc.data();
-                    if (playerData.nation) {
-                        nationalTeams.add(playerData.nation);
+                // Update both dropdowns
+                [elements.country1Select, elements.country2Select].forEach(select => {
+                    const currentValue = select.value;
+                    
+                    // Clear existing options except the first one
+                    while (select.options.length > 1) {
+                        select.remove(1);
+                    }
+                    
+                    // Add all countries
+                    COUNTRIES.forEach(country => {
+                        const option = document.createElement('option');
+                        option.value = country;
+                        option.textContent = country;
+                        select.appendChild(option);
+                    });
+                    
+                    // Restore selection if still valid
+                    if (currentValue && COUNTRIES.includes(currentValue)) {
+                        select.value = currentValue;
                     }
                 });
-                
-                // Convert to array of objects
-                const teams = Array.from(nationalTeams).map(nation => ({
-                    id: nation,
-                    name: nation
-                }));
-                
-                // Sort teams alphabetically
-                teams.sort((a, b) => a.name.localeCompare(b.name));
-                
-                return teams;
-            } catch (error) {
-                console.error("Error loading national teams:", error);
-                return [];
+            } else {
+                console.error("COUNTRIES is not defined or empty. Make sure countries.js is loaded correctly.");
+                // Fallback: show error in dropdowns
+                [elements.country1Select, elements.country2Select].forEach(select => {
+                    select.innerHTML = '<option value="">-- Erreur: Pays non chargés --</option>';
+                });
             }
         }
 
-        // Load players for a specific national team from Firebase
-        async function loadPlayersForNationalTeam(nationName) {
+        // Load all players from Firebase
+        async function loadAllPlayers() {
             try {
-                const playersSnapshot = await db.collection("players")
-                    .where("nation", "==", nationName)
-                    .get();
-                
+                const playersSnapshot = await db.collection("players").get();
                 const players = [];
                 playersSnapshot.forEach(doc => {
                     players.push({
@@ -378,41 +393,24 @@
                         ...doc.data()
                     });
                 });
-                
+                console.log("Players loaded:", players.length);
                 return players;
             } catch (error) {
-                console.error(`Error loading players for ${nationName}:`, error);
+                console.error("Error loading players:", error);
                 return [];
             }
         }
 
-        // Update team selectors with available national teams
-        async function updateTeamSelectors() {
-            const teams = await loadNationalTeamsData();
-            
-            // Update both dropdowns
-            [elements.team1Select, elements.team2Select].forEach(select => {
-                const currentValue = select.value;
-                select.innerHTML = '<option value="">Sélectionner une équipe nationale</option>';
-                
-                teams.forEach(team => {
-                    const option = document.createElement('option');
-                    option.value = team.id;
-                    option.textContent = team.name;
-                    select.appendChild(option);
-                });
-                
-                // Restore selection if still valid
-                if (currentValue && teams.some(t => t.id === currentValue)) {
-                    select.value = currentValue;
-                }
-            });
+        // Filter players by nationality
+        function filterPlayersByNationality(players, nationality) {
+            return players.filter(player => player.nation === nationality);
         }
 
         // Initialize the application
         async function init() {
             try {
-                await updateTeamSelectors();
+                console.log("Initializing application...");
+                updateCountrySelectors();
                 setupEventListeners();
             } catch (error) {
                 console.error('Error initializing application:', error);
@@ -422,8 +420,8 @@
 
         // Setup all event listeners
         function setupEventListeners() {
-            elements.team1Select.addEventListener('change', () => updateTeamDisplay('team1'));
-            elements.team2Select.addEventListener('change', () => updateTeamDisplay('team2'));
+            elements.country1Select.addEventListener('change', () => updateCountryDisplay('country1'));
+            elements.country2Select.addEventListener('change', () => updateCountryDisplay('country2'));
             
             document.getElementById('auto-fill-reset').addEventListener('click', resetPlayerInputs);
             document.getElementById('auto-fill-all').addEventListener('click', autoFillAll);
@@ -431,25 +429,25 @@
             elements.saveBtn.addEventListener('click', saveResults);
         }
 
-        // Update team display when a team is selected
-        async function updateTeamDisplay(teamPrefix) {
-            const selectElement = elements[`${teamPrefix}Select`];
-            const nameElement = elements[`${teamPrefix}Name`];
+        // Update country display when a country is selected
+        async function updateCountryDisplay(countryPrefix) {
+            const selectElement = elements[`${countryPrefix}Select`];
+            const nameElement = elements[`${countryPrefix}Name`];
             
-            // Get team name from selected option
+            // Get country name from selected option
             const selectedOption = selectElement.options[selectElement.selectedIndex];
-            nameElement.textContent = selectedOption.text || `Équipe Nationale ${teamPrefix === 'team1' ? '1' : '2'}`;
+            nameElement.textContent = selectedOption.text || `Pays ${countryPrefix === 'country1' ? '1' : '2'}`;
             
-            // Prevent selecting the same team for both sides
-            if (elements.team1Select.value && elements.team1Select.value === elements.team2Select.value) {
-                alert("Vous ne pouvez pas sélectionner la même équipe nationale pour les deux côtés");
+            // Prevent selecting the same country for both sides
+            if (elements.country1Select.value && elements.country1Select.value === elements.country2Select.value) {
+                alert("Vous ne pouvez pas sélectionner le même pays pour les deux côtés");
                 selectElement.value = "";
-                nameElement.textContent = `Équipe Nationale ${teamPrefix === 'team1' ? '1' : '2'}`;
+                nameElement.textContent = `Pays ${countryPrefix === 'country1' ? '1' : '2'}`;
                 return;
             }
             
-            // Update player table if both teams are selected
-            if (elements.team1Select.value && elements.team2Select.value) {
+            // Update player table if both countries are selected
+            if (elements.country1Select.value && elements.country2Select.value) {
                 await updatePlayerTable();
             } else {
                 showNoPlayersMessage();
@@ -460,59 +458,77 @@
         function showNoPlayersMessage() {
             elements.playersBody.innerHTML = `
                 <tr>
-                    <td colspan="14" class="no-players-message">Sélectionnez deux équipes nationales pour afficher les joueurs</td>
+                    <td colspan="15" class="no-players-message">Sélectionnez deux pays pour afficher les joueurs</td>
                 </tr>
             `;
         }
 
-        // Update player table based on selected national teams
+        // Update player table based on selected countries
         async function updatePlayerTable() {
-            const nation1 = elements.team1Select.value;
-            const nation2 = elements.team2Select.value;
+            const country1Name = elements.country1Select.value;
+            const country2Name = elements.country2Select.value;
 
-            if (!nation1 || !nation2) {
+            if (!country1Name || !country2Name) {
                 showNoPlayersMessage();
                 return;
             }
             
+            console.log(`Loading players for ${country1Name} and ${country2Name}`);
+            
+            // Show loading state
+            elements.playersBody.innerHTML = `
+                <tr>
+                    <td colspan="15" class="no-players-message">Chargement des joueurs...</td>
+                </tr>
+            `;
+            
+            // Load all players
+            const allPlayers = await loadAllPlayers();
+            
+            // Filter players by nationality
+            const country1Players = filterPlayersByNationality(allPlayers, country1Name);
+            const country2Players = filterPlayersByNationality(allPlayers, country2Name);
+            
+            console.log(`Found ${country1Players.length} players for ${country1Name} and ${country2Players.length} for ${country2Name}`);
+            
             // Clear existing rows
             elements.playersBody.innerHTML = '';
             
-            // Load players for both nations
-            const [team1Players, team2Players] = await Promise.all([
-                loadPlayersForNationalTeam(nation1),
-                loadPlayersForNationalTeam(nation2)
-            ]);
-            
-            // Check if we have players
-            if (team1Players.length === 0 && team2Players.length === 0) {
-                elements.playersBody.innerHTML = `
-                    <tr>
-                        <td colspan="14" class="no-players-message">Aucun joueur trouvé pour ces équipes nationales</td>
-                    </tr>
-                `;
-                return;
+            // Add players from country 1
+            if (country1Players.length === 0) {
+                addNoPlayersRow(country1Name);
+            } else {
+                country1Players.forEach(player => {
+                    addPlayerRow(player, country1Name);
+                });
             }
             
-            // Add players from team 1
-            team1Players.forEach(player => {
-                addPlayerRow(player, nation1);
-            });
-            
-            // Add players from team 2
-            team2Players.forEach(player => {
-                addPlayerRow(player, nation2);
-            });
+            // Add players from country 2
+            if (country2Players.length === 0) {
+                addNoPlayersRow(country2Name);
+            } else {
+                country2Players.forEach(player => {
+                    addPlayerRow(player, country2Name);
+                });
+            }
+        }
+
+        // Add a row indicating no players for a country
+        function addNoPlayersRow(countryName) {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td colspan="15" class="no-players-message">Aucun joueur trouvé pour ${countryName}</td>
+            `;
+            elements.playersBody.appendChild(row);
         }
 
         // Add a player row to the table
-        function addPlayerRow(player, nation) {
+        function addPlayerRow(player, countryName) {
             const row = document.createElement('tr');
             
-            // Store nation and position as data attributes
-            row.dataset.nation = nation;
+            // Store country and position as data attributes
+            row.dataset.country = countryName;
             row.dataset.position = player.position;
-            row.dataset.playerId = player.id;
             
             // Get the round we're currently working with
             const round = elements.roundSelect.value;
@@ -523,6 +539,7 @@
             row.innerHTML = `
                 <td>${player.name}</td>
                 <td>${player.position}</td>
+                <td>${player.nation}</td>
                 <td><input type="number" class="number-input goals" min="0" value="0"></td>
                 <td><input type="number" class="number-input assists" min="0" value="0"></td>
                 <td><input type="checkbox" class="checkbox-input hat-trick"></td>
@@ -593,72 +610,96 @@
         }
 
         // Auto-fill all relevant stats
-        async function autoFillAll() {
-            const team1Score = parseInt(elements.team1Score.value) || 0;
-            const team2Score = parseInt(elements.team2Score.value) || 0;
-            const team1ShotsReceived = parseInt(document.getElementById('team1-shots-received').value) || 0;
-            const team2ShotsReceived = parseInt(document.getElementById('team2-shots-received').value) || 0;
+        // Auto-fill all relevant stats
+async function autoFillAll() {
+    const country1Score = parseInt(elements.country1Score.value) || 0;
+    const country2Score = parseInt(elements.country2Score.value) || 0;
+    const country1ShotsReceived = parseInt(document.getElementById('country1-shots-received').value) || 0;
+    const country2ShotsReceived = parseInt(document.getElementById('country2-shots-received').value) || 0;
 
-            if (!elements.team1Select.value || !elements.team2Select.value) {
-                alert("Veuillez sélectionner deux équipes nationales d'abord!");
-                return;
-            }
+    if (!elements.country1Select.value || !elements.country2Select.value) {
+        alert("Veuillez sélectionner deux pays d'abord!");
+        return;
+    }
 
-            // Get team names for comparison
-            const team1Name = elements.team1Name.textContent;
-            const team2Name = elements.team2Name.textContent;
+    // Get the actual selected country values from the dropdowns
+    const country1Value = elements.country1Select.value;
+    const country2Value = elements.country2Select.value;
 
-            // Determine winner and goal difference
-            const winnerNation = team1Score > team2Score ? elements.team1Select.value :
-                              team2Score > team1Score ? elements.team2Select.value : null;
-            const goalDiff = Math.abs(team1Score - team2Score);
+    // Determine winner based on scores
+    const winnerValue = country1Score > country2Score ? country1Value :
+                       country2Score > country1Score ? country2Value : null;
+    const goalDiff = Math.abs(country1Score - country2Score);
 
-            // Process all player rows
-            const rows = elements.playersBody.querySelectorAll('tr');
-            rows.forEach(row => {
-                const playerNation = row.dataset.nation;
-                const position = row.dataset.position;
-                const isTeam1Player = playerNation === elements.team1Select.value;
+    console.log(`Auto-fill: ${country1Value} ${country1Score} - ${country2Score} ${country2Value}`);
+    console.log(`Winner: ${winnerValue}, Goal diff: ${goalDiff}`);
 
-                // Get all input elements
-                const victoryCheckbox = row.querySelector('.victory');
-                const bigWinCheckbox = row.querySelector('.big-win');
-                const cleanSheetCheckbox = row.querySelector('.clean-sheet');
-                const shotsConcededWinCheckbox = row.querySelector('.shots-conceded-win');
+    // Process all player rows
+    const rows = elements.playersBody.querySelectorAll('tr');
+    let playersUpdated = 0;
+    
+    rows.forEach(row => {
+        // Skip rows that are just messages
+        if (row.cells.length === 1 || !row.dataset.country) return;
+        
+        const playerCountry = row.dataset.country;
+        const position = row.dataset.position;
+        
+        // Determine which team this player belongs to
+        const isCountry1Player = playerCountry === country1Value;
+        const isCountry2Player = playerCountry === country2Value;
+        
+        // Skip if player doesn't belong to either selected country
+        if (!isCountry1Player && !isCountry2Player) return;
+        
+        playersUpdated++;
 
-                // --- Auto-fill logic ---
-                
-                // 1. Victory & Big Win (+4 goal difference)
-                if (winnerNation) {
-                    victoryCheckbox.checked = (playerNation === winnerNation);
-                    bigWinCheckbox.checked = (playerNation === winnerNation && goalDiff >= 4);
-                } else {
-                    victoryCheckbox.checked = false;
-                    bigWinCheckbox.checked = false;
-                }
+        // Get all input elements
+        const victoryCheckbox = row.querySelector('.victory');
+        const bigWinCheckbox = row.querySelector('.big-win');
+        const cleanSheetCheckbox = row.querySelector('.clean-sheet');
+        const shotsConcededWinCheckbox = row.querySelector('.shots-conceded-win');
 
-                // 2. Clean Sheet (GK and DF only)
-                if (position === "GK" || position === "DF") {
-                    const opponentScore = isTeam1Player ? team2Score : team1Score;
-                    cleanSheetCheckbox.checked = (opponentScore === 0);
-                } else {
-                    cleanSheetCheckbox.checked = false;
-                }
-
-                // 3. Shots Conceded Win (GK only)
-                if (position === "GK") {
-                    const shotsReceived = isTeam1Player ? team1ShotsReceived : team2ShotsReceived;
-                    shotsConcededWinCheckbox.checked = (victoryCheckbox.checked && shotsReceived >= 10);
-                } else {
-                    shotsConcededWinCheckbox.checked = false;
-                }
-
-                // Update points immediately
-                updatePlayerPoints(row);
-            });
-
-            alert("Statistiques automatiquement remplies avec succès!");
+        // --- Auto-fill logic ---
+        
+        // 1. Victory & Big Win (+4 goal difference)
+        if (winnerValue) {
+            victoryCheckbox.checked = (playerCountry === winnerValue);
+            bigWinCheckbox.checked = (playerCountry === winnerValue && goalDiff >= 4);
+        } else {
+            victoryCheckbox.checked = false;
+            bigWinCheckbox.checked = false;
         }
+
+        // 2. Clean Sheet (GK and DF only) - opponent scored 0 goals
+        if (position === "GK" || position === "DF") {
+            if (isCountry1Player) {
+                cleanSheetCheckbox.checked = (country2Score === 0);
+            } else if (isCountry2Player) {
+                cleanSheetCheckbox.checked = (country1Score === 0);
+            }
+        } else {
+            cleanSheetCheckbox.checked = false;
+        }
+
+        // 3. Shots Conceded Win (GK only) - victory + 10+ shots received
+        if (position === "GK") {
+            if (isCountry1Player) {
+                shotsConcededWinCheckbox.checked = (victoryCheckbox.checked && country1ShotsReceived >= 10);
+            } else if (isCountry2Player) {
+                shotsConcededWinCheckbox.checked = (victoryCheckbox.checked && country2ShotsReceived >= 10);
+            }
+        } else {
+            shotsConcededWinCheckbox.checked = false;
+        }
+
+        // Update points immediately
+        updatePlayerPoints(row);
+    });
+
+    console.log(`Auto-fill completed for ${playersUpdated} players`);
+    alert(`Statistiques automatiquement remplies avec succès pour ${playersUpdated} joueurs!`);
+}
 
         // Reset all player inputs
         function resetPlayerInputs() {
@@ -677,14 +718,18 @@
             
             // Update all points after reset
             const rows = elements.playersBody.querySelectorAll('tr');
-            rows.forEach(row => updatePlayerPoints(row));
+            rows.forEach(row => {
+                if (row.dataset.country) {
+                    updatePlayerPoints(row);
+                }
+            });
         }
 
         // Save results to Firebase
         async function saveResults() {
             // Validate inputs
-            if (!elements.team1Select.value || !elements.team2Select.value) {
-                alert("Sélectionnez deux équipes nationales d'abord!");
+            if (!elements.country1Select.value || !elements.country2Select.value) {
+                alert("Sélectionnez deux pays d'abord!");
                 return;
             }
 
@@ -698,29 +743,47 @@
 
                 // Process each player
                 const rows = elements.playersBody.querySelectorAll('tr');
+                let playersSaved = 0;
+                
                 for (const row of rows) {
-                    if (row.cells.length > 1) { // Skip the "no players" message row
-                        const playerId = row.dataset.playerId;
-                        const points = parseInt(row.querySelector('.total-points').textContent || 0);
+                    // Skip message rows
+                    if (row.cells.length <= 2 || !row.dataset.country) continue;
+                    
+                    const playerName = row.cells[0].textContent;
+                    const countryName = row.dataset.country;
+                    const points = parseInt(row.querySelector('.total-points').textContent || 0);
+                    
+                    // Find player by name and nationality
+                    const playersSnapshot = await db.collection("players")
+                        .where("name", "==", playerName)
+                        .where("nationality", "==", countryName)
+                        .get();
+                    
+                    if (!playersSnapshot.empty) {
+                        // Update existing player
+                        const playerDoc = playersSnapshot.docs[0];
+                        const playerRef = db.collection("players").doc(playerDoc.id);
                         
-                        if (playerId) {
-                            // Create a reference to the player document using the actual document ID
-                            const playerRef = db.collection("players").doc(playerId);
-                            
-                            // Prepare the update data
-                            const updateData = {
-                                [`matches.${round}`]: points
-                            };
-                            
-                            // Add to batch
-                            batch.update(playerRef, updateData);
-                        }
+                        // Prepare the update data
+                        const updateData = {
+                            [`matches.${round}`]: points
+                        };
+                        
+                        // Add to batch
+                        batch.update(playerRef, updateData);
+                        playersSaved++;
+                    } else {
+                        console.warn(`Player ${playerName} with nationality ${countryName} not found in database`);
                     }
                 }
 
-                // Commit the batch
-                await batch.commit();
-                alert("Données enregistrées avec succès dans Firebase!");
+                if (playersSaved === 0) {
+                    alert("Aucun joueur trouvé dans la base de données à mettre à jour.");
+                } else {
+                    // Commit the batch
+                    await batch.commit();
+                    alert(`${playersSaved} joueur(s) mis à jour avec succès dans Firebase!`);
+                }
             } catch (error) {
                 console.error("Error saving data:", error);
                 alert("Erreur lors de l'enregistrement: " + error.message);
