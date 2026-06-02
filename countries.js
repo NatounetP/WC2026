@@ -8,7 +8,7 @@ const COUNTRIES = [
     "Espagne", "Cap Vert", "Arabie Saoudite", "Uruguay", "France", 
     "Sénégal", "Norvège", "Algérie", "Autriche", "Jordanie", 
     "Portugal", "Ouzbékistan", "Colombie", "Angleterre", "Croatie", 
-    "Ghana", "Panama", "PO D", "PO A", "PO C", "PO B", "PO 1", "PO 2"
+    "Ghana", "Panama", "Turquie", "Suède", "Bosnie", "Tchéquie", "RD Congo", "Irak"
 ];
 
 // Optionnel: trier alphabétiquement
