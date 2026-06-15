@@ -610,8 +610,7 @@
         }
 
         // Auto-fill all relevant stats
-        // Auto-fill all relevant stats
-async function autoFillAll() {
+        async function autoFillAll() {
     const country1Score = parseInt(elements.country1Score.value) || 0;
     const country2Score = parseInt(elements.country2Score.value) || 0;
     const country1ShotsReceived = parseInt(document.getElementById('country1-shots-received').value) || 0;
@@ -697,9 +696,9 @@ async function autoFillAll() {
         updatePlayerPoints(row);
     });
 
-    console.log(`Auto-fill completed for ${playersUpdated} players`);
-    alert(`Statistiques automatiquement remplies avec succès pour ${playersUpdated} joueurs!`);
-}
+            console.log(`Auto-fill completed for ${playersUpdated} players`);
+            alert(`Statistiques automatiquement remplies avec succès pour ${playersUpdated} joueurs!`);
+        }
 
         // Reset all player inputs
         function resetPlayerInputs() {
@@ -749,14 +748,14 @@ async function autoFillAll() {
                     // Skip message rows
                     if (row.cells.length <= 2 || !row.dataset.country) continue;
                     
-                    const playerName = row.cells[0].textContent;
+                    const playerName = row.cells[0].textContent.trim();
                     const countryName = row.dataset.country;
                     const points = parseInt(row.querySelector('.total-points').textContent || 0);
                     
-                    // Find player by name and nationality
+                    // Find player by name and nation (field is "nation" in Firestore, consistent with filterPlayersByNationality)
                     const playersSnapshot = await db.collection("players")
                         .where("name", "==", playerName)
-                        .where("nationality", "==", countryName)
+                        .where("nation", "==", countryName)
                         .get();
                     
                     if (!playersSnapshot.empty) {
@@ -773,7 +772,7 @@ async function autoFillAll() {
                         batch.update(playerRef, updateData);
                         playersSaved++;
                     } else {
-                        console.warn(`Player ${playerName} with nationality ${countryName} not found in database`);
+                        console.warn(`Joueur introuvable en base — name: "${playerName}", nation: "${countryName}"`);
                     }
                 }
 
