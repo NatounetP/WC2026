@@ -1230,7 +1230,7 @@
             <h3>Phase à élimination directe / Tournoi "Bracket"</h3>
             La phase de groupe de la Coupe de Monde est de 3 matchs. Les équipes qualifiés passent en 16ème de finale.
         Pour notre jeu les 3 matchs de poules (M1, M2, M3) et les 16ème de finale donneront un total d'accession à chacun. En prenant le classement après les 16èmes de finale nous commenceront un tableau de match à élimination direct ("Bracket"). 
-        On ne se battra plus pour faire le plus de points, mais juste plus de points que notre adversaire direct. On avancera jusqu'à la finale qui définiera le vainqueur final. Cependant les points et le classement général continueront de faire valeur pour deux raisons:
+        On ne se battra plus pour faire le plus de points, mais juste plus de points que notre adversaire direct. On avancera jusqu'à la finale qui définira le vainqueur final. Cependant les points et le classement général continueront de faire valeur pour deux raisons:
 1. En cas d'égalité dans un match de Bracket, l'équipe avec le plus de points au total passe; 2. pour au final définir les 2 perdants responsables d'organiser un apéro lors de la soirée d'ouverture de la prochaine compétition (Euro 28). Si un des deux derniers venait à gagner le tournoi "bracket", il sera dispensé de sa charge et l'antépénultième prendra sa place.
             
         <p>Le premier round des matchs est défini comme suit:</p>
@@ -1301,7 +1301,7 @@ Avant le début de la bracket (après les 1/32èmes) un double tour de draft per
             </div>
         </div>
 
-        <!-- Section Bracket -->
+        <!-- Section 		-->
         <div id="bracket" class="tab-content">
             <div class="section">
                 <h2 id="bracket-title">Tournament Bracket</h2>
@@ -1398,6 +1398,11 @@ Avant le début de la bracket (après les 1/32èmes) un double tour de draft per
             }         
             document.getElementById(tabName).classList.add("active");
             event.currentTarget.classList.add("active");
+            
+            // Re-render bracket when tab is opened to ensure fresh data
+            if (tabName === 'bracket') {
+                renderBracket();
+            }
         }
 
         // Function to toggle between field/list views for each team
@@ -1442,13 +1447,6 @@ Avant le début de la bracket (après les 1/32èmes) un double tour de draft per
         const tournamentSettings = await db.collection("tournament").doc("general").get();
         const showBracket = tournamentSettings.exists && tournamentSettings.data().start === true;
         const transferWindowOpen = tournamentSettings.exists && tournamentSettings.data().transferWindowOpen === true;
-
-        // Load bracket data only if needed
-        let bracketData = {};
-        if (showBracket) {
-            const bracketDoc = await db.collection("tournament").doc("bracket").get();
-            bracketData = bracketDoc.exists ? bracketDoc.data() : {};
-        }
 
         // Load player stats
         const playersSnapshot = await db.collection("players").get();
@@ -1497,10 +1495,7 @@ Avant le début de la bracket (après les 1/32èmes) un double tour de draft per
         
         // Only render bracket if enabled
         if (showBracket) {
-            renderBracket({
-                teams: teams,
-                bracket: bracketData
-            });
+            renderBracket();
             document.querySelector('.tab[onclick="openTab(\'bracket\')"]').style.display = 'block';
         } else {
             document.querySelector('.tab[onclick="openTab(\'bracket\')"]').style.display = 'none';
@@ -1636,7 +1631,7 @@ Avant le début de la bracket (après les 1/32èmes) un double tour de draft per
             
             transferredOutHtml += `
                 <div class="player">
-					${player.name} (${positionName}, ${player.nation || ''})
+                    ${player.name} (${positionName}, ${player.nation || ''})
                     <span class="player-points">${pointsAtTransfer} pts</span>
                 </div>
             `;
@@ -1671,7 +1666,7 @@ Avant le début de la bracket (après les 1/32èmes) un double tour de draft per
                             <div class="goal-right"></div>
                         </div>
                         
-						<div class="formation-title">Transfert</div>
+                        <div class="formation-title">Transfert</div>
                         <!-- Joueurs transférés affichés sous le terrain -->
                         ${transferredOutPlayers.length > 0 ? `
                         <div class="transferred-out-players">
@@ -1680,7 +1675,7 @@ Avant le début de la bracket (après les 1/32èmes) un double tour de draft per
                                 const positionName = player.position === 'GK' ? 'G' : player.position === 'DF' ? 'D' : 'A';
                                 return `
                                     
-									<div class="player">
+                                    <div class="player">
                     ${player.name} (${positionName}, ${player.nation || ''})
                     <span class="player-details">
                        
@@ -1930,123 +1925,132 @@ function determineFormation(players) {
     return Object.values(matchPoints).reduce((sum, val) => sum + (val || 0), 0);
 }
 
-        function renderBracket(tournamentData) {
+        // MODIFIED: renderBracket now fetches fresh data and computes scores automatically
+        async function renderBracket() {
     const container = document.getElementById('bracket-container');
-    container.innerHTML = '';
-    
-    if (!tournamentData || !tournamentData.bracket) {
-        container.innerHTML = '<p>No bracket data available</p>';
-        return;
-    }
+    container.innerHTML = '<div class="loading">Mise à jour du tableau...</div>';
 
-    // Create rounds in order with proper fallbacks
-    const rounds = [
-        { 
-            name: "Round of 32", 
-            class: "bracket-round-32",
-            matches: tournamentData.bracket.roundOf32 || [] 
-        },
-        { 
-            name: "Round of 16", 
-            class: "bracket-round-16",
-            matches: tournamentData.bracket.roundOf16 || [] 
-        },
-        { 
-            name: "Quarter Finals", 
-            class: "bracket-round-8",
-            matches: tournamentData.bracket.quarterFinals || [] 
-        },
-        { 
-            name: "Semi Finals", 
-            class: "bracket-round-4",
-            matches: tournamentData.bracket.semiFinals || [] 
-        },
-        { 
-            name: "FINAL", 
-            class: "bracket-round-2 bracket-final",
-            matches: tournamentData.bracket.final ? [tournamentData.bracket.final] : [] 
-        }
-    ];
-    
-    rounds.forEach(round => {
-        if (!round.matches || round.matches.length === 0) return;
-        
-        const roundDiv = document.createElement('div');
-        roundDiv.className = `bracket-round ${round.class}`;
-        
-        const titleDiv = document.createElement('div');
-        titleDiv.className = 'bracket-round-title';
-        titleDiv.textContent = round.name;
-        if (round.name === "Round of 32") {
-            titleDiv.innerHTML += ' <span style="font-size:0.7rem; background:#ff9800; color:white; padding:2px 5px; border-radius:3px; margin-left:5px;">Fin de la phase de groupes</span>';
-        }
-        roundDiv.appendChild(titleDiv);
-        
-        round.matches.forEach((match, index) => {
-            if (!match) return;
-            
-            const matchDiv = document.createElement('div');
-            matchDiv.className = 'bracket-match';
-            
-            // Handle team data - fallback to IDs if team objects don't exist
-            const team1 = match.team1Id || (match.teamId && typeof match.teamId === 'object' ? match.teamId : { shortName: match.teamId || 'TBD' });
-            const team2 = match.team2Id || (match.teamZId && typeof match.teamZId === 'object' ? match.teamZId : { shortName: match.teamZId || 'TBD' });
-            
-            // Handle scores - some matches might use score1/score2, others might use score
-            const score1 = match.score1 !== undefined ? match.score1 : (match.score && match.score[0]);
-            const score2 = match.score2 !== undefined ? match.score2 : (match.score && match.score[1]);
-            
-            // Handle winner - some matches might use winnerId, others might determine from scores
-            let winnerId = match.winnerId;
-            if (!winnerId && score1 !== undefined && score2 !== undefined) {
-                winnerId = score1 > score2 ? match.team1Id || match.teamId : 
-                          score2 > score1 ? match.team2Id || match.teamZId : 
-                          null; // draw
-            }
-            
-            const topTeam = document.createElement('div');
-            topTeam.className = `bracket-team top ${(match.team1Id || match.teamId) === winnerId ? 'winner' : ''}`;
-            topTeam.innerHTML = `
-                <span>${typeof team1 === 'object' ? team1.shortName : team1}</span>
-                ${score1 !== undefined ? 
-                    `<span class="bracket-score">${score1}</span>` : ''
-                }
-                ${match.penaltyScore1 !== undefined ? 
-                    `<span class="penalty-score">(${match.penaltyScore1})</span>` : ''
-                }
-            `;
-            
-            const bottomTeam = document.createElement('div');
-            bottomTeam.className = `bracket-team bottom ${(match.team2Id || match.teamZId) === winnerId ? 'winner' : ''}`;
-            bottomTeam.innerHTML = `
-                <span>${typeof team2 === 'object' ? team2.shortName : team2}</span>
-                ${score2 !== undefined ? 
-                    `<span class="bracket-score">${score2}</span>` : ''
-                }
-                ${match.penaltyScore2 !== undefined ? 
-                    `<span class="penalty-score">(${match.penaltyScore2})</span>` : ''
-                }
-            `;
-            
-            // Add transfer window indicator after round of 32
-            if (round.name === "Round of 32") {
-                const transferNote = document.createElement('div');
-                transferNote.className = 'match-date';
-                transferNote.style.backgroundColor = '#fff3e0';
-                transferNote.style.color = '#e65100';
-                transferNote.style.padding = '2px';
-                transferNote.style.borderRadius = '3px';
-                transferNote.textContent = '🔓 Fenêtre de transferts ouverte';
-                matchDiv.appendChild(transferNote);
-            }
-            
-            matchDiv.appendChild(topTeam);
-            matchDiv.appendChild(bottomTeam);            
-            roundDiv.appendChild(matchDiv);
+    try {
+        // Fetch fresh teams and players data
+        const [teamsSnap, playersSnap, bracketSnap] = await Promise.all([
+            db.collection('teams').get(),
+            db.collection('players').get(),
+            db.collection('tournament').doc('bracket').get()
+        ]);
+
+        const teams = teamsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+        const players = playersSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+        const bracketData = bracketSnap.exists ? bracketSnap.data() : {};
+
+        // Build team points map by match round
+        const teamPoints = {};
+        teams.forEach(t => { 
+            teamPoints[t.id] = { 
+                M1: 0, M2: 0, M3: 0, 
+                F32: 0, F16: 0, F8: 0, F4: 0, Final: 0 
+            }; 
         });
-        
-        container.appendChild(roundDiv);
-    });
+
+        players.forEach(p => {
+            const tid = p.team || p.equipe;
+            if (!tid || !teamPoints[tid]) return;
+            const matches = p.matches || {};
+            for (const [key, val] of Object.entries(matches)) {
+                if (teamPoints[tid][key] !== undefined) {
+                    teamPoints[tid][key] += (val || 0);
+                }
+            }
+        });
+
+        // Helper to get team name
+const getTeamName = (id) => {
+    if (!id) return 'TBD';
+    const t = teams.find(t => t.id === id);
+    return t ? t.name : id;
+};
+
+        // Helper to build a match with computed scores
+        const buildMatch = (match, roundKey) => {
+            if (!match) return null;
+            const t1 = match.team1Id || match.teamId;
+            const t2 = match.team2Id || match.teamZId;
+            const s1 = (t1 && teamPoints[t1] && teamPoints[t1][roundKey] !== undefined) ? teamPoints[t1][roundKey] : null;
+            const s2 = (t2 && teamPoints[t2] && teamPoints[t2][roundKey] !== undefined) ? teamPoints[t2][roundKey] : null;
+            let winner = null;
+            if (s1 !== null && s2 !== null && s1 !== s2) {
+                winner = s1 > s2 ? t1 : t2;
+            }
+            return { team1: t1, team2: t2, score1: s1, score2: s2, winnerId: winner, roundKey };
+        };
+
+        // Round configuration: match round key in bracket doc -> display label -> points round key
+        const roundConfigs = [
+            { key: 'roundOf32', label: '1/16 de finale', roundKey: 'F32' },
+            { key: 'roundOf16', label: '1/8 de finale', roundKey: 'F16' },
+            { key: 'quarterFinals', label: '1/4 de finale', roundKey: 'F8' },
+            { key: 'semiFinals', label: '1/2 finale', roundKey: 'F4' },
+            { key: 'final', label: 'FINAL', roundKey: 'Final' }
+        ];
+
+        // Build matches for each round
+        const matchesByRound = {};
+        roundConfigs.forEach(rc => {
+            const raw = bracketData[rc.key] || [];
+            const list = Array.isArray(raw) ? raw : (raw ? [raw] : []);
+            matchesByRound[rc.key] = list.map(m => buildMatch(m, rc.roundKey)).filter(Boolean);
+        });
+
+        // Render
+        container.innerHTML = '';
+        let hasMatches = false;
+
+        roundConfigs.forEach(rc => {
+            const matches = matchesByRound[rc.key] || [];
+            if (matches.length === 0) return;
+            hasMatches = true;
+
+            const roundDiv = document.createElement('div');
+            roundDiv.className = `bracket-round ${rc.key === 'final' ? 'bracket-final' : ''}`;
+
+            const title = document.createElement('div');
+            title.className = 'bracket-round-title';
+            title.textContent = rc.label;
+            roundDiv.appendChild(title);
+
+            matches.forEach(m => {
+                if (!m) return;
+                const matchDiv = document.createElement('div');
+                matchDiv.className = 'bracket-match';
+
+                const top = document.createElement('div');
+                top.className = `bracket-team ${m.winnerId === m.team1 ? 'winner' : ''}`;
+                top.innerHTML = `<span>${getTeamName(m.team1)}</span><span class="bracket-score">${m.score1 !== null ? m.score1 : '-'}</span>`;
+
+                const bottom = document.createElement('div');
+                bottom.className = `bracket-team ${m.winnerId === m.team2 ? 'winner' : ''}`;
+                bottom.innerHTML = `<span>${getTeamName(m.team2)}</span><span class="bracket-score">${m.score2 !== null ? m.score2 : '-'}</span>`;
+
+                matchDiv.appendChild(top);
+                matchDiv.appendChild(bottom);
+
+                const info = document.createElement('div');
+                info.className = 'match-date';
+                matchDiv.appendChild(info);
+
+                roundDiv.appendChild(matchDiv);
+            });
+
+            container.appendChild(roundDiv);
+        });
+
+        if (!hasMatches) {
+            container.innerHTML = '<div class="loading">Aucun match configuré dans le bracket.</div>';
+        }
+
+    } catch (error) {
+        console.error('Error rendering bracket:', error);
+        container.innerHTML = `<p class="error">Erreur lors du chargement du bracket: ${error.message}</p>`;
+    }
 }
 
         // Function to render transfers history
